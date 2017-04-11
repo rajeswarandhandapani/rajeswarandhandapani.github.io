@@ -1,23 +1,48 @@
-.hero {
-    background: linear-gradient(141deg, #0fb8ad 0%, #1fc8db 51%, #2cb5e8 75%);
-}
-
-.hero-container {
-    display: table;
-    margin: 0 auto;
-    padding: 0 20px;
-    height: 10vh;
-    min-height: 400px;
-    
-}
-
-.hero-content {
-    display: table-cell;
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    vertical-align: middle;
-    color: white;
-    font-size: 6vw;
-    min-fx
-}
+    body {
+        font: 20px Montserrat, sans-serif;
+        line-height: 1.8;
+        color: #f5f6f7;
+    }
+    p {
+        font-size: 16px;
+    }
+    .bottommargin {
+        margin-bottom: 45px;
+    }
+    .bg-1 {
+        background-color: #1abc9c;
+        /* Green */
+        
+        color: #ffffff;
+        padding: 20px 0;
+    }
+    .bg-2 {
+        background-color: #474e5d;
+        /* Dark Blue */
+        
+        color: #ffffff;
+    }
+    .bg-3 {
+        background-color: #ffffff;
+        /* White */
+        
+        color: #555555;
+    }
+    .bg-4 {
+        background-color: #2f2f2f;
+        /* Black Gray */
+        
+        color: #fff;
+    }
+    .navbar {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        border: 0;
+        border-radius: 0;
+        margin-bottom: 0;
+        font-size: 12px;
+        letter-spacing: 5px;
+    }
+    .navbar-nav li a:hover {
+        color: #1abc9c !important;
+    }
