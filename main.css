@@ -75,8 +75,10 @@ body {
 }
 
 
-.main-content {
-    grid-area: content;
+.certification-badges {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
 }
 
 .footer{
@@ -112,6 +114,11 @@ body {
         width: 95%;
     }
 
+    .certification-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
 
     .footer__social{
         flex-direction: column;
