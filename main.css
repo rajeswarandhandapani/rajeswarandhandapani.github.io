@@ -7,12 +7,29 @@ a:visited,
 a:hover,
 a:active {
     color: unset;
+    text-decoration: none;
+}
+
+.card {
+    border-radius: .25rem;
+    box-shadow: 2px 2px 2px #684d4d;
+    background-color: #fff;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(0, 0, 0, .125);
+    padding: 1rem;
+    line-height: 2;
+}
+
+.card-section {
+    padding-left: 15px;
 }
 
 body {
     background-color: #ff0060;
     font-family: 'Noto Sans', sans-serif;
     color: #555;
+    margin: 0;
+    padding: 0;
 }
 
 .aside-contact {
@@ -22,6 +39,8 @@ body {
     justify-content: center;
     gap: 2rem;
 }
+
+
 
 .container {
     width: 80%;
@@ -40,62 +59,64 @@ body {
     list-style-type: none;
 }
 
-header {
-    grid-area: header;
-}
-
-
-.title-card {
+.container__title-card {
     color: aliceblue;
     margin-bottom: 5rem;
 }
 
 
-.title {
+.title-card__title {
     font-size: 4rem;
     margin-bottom: 0;
 }
 
-.sub-title {
+.title-card__sub-title {
     font-size: 1rem;
 }
 
-
-
-
-
-.social-links {
-    
-}
 
 .main-content {
     grid-area: content;
 }
 
-
-.card {
-    border-radius: .25rem;
-    box-shadow: 2px 2px 2px #684d4d;
-    background-color: #fff;
-    margin-bottom: 3rem;
-    border: 1px solid rgba(0, 0, 0, .125);
-    padding: 1rem;
-    line-height: 2;
+.footer{
+    background-color: rgb(32, 32, 32);
+    color: aliceblue;
+    text-align: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
 }
 
-.card-section {
-    padding-left: 15px;
+.footer__social{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 25px;
+    padding-left: 20px;
 }
+
 
 @media(max-width: 800px) {
+    .aside-contact {
+        display: none;
+    }
+
     .container {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "header"
-            "content"
-            "aside"
-            "footer"
-        ;
-        gap: 10px;
+        width: 95%;
+    }
+
+
+    .footer__social{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 25px;
+        padding-left: 10px;
     }
 }
