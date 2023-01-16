@@ -22,6 +22,17 @@
       gtag('config', 'G-52Z4BEKPKK');
    </script>
 
+   <script>
+      function scrollToContact() {
+         let footer = document.getElementById('footer-contact');
+         footer.scrollIntoView({
+          block: 'end',
+          behavior: 'smooth',
+          inline: 'center'
+        });
+      }
+   </script>
+
    <title>Rajeswaran Dhandapani | Senior Full Stack Developer</title>
 
 </head>
@@ -44,7 +55,7 @@
 
       <nav class="container__nav">
          <ul>
-            <li><a href="#footer-contact">Contact Me</a></li>
+            <li><a href="javascript:scrollToContact();">Contact Me</a></li>
             <li><a href="RajeswaranDhandapaniResume.pdf" target="_blank">My Resume (PDF 460KB)</a></li>
          </ul>
       </nav>
