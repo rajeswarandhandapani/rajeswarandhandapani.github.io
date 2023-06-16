@@ -10,6 +10,23 @@ a:active {
     text-decoration: none;
 }
 
+body {
+    background-color: #284f76;
+    font-family: 'Noto Sans', sans-serif;
+    color: #555;
+    margin: 0;
+    padding: 0;
+}
+
+.aside-contact {
+    display: none;
+}
+
+.container {
+    width: 95%;
+    margin: auto;
+}
+
 .card {
     border-radius: .25rem;
     box-shadow: 2px 2px 2px #684d4d;
@@ -20,66 +37,45 @@ a:active {
     line-height: 2;
 }
 
-.card-section {
-    padding-left: 15px;
-}
-
-body {
-    background-color: #284f76;
-    font-family: 'Noto Sans', sans-serif;
-    color: #555;
-    margin: 0;
-    padding: 0;
-}
-
-.aside-contact {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2rem;
-}
-
-
-
-.container {
-    width: 80%;
-    margin: auto;
-    gap: 20px;
-}
-
-.container__nav ul {
+.nav-items {
     color: aliceblue;
     display: flex;
     justify-content: right;
     gap: 50px;
 }
 
-.container__nav ul li {
+.nav-items li {
     list-style-type: none;
 }
 
-.container__title-card {
+.header {
     color: aliceblue;
     margin-bottom: 5rem;
+    background-color: inherit;
 }
 
-
-.title-card__title {
+.header h1 {
     font-size: 4rem;
     margin-bottom: 0;
 }
 
-.title-card__sub-title {
-    font-size: 1rem;
+.skills {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
 }
 
+.skills section {
+    width: 100%;
+}
 
 .certification-badges {
     display: flex;
-    justify-content: center;
-    gap: 50px;
+    flex-wrap: wrap;
+    gap: 20px;
 }
+
+
 
 .footer{
     margin-top: 10rem;
@@ -97,12 +93,13 @@ body {
     gap: 50px;
 }
 
+
+
 .footer__social{
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 50px;
-    padding-left: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
+    padding-left: 10px;
 }
 
 .footer__social a {
@@ -113,25 +110,34 @@ body {
 }
 
 
-@media(max-width: 800px) {
-    .aside-contact {
-        display: none;
-    }
+@media(min-width: 800px) {
 
+    .aside-contact {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+    }
+    
     .container {
-        width: 95%;
+        width: 85%;
+        
     }
 
     .certification-badges {
         display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
+        justify-content: center;
+        gap: 50px;
     }
-
+    
     .footer__social{
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 25px;
-        padding-left: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        gap: 50px;
+        padding-left: 20px;
     }
+    
 }

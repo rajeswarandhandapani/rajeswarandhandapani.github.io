@@ -4,13 +4,14 @@
 <head>
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   <meta name="description" content="Rajeswaran Dhandapani | Full Stack Developer Website | Full Stack Developer Resume">
+   <meta name="description"
+      content="Rajeswaran Dhandapani | Full Stack Developer Website | Full Stack Developer Resume">
    <meta name="author" content="Rajeswaran Dhandapani" />
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
    <script src="https://kit.fontawesome.com/415902d2e8.js" crossorigin="anonymous"></script>
-   <link rel="stylesheet" href="main.min.css">
+   <link rel="stylesheet" href="main.css">
 
    <!-- Google tag (gtag.js) -->
    <script async src="https://www.googletagmanager.com/gtag/js?id=G-52Z4BEKPKK"></script>
@@ -26,10 +27,10 @@
       function scrollToContact() {
          let footer = document.getElementById('footer-contact');
          footer.scrollIntoView({
-          block: 'end',
-          behavior: 'smooth',
-          inline: 'center'
-        });
+            block: 'end',
+            behavior: 'smooth',
+            inline: 'center'
+         });
       }
    </script>
 
@@ -40,10 +41,11 @@
 <body>
 
    <aside class="aside-contact card">
-      <a href="https://www.linkedin.com/in/rajeswaran-dhandapani" target="_blank" aria-label="Contact Rajeswaran Dhandapani over LinkedIn">
+      <a href="https://www.linkedin.com/in/rajeswaran-dhandapani" target="_blank"
+         aria-label="Contact Rajeswaran Dhandapani over LinkedIn">
          <i class="fa-brands fa-linkedin fa-border fa-2x"></i>
       </a>
-      <a href="mailTo:prorajeswaran@gmail.com"  aria-label="Contact Rajeswaran Dhandapani over email">
+      <a href="mailTo:prorajeswaran@gmail.com" aria-label="Contact Rajeswaran Dhandapani over email">
          <i class="fa-solid fa-envelope fa-border fa-2x"></i>
       </a>
       <a href="tel:+14124075282" aria-label="Contact Rajeswaran Dhandapani over phone">
@@ -53,24 +55,22 @@
 
    <div class="container">
 
-      <nav class="container__nav">
-         <ul>
+      <nav>
+         <ul class="nav-items">
             <li><a href="javascript:scrollToContact();">Contact Me</a></li>
             <li><a href="RajeswaranDhandapaniResume.pdf" target="_blank">My Resume (PDF 460KB)</a></li>
          </ul>
       </nav>
 
-      <header class="container__title-card text-center">
-         <h1 class="title-card__title">Hi, I'm Rajeswaran Dhandapani</h1>
-         <h2 class="title-card__sub-title">Senior Full Stack Developer | MS Certified Azure Developer | MS Certified
-            Azure
-            Artificial
-            Intelligence Fundamentals</p>
-      </header>
+      <main>
 
-
-
-      <section class="main-content">
+         <header class="header text-center">
+            <h1>Hi, I'm Rajeswaran Dhandapani</h1>
+            <h2>Senior Full Stack Developer | MS Certified Azure Developer | MS Certified
+               Azure
+               Artificial
+               Intelligence Fundamentals</p>
+         </header>
 
          <div class="card">
             <h2>About Me</h2>
@@ -103,14 +103,35 @@
 
 
 
-         <div class="card">
-            <h2>Certification</h2>
-            <div class="certification-badges">
-               <div data-iframe-width="150" data-iframe-height="270" data-share-badge-id="654cc9b7-5d27-44a2-8eb6-e6deb6bd01be" data-share-badge-host="https://www.credly.com"></div>
-               <div data-iframe-width="150" data-iframe-height="270" data-share-badge-id="ffd6203f-59c5-4d5b-bad6-d2b1accf7b4c" data-share-badge-host="https://www.credly.com"></div>
-               <div data-iframe-width="150" data-iframe-height="270" data-share-badge-id="9f655521-15a7-4c35-874d-054559f8309d" data-share-badge-host="https://www.credly.com"></div>
-               <script type="text/javascript" async src="//cdn.credly.com/assets/utilities/embed.js"></script>
-            </div>
+         <div class="skills">
+            <section class=" card">
+               <h2>Certification</h2>
+               <div class="certification-badges">
+                  <div data-iframe-width="150" data-iframe-height="270"
+                     data-share-badge-id="654cc9b7-5d27-44a2-8eb6-e6deb6bd01be"
+                     data-share-badge-host="https://www.credly.com"></div>
+                  <div data-iframe-width="150" data-iframe-height="270"
+                     data-share-badge-id="ffd6203f-59c5-4d5b-bad6-d2b1accf7b4c"
+                     data-share-badge-host="https://www.credly.com"></div>
+                  <div data-iframe-width="150" data-iframe-height="270"
+                     data-share-badge-id="9f655521-15a7-4c35-874d-054559f8309d"
+                     data-share-badge-host="https://www.credly.com"></div>
+                  <script type="text/javascript" async src="//cdn.credly.com/assets/utilities/embed.js"></script>
+               </div>
+            </section>
+            <section class=" card">
+               <h2>Technology Stack</h2>
+               <ul>
+                  <li>Programming Skills: Java, JavaScript, TypeScript</li>
+                  <li>Runtime Environments: JVM, Node.js</li>
+                  <li>Front-End Skills: HTML, CSS, Angular, Bootstrap</li>
+                  <li>Back-End Frameworks: Spring Boot, Hibernate, Express.js</li>
+                  <li>Database Skills: RDBMS, NoSQL (MS SQL Server & MongoDB)</li>
+                  <li>Website Analytical Tools: Google Analytics with tagging</li>
+                  <li>Additional Skills: Siteminder, OAuth, Git, SVN, Docker</li>
+                </ul>
+                
+            </section>
          </div>
 
 
@@ -147,7 +168,7 @@
             </section>
          </div>
 
-      </section>
+      </main>
    </div>
 
    <footer id="footer-contact" class="footer">
