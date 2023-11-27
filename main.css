@@ -11,7 +11,7 @@
   }
   
   body {
-    background-color: #284f76;
+    background:   linear-gradient(to bottom, #8d05e7, #ff0095);
     font-family: 'Noto Sans', sans-serif;
     color: #555;
     margin: 0;
