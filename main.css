@@ -73,7 +73,21 @@
     flex-wrap: wrap;
     justify-content: space-around;
   }
-  
+
+  .badge {
+    max-width: 150px; 
+    max-height: 270px; 
+    border: 1px solid #e5e5e5; 
+    border-radius: 5%;
+    text-align: center;
+    padding: 20px 15px;
+    display: inline-block;
+  }
+
+  .badge h6 {
+    background-color: #e5e5e5;
+  }
+
   footer {
     margin-top: 10rem;
     background-color: #182730;
