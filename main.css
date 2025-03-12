@@ -23,7 +23,7 @@ body {
 }
 
 .container {
-    width: 95%;
+    padding: 5px;
     min-width: 425px;
     max-width: 1600px;
     margin: auto;
@@ -131,6 +131,10 @@ footer .social a {
     gap: 10px;
 }
 
+ul {
+    padding-left: 10px;
+}
+
 @media (min-width: 60rem) {
     .aside-contact {
         position: fixed;
@@ -151,6 +155,10 @@ footer .social a {
     footer .social {
         flex-direction: row;
         gap: 25px;
+    }
+
+    ul {
+        padding-left: 40px;
     }
 }
   
