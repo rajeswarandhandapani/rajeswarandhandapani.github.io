@@ -40,7 +40,6 @@ body {
 
 .nav-items {
     color: aliceblue;
-    font-size: 1.5rem;
     font-weight: bolder;
     display: flex;
     justify-content: flex-end;
@@ -68,7 +67,7 @@ body {
 .certification-badges {
     display: grid;
     grid-template-rows: repeat(auto-fit, 1fr);
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
 }
 
@@ -138,6 +137,10 @@ footer .social a {
         flex-direction: column;
         justify-content: center;
         gap: 2rem;
+    }
+
+    .certification-badges {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
 
     .container {
