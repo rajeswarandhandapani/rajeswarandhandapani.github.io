@@ -36,6 +36,14 @@
                 inline: 'center'
             });
         }
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+                chatWindow.style.display = 'block';
+            } else {
+                chatWindow.style.display = 'none';
+            }
+        }
     </script>
 
     <title>Rajeswaran Dhandapani | Senior Full Stack Developer</title>
@@ -356,6 +364,25 @@
         Copyright © 2025. Rajeswaran Dhandapani
     </p>
 </footer>
+
+<div id="chat-container">
+    <span class="chat-text">Chat with my AI Agent</span>
+    <div id="chat-button" onclick="toggleChat()">
+        <i class="chat-icon-d fa-solid fa-comments fa-4x"></i>
+        <i class="chat-icon-m fa-solid fa-comments fa-2x"></i>
+    </div>
+</div>
+
+<!-- Chatbot Iframe -->
+<div id="chat-window">
+    <button id="close-chat" onclick="toggleChat()">X</button>
+    <iframe
+            src="https://rajeswarandhandapani-rajes-bot.hf.space"
+            frameborder="0"
+            width="850"
+            height="450"
+    ></iframe>
+</div>
 
 </body>
 
