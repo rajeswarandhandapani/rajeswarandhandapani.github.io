@@ -1,5 +1,16 @@
-.text-center {
-    text-align: center;
+/* ==========================================================================
+   Base Styles and Utility Classes
+   ========================================================================== */
+body {
+    background: linear-gradient(to right, #6110af, #ff0095);
+    font-family: 'Noto Sans', sans-serif;
+    color: #555;
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    padding-left: 10px;
 }
 
 a:link,
@@ -10,16 +21,8 @@ a:active {
     text-decoration: none;
 }
 
-body {
-    background: linear-gradient(to right, #6110af, #ff0095);
-    font-family: 'Noto Sans', sans-serif;
-    color: #555;
-    margin: 0;
-    padding: 0;
-}
-
-.aside-contact {
-    display: none;
+.text-center {
+    text-align: center;
 }
 
 .container {
@@ -28,28 +31,10 @@ body {
     margin: auto;
 }
 
-.card {
-    border-radius: 0.25rem;
-    box-shadow: 2px 2px 2px #684d4d;
-    background-color: #fff;
-    margin-bottom: 3rem;
-    border: 1px solid rgba(0, 0, 0, 0.125);
-    padding: 1rem;
-    line-height: 2;
-}
-
-.nav-items {
-    color: aliceblue;
-    font-weight: bolder;
-    display: flex;
-    justify-content: flex-end;
-    gap: 50px;
-}
-
-.nav-items li {
-    list-style-type: none;
-}
-
+/* ==========================================================================
+   Layout Components
+   ========================================================================== */
+/* Header */
 .header {
     color: aliceblue;
     margin-bottom: 5rem;
@@ -64,46 +49,27 @@ body {
     font-size: 1.25rem;
 }
 
-.certification-badges {
-    display: grid;
-    grid-template-rows: repeat(auto-fit, 1fr);
-    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
-    gap: 1rem;
+/* Navigation */
+.nav-items {
+    color: aliceblue;
+    font-weight: bolder;
+    display: flex;
+    justify-content: flex-end;
+    gap: 50px;
 }
 
-.badge {
-    max-width: 175px;
-    max-height: 270px;
-    border: 1px solid #e5e5e5;
-    border-radius: 5%;
-    text-align: center;
-    display: inline-block;
-    padding-bottom: 2rem;
+.nav-items li {
+    list-style-type: none;
 }
 
-.badge img {
-    width: 105px;
-    height: 105px;
-    transition: transform 0.3s ease;
+/* Side Contact Links */
+.aside-contact {
+    display: none;
 }
 
-.badge h5 {
-    margin: 0 5px;
-}
-
-.badge img:hover {
-    transform: scale(1.5);
-}
-
-.badge .issuer {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin: 0 auto 2rem auto;
-    background-color: #e5e5e5;
-}
-
+/* Footer */
 footer {
-    margin-top: 10rem;
+    margin-top: 5rem;
     background-color: #182730;
     color: aliceblue;
     text-align: center;
@@ -130,11 +96,124 @@ footer .social a {
     gap: 10px;
 }
 
-ul {
-    padding-left: 10px;
+/* ==========================================================================
+   Reusable Component Styles
+   ========================================================================== */
+/* Card Container */
+.card {
+    border-radius: 0.25rem;
+    box-shadow: 2px 2px 2px #684d4d;
+    background-color: #fff;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem;
+    line-height: 2;
 }
 
-/* Chat Container */
+/* Grid Layouts */
+.grid {
+    display: grid;
+    gap: 2rem;
+}
+
+.grid-1col {
+    grid-template-columns: 1fr;
+}
+
+.grid-auto {
+    grid-template-rows: repeat(auto-fit, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+}
+
+/* Card Items */
+.item {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+.item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.item h3 {
+    color: #6110af;
+    margin-top: 0;
+}
+
+/* Specialized Items */
+.item-badge {
+    max-width: 175px;
+    text-align: center;
+    padding-bottom: 2rem;
+    background-color: white;
+}
+
+.item-badge img {
+    width: 105px;
+    height: 105px;
+    transition: transform 0.3s ease;
+}
+
+.item-badge img:hover {
+    transform: scale(1.5);
+}
+
+.item-badge h5 {
+    margin: 0 5px;
+}
+
+.item-badge .issuer {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 0 auto 2rem auto;
+    background-color: #e5e5e5;
+}
+
+/* Link Groups */
+.links {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(to right, #6110af, #ff0095);
+    color: white !important;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+/* Tags */
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+    border: 1px solid #ddd;
+}
+
+/* Chat Interface */
 #chat-container {
     position: fixed;
     bottom: 25px;
@@ -146,12 +225,10 @@ ul {
     z-index: 1000;
 }
 
-/* Chat Text */
 .chat-text {
     display: none;
 }
 
-/* Floating Chat Button */
 #chat-button {
     background-color: #6110af;
     color: white;
@@ -173,13 +250,12 @@ ul {
     background-color: #ff0095;
 }
 
-/* Chat Window */
 #chat-window {
     position: fixed;
     bottom: 10px;
     right: 0;
     width: 100%;
-    height: 500px;
+    height: 620px;
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -189,7 +265,6 @@ ul {
     overflow: hidden;
 }
 
-/* Close Button */
 #close-chat {
     position: absolute;
     top: 1px;
@@ -220,8 +295,26 @@ ul {
     overflow: hidden;
 }
 
-
+/* ==========================================================================
+   Media Queries
+   ========================================================================== */
 @media (min-width: 60rem) {
+    /* Layout adjustments */
+    .container {
+        width: 85%;
+    }
+
+    ul {
+        padding-left: 40px;
+    }
+
+    /* Header adjustments */
+    .header h1 {
+        font-size: 4rem;
+        margin-bottom: 0;
+    }
+
+    /* Side contact visibility */
     .aside-contact {
         position: fixed;
         display: flex;
@@ -230,31 +323,26 @@ ul {
         gap: 2rem;
     }
 
-    .header h1 {
-        font-size: 4rem;
-        margin-bottom: 0;
-    }
-
-    .certification-badges {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-
-    .container {
-        width: 85%;
-    }
-
+    /* Footer adjustments */
     footer .social {
         flex-direction: row;
         gap: 25px;
     }
 
-    ul {
-        padding-left: 40px;
+    /* Grid adjustments */
+    .grid-1col {
+        grid-template-columns: repeat(3, 1fr);
     }
 
+    .grid-auto {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    /* Chat adjustments */
     #chat-container {
         bottom: 25px;
     }
+
     .chat-text {
         background-color: #6110af;
         color: #FFFFFF;
@@ -274,6 +362,7 @@ ul {
     .chat-icon-d {
         display: block;
     }
+
     .chat-icon-m {
         display: none;
     }
@@ -285,4 +374,3 @@ ul {
         height: 500px;
     }
 }
-  
