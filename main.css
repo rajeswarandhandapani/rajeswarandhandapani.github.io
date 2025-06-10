@@ -1,10 +1,47 @@
+
+/* ==========================================================================
+   CSS Custom Properties (Theme Colors)
+   ========================================================================== */
+:root {
+    /* Primary brand colors */
+    --primary-purple: #6110af;
+    --primary-pink: #ff0095;
+    
+    /* Text colors */
+    --text-primary: #555;
+    --text-light: aliceblue;
+    --text-white: #fff;
+    --text-pure-white: #FFFFFF;
+    
+    /* Background colors */
+    --bg-dark: #182730;
+    --bg-white: #fff;
+    --bg-light-gray: #f9f9f9;
+    --bg-gray: #f0f0f0;
+    --bg-medium-gray: #e5e5e5;
+    
+    /* Border colors */
+    --border-dark: #684d4d;
+    --border-light: #e5e5e5;
+    --border-medium: #ccc;
+    --border-light-gray: #ddd;
+    
+    /* Shadow colors */
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-medium: rgba(0, 0, 0, 0.125);
+    --shadow-dark: rgba(0, 0, 0, 0.2);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(to right, var(--primary-purple), var(--primary-pink));
+}
+
 /* ==========================================================================
    Base Styles and Utility Classes
    ========================================================================== */
 body {
-    background: linear-gradient(to right, #6110af, #ff0095);
+    background: var(--gradient-primary);
     font-family: 'Noto Sans', sans-serif;
-    color: #555;
+    color: var(--text-primary);
     margin: 0;
     padding: 0;
 }
@@ -36,7 +73,7 @@ a:active {
    ========================================================================== */
 /* Header */
 .header {
-    color: aliceblue;
+    color: var(--text-light);
     margin-top: 4rem;
     margin-bottom: 5rem;
 }
@@ -57,15 +94,15 @@ a:active {
     transform: scale(1);
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 4px solid var(--text-white);
+    box-shadow: 0 4px 8px var(--shadow-light);
 }
 
 
 
 /* Navigation */
 .nav-items {
-    color: aliceblue;
+    color: var(--text-light);
     font-weight: bolder;
     display: flex;
     justify-content: flex-end;
@@ -84,8 +121,8 @@ a:active {
 /* Footer */
 footer {
     margin-top: 5rem;
-    background-color: #182730;
-    color: aliceblue;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
     text-align: center;
     box-sizing: border-box;
     padding: 40px 0;
@@ -116,10 +153,10 @@ footer .social a {
 /* Card Container */
 .card {
     border-radius: 0.25rem;
-    box-shadow: 2px 2px 2px #684d4d;
-    background-color: #fff;
+    box-shadow: 2px 2px 2px var(--border-dark);
+    background-color: var(--bg-white);
     margin-bottom: 3rem;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    border: 1px solid var(--shadow-medium);
     padding: 1rem;
     line-height: 2;
 }
@@ -141,20 +178,20 @@ footer .social a {
 
 /* Card Items */
 .item {
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     padding: 1.5rem;
-    background-color: #f9f9f9;
+    background-color: var(--bg-light-gray);
     transition: all 0.3s ease;
 }
 
 .item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 20px var(--shadow-light);
 }
 
 .item h3 {
-    color: #6110af;
+    color: var(--primary-purple);
     margin-top: 0;
 }
 
@@ -163,7 +200,7 @@ footer .social a {
     max-width: 175px;
     text-align: center;
     padding-bottom: 2rem;
-    background-color: white;
+    background-color: var(--text-white);
 }
 
 .item-badge img {
@@ -184,7 +221,7 @@ footer .social a {
     font-size: 0.9rem;
     font-weight: bold;
     margin: 0 auto 2rem auto;
-    background-color: #e5e5e5;
+    background-color: var(--bg-medium-gray);
 }
 
 /* Link Groups */
@@ -198,8 +235,8 @@ footer .social a {
     display: inline-flex;
     align-items: center;
     padding: 0.5rem 1rem;
-    background: linear-gradient(to right, #6110af, #ff0095);
-    color: white !important;
+    background: var(--gradient-primary);
+    color: var(--text-white) !important;
     border-radius: 4px;
     font-weight: bold;
 }
@@ -220,11 +257,11 @@ footer .social a {
 }
 
 .tag {
-    background-color: #f0f0f0;
+    background-color: var(--bg-gray);
     border-radius: 20px;
     padding: 0.2rem 0.8rem;
     font-size: 0.8rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-light-gray);
 }
 
 /* Chat Interface */
@@ -244,15 +281,15 @@ footer .social a {
 }
 
 #chat-button {
-    background-color: #6110af;
-    color: white;
+    background-color: var(--primary-purple);
+    color: var(--text-white);
     border-radius: 50%;
     width: 75px;
     height: 75px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px var(--shadow-light);
     cursor: pointer;
 }
 
@@ -261,7 +298,7 @@ footer .social a {
 }
 
 #chat-button:hover {
-    background-color: #ff0095;
+    background-color: var(--primary-pink);
 }
 
 #chat-window {
@@ -271,10 +308,10 @@ footer .social a {
     width: 100vw;
     height: 70vh;
     max-height: 600px;
-    background-color: white;
-    border: 1px solid #ccc;
+    background-color: var(--text-white);
+    border: 1px solid var(--border-medium);
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px var(--shadow-light);
     display: none;
     z-index: 1000;
     overflow: hidden;
@@ -284,8 +321,8 @@ footer .social a {
     position: absolute;
     top: 10px;
     right: 25px;
-    background-color: #ff0095;
-    color: white;
+    background-color: var(--primary-pink);
+    color: var(--text-white);
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -295,11 +332,11 @@ footer .social a {
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px var(--shadow-dark);
 }
 
 #close-chat:hover {
-    background-color: #6110af;
+    background-color: var(--primary-purple);
 }
 
 #chat-window iframe {
@@ -360,11 +397,9 @@ footer .social a {
     /* Chat adjustments */
     #chat-container {
         bottom: 25px;
-    }
-
-    .chat-text {
-        background-color: #6110af;
-        color: #FFFFFF;
+    }    .chat-text {
+        background-color: var(--primary-purple);
+        color: var(--text-pure-white);
         font-size: 1.5rem;
         font-weight: bold;
         padding: 5px 10px;
@@ -384,7 +419,9 @@ footer .social a {
 
     .chat-icon-m {
         display: none;
-    }    #chat-window {
+    }    
+    
+    #chat-window {
         bottom: 90px;
         right: 20px;
         width: min(450px, 90vw);
