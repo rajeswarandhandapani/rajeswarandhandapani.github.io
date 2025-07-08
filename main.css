@@ -106,6 +106,9 @@ a:active {
     display: flex;
     justify-content: center;
     gap: 50px;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
 }
 
 .nav-items li {
@@ -115,6 +118,17 @@ a:active {
 .nav-items i {
     margin-right: 8px;
     font-size: 0.9em;
+}
+
+.nav-items a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-items a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Side Contact Links */
@@ -543,6 +557,26 @@ footer .social a {
 
 /* Responsive adjustments for projects */
 @media (max-width: 768px) {
+    /* Navigation adjustments for mobile */
+    .nav-items {
+        gap: 15px;
+        font-size: 0.9rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .nav-items a {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+    
+    .nav-items i {
+        margin-right: 4px;
+        font-size: 0.8em;
+    }
+    
+    /* Project adjustments */
     .project-header {
         flex-direction: column;
         align-items: stretch;
@@ -558,5 +592,29 @@ footer .social a {
     
     .scrollable-projects {
         max-height: 500px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .nav-items {
+        gap: 8px;
+        font-size: 0.8rem;
+        padding: 0 10px;
+    }
+    
+    .nav-items a {
+        padding: 8px 6px;
+        font-size: 0.75rem;
+    }
+    
+    .nav-items i {
+        margin-right: 3px;
+        font-size: 0.75em;
+    }
+    
+    /* Hide icons on very small screens to save space */
+    .nav-items i {
+        display: none;
     }
 }
