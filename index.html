@@ -28,6 +28,17 @@
     </script>
 
     <script>
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({
+                    block: 'start',
+                    behavior: 'smooth',
+                    inline: 'center'
+                });
+            }
+        }
+
         function scrollToContact() {
             let footer = document.getElementById('footer-contact');
             footer.scrollIntoView({
@@ -67,6 +78,9 @@
 
     <nav>
         <ul class="nav-items">
+            <li><a href="javascript:scrollToSection('certifications');">Certifications</a></li>
+            <li><a href="javascript:scrollToSection('projects');">GitHub Projects</a></li>
+            <li><a href="javascript:scrollToSection('experience');">Professional Experience</a></li>
             <li><a href="javascript:scrollToContact();">Contact Me</a></li>
             <li><a href="Rajeswaran_Dhandapani_Senior Full_Stack_Developer_CV.pdf" target="_blank">My Resume (PDF)</a>
             </li>
@@ -164,7 +178,7 @@
             </ul>
         </section>
 
-        <section class="card">
+        <section class="card" id="certifications">
             <h2>Hall Of Fame <small>(Certifications)</small></h2>
             <div class="grid grid-auto">
                 <div class="item item-badge">
@@ -233,7 +247,7 @@
             </div>
         </section>
 
-        <section class="card">
+        <section class="card" id="projects">
             <h2>Featured GitHub Projects</h2>
             <div class="projects-container scrollable-projects">
                 <div class="project-card">
@@ -365,7 +379,7 @@
             </div>
         </section>
 
-        <section class="card">
+        <section class="card" id="experience">
             <h2>Professional Experience</h2>
             <ul>
                 <li>
