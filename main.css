@@ -104,7 +104,7 @@ a:active {
     color: var(--color-text-light);
     font-weight: bolder;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 50px;
 }
 
