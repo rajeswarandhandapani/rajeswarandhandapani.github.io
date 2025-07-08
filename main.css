@@ -205,11 +205,6 @@ nav {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Side Contact Links */
-.aside-contact {
-    display: none;
-}
-
 /* Footer */
 footer {
     margin-top: 5rem;
@@ -569,15 +564,6 @@ footer .social a {
     .header h1 {
         font-size: 4rem;
         margin-bottom: 0;
-    }
-
-    /* Side contact visibility */
-    .aside-contact {
-        position: fixed;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 2rem;
     }
 
     /* Footer adjustments */
