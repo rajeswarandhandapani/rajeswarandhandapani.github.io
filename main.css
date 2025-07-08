@@ -65,7 +65,7 @@ a:active {
     padding: 5px;
     max-width: 1600px;
     margin: auto;
-    padding-top: 80px; /* Account for fixed navigation */
+    padding-top: 90px; /* Account for fixed navigation with brand logo */
 }
 
 /* ==========================================================================
@@ -112,6 +112,66 @@ nav {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 10px var(--shadow-medium);
     padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--text-white);
+    box-shadow: 0 2px 4px var(--shadow-light);
+}
+
+.nav-brand-text {
+    color: var(--text-white);
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-shadow: 0 1px 2px var(--shadow-dark);
+}
+
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 1001;
+}
+
+.hamburger {
+    width: 25px;
+    height: 3px;
+    background-color: var(--text-white);
+    margin: 3px 0;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.nav-toggle-open .hamburger:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.nav-toggle-open .hamburger:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle-open .hamburger:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
 }
 
 .nav-items {
@@ -581,22 +641,64 @@ footer .social a {
 @media (max-width: 768px) {
 
     /* Navigation adjustments for mobile */
+    nav {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+    }
+
+    .container {
+        padding-top: 80px; /* Reduced padding for compact mobile nav */
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
     .nav-items {
-        gap: 15px;
-        font-size: 0.9rem;
-        justify-content: center;
-        flex-wrap: wrap;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: var(--gradient-primary);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 2px 10px var(--shadow-medium);
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+    }
+
+    .nav-items.nav-open {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .nav-items li {
+        margin: 10px 0;
+        text-align: center;
     }
 
     .nav-items a {
-        padding: 10px 8px;
-        font-size: 0.85rem;
-        white-space: nowrap;
+        display: block;
+        padding: 15px 20px;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-items a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
     }
 
     .nav-items i {
-        margin-right: 4px;
-        font-size: 0.8em;
+        margin-right: 10px;
+        font-size: 1.1em;
     }
 
     /* Chat window mobile adjustments */
@@ -647,24 +749,54 @@ footer .social a {
 
 /* Extra small screens */
 @media (max-width: 480px) {
+    nav {
+        padding: 12px 15px;
+    }
+
+    .container {
+        padding-top: 70px; /* Compact mobile nav */
+    }
+
+    .nav-logo {
+        width: 35px;
+        height: 35px;
+    }
+
+    .nav-brand-text {
+        font-size: 1rem;
+    }
+
     .nav-items {
-        gap: 8px;
-        font-size: 0.8rem;
-        padding: 0 10px;
+        top: 65px;
+        padding: 15px;
     }
 
     .nav-items a {
-        padding: 8px 6px;
-        font-size: 0.75rem;
+        padding: 12px 15px;
+        font-size: 0.9rem;
     }
 
     .nav-items i {
-        margin-right: 3px;
-        font-size: 0.75em;
+        margin-right: 8px;
+        font-size: 1em;
     }
+}
 
-    /* Hide icons on very small screens to save space */
-    .nav-items i {
-        display: none;
-    }
+/* Mobile navigation backdrop */
+.nav-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 998;
+}
+
+.nav-backdrop.nav-open {
+    opacity: 1;
+    visibility: visible;
 }

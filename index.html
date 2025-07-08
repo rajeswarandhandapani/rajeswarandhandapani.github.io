@@ -37,6 +37,8 @@
                     inline: 'center'
                 });
             }
+            // Close mobile menu after navigation
+            closeMobileNav();
         }
 
         function scrollToContact() {
@@ -46,6 +48,28 @@
                 behavior: 'smooth',
                 inline: 'center'
             });
+            // Close mobile menu after navigation
+            closeMobileNav();
+        }
+
+        function toggleMobileNav() {
+            const navItems = document.querySelector('.nav-items');
+            const navToggle = document.querySelector('.nav-toggle');
+            const navBackdrop = document.querySelector('.nav-backdrop');
+            
+            navItems.classList.toggle('nav-open');
+            navToggle.classList.toggle('nav-toggle-open');
+            navBackdrop.classList.toggle('nav-open');
+        }
+
+        function closeMobileNav() {
+            const navItems = document.querySelector('.nav-items');
+            const navToggle = document.querySelector('.nav-toggle');
+            const navBackdrop = document.querySelector('.nav-backdrop');
+            
+            navItems.classList.remove('nav-open');
+            navToggle.classList.remove('nav-toggle-open');
+            navBackdrop.classList.remove('nav-open');
         }
 
         function toggleChat() {
@@ -76,7 +100,18 @@
 
 <div class="container">
 
+    <div class="nav-backdrop" onclick="closeMobileNav()"></div>
+
     <nav>
+        <div class="nav-brand">
+            <img src="images/rajes.jpeg" alt="Rajeswaran Dhandapani" class="nav-logo">
+            <span class="nav-brand-text">Rajeswaran</span>
+        </div>
+        <button class="nav-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+            <span class="hamburger"></span>
+            <span class="hamburger"></span>
+            <span class="hamburger"></span>
+        </button>
         <ul class="nav-items">
             <li><a href="javascript:scrollToSection('certifications');"><i class="fa-solid fa-certificate"></i> Certifications</a></li>
             <li><a href="javascript:scrollToSection('projects');"><i class="fa-brands fa-github"></i> GitHub Projects</a></li>
