@@ -586,8 +586,8 @@ footer .social a {
 .project-header {
     display: flex;
     flex-direction: column;
-    padding: 16px 16px 0 16px;
-    margin-bottom: 8px;
+    padding: 18px 18px 0 18px;
+    margin-bottom: 10px;
     gap: 8px;
 }
 
@@ -611,26 +611,26 @@ footer .social a {
 }
 
 .project-description {
-    padding: 0 16px;
-    margin-bottom: 10px;
+    padding: 0 18px;
+    margin-bottom: 14px;
     flex-grow: 1;
-    max-height: 100px;
+    max-height: 130px;
     overflow: hidden;
     position: relative;
 }
 
 .project-description p {
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-size: 0.9rem;
+    line-height: 1.5;
     margin-top: 0;
     margin-bottom: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: #666;
+    color: #555;
 }
 
 .project-tags {
@@ -638,7 +638,7 @@ footer .social a {
     flex-wrap: wrap;
     gap: 4px;
     margin-top: auto;
-    padding: 10px 16px;
+    padding: 12px 18px;
     background: #f8f9fa;
     border-top: 1px solid #eee;
 }
@@ -646,9 +646,9 @@ footer .social a {
 .project-tags .tag {
     background: white;
     color: #666;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.65em;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 0.7em;
     font-weight: 500;
     white-space: nowrap;
     border: 1px solid #e9ecef;
