@@ -427,12 +427,13 @@ nav {
    ========================================================================== */
 #chat-container {
     position: fixed;
-    bottom: 25px;
+    bottom: 0px;
     right: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 1000;
+    overflow: hidden;
 }
 
 .chat-text { display: none; }
@@ -456,24 +457,28 @@ nav {
 
 #chat-window {
     position: fixed;
-    bottom: 10px;
+    bottom: 5px;
     right: 0;
     width: 100vw;
-    height: 70vh;
-    max-height: 600px;
-    background: var(--text-white);
-    border: 1px solid #ccc;
+    height: 85vh;
+    min-height: 650px;
+    background: transparent;
+    border: none;
     border-radius: 10px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: none;
     display: none;
     z-index: 1000;
-    overflow: hidden;
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
 }
+
+#chat-window::-webkit-scrollbar { display: none !important; }
 
 #close-chat {
     position: absolute;
     top: 10px;
-    right: 25px;
+    right: 16px;
     background: var(--pink);
     color: var(--text-white);
     border: none;
@@ -495,7 +500,15 @@ nav {
     height: 100%;
     border: none;
     border-radius: 10px;
+    overflow: hidden;
 }
+
+#chat-window * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#chat-window *::-webkit-scrollbar { display: none; }
 
 /* ==========================================================================
    11. Footer
@@ -526,11 +539,11 @@ footer .social a {
 }
 
 /* ==========================================================================
-   12. Media Queries
+   12. Media Queries - Simplified (Mobile & Non-Mobile)
    ========================================================================== */
 
-/* Desktop (60rem+) */
-@media (min-width: 60rem) {
+/* Non-Mobile (Desktop/Tablet) - 993px and above */
+@media (min-width: 993px) {
     .container { width: 85%; }
     ul { padding-left: 40px; }
     .header { margin-top: 4rem; }
@@ -539,6 +552,7 @@ footer .social a {
     
     .grid-1col { grid-template-columns: repeat(3, 1fr); }
     .grid-auto { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .projects-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
     
     footer .social { flex-direction: row; }
     
@@ -559,24 +573,22 @@ footer .social a {
     .chat-icon-m { display: none; }
     
     #chat-window {
-        bottom: 90px;
+        bottom: 25px;
         right: 20px;
         width: min(450px, 90vw);
-        height: min(600px, 80vh);
+        /* height: min(750px, 85vh); */
+        /* min-height: 400px; */
         max-width: 500px;
     }
 }
 
-/* Projects Grid Breakpoints */
-@media (min-width: 600px) { .projects-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 992px) { .projects-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
-@media (min-width: 1400px) { .projects-grid { grid-template-columns: repeat(4, 1fr); } }
-
-/* Tablet & Mobile (max 768px) */
-@media (max-width: 768px) {
+/* Mobile - 992px and below */
+@media (max-width: 992px) {
     nav { padding: 15px 20px; }
     .container { padding-top: 80px; }
     .nav-toggle { display: flex; }
+    .nav-logo { width: 35px; height: 35px; }
+    .nav-brand-text { font-size: 1rem; }
     
     .nav-items {
         position: fixed;
@@ -629,25 +641,14 @@ footer .social a {
     #chat-window iframe { border-radius: 0; }
     
     #close-chat {
-        top: 15px;
+        top: 10px;
         right: 15px;
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         font-size: 1.2rem;
         z-index: 10000;
     }
     
     .project-links { justify-content: center; }
     .scrollable-projects { max-height: 500px; }
-}
-
-/* Small Mobile (max 480px) */
-@media (max-width: 480px) {
-    nav { padding: 12px 15px; }
-    .container { padding-top: 70px; }
-    .nav-logo { width: 35px; height: 35px; }
-    .nav-brand-text { font-size: 1rem; }
-    .nav-items { top: 65px; padding: 15px; }
-    .nav-items a { padding: 12px 15px; font-size: 0.9rem; }
-    .nav-items i { margin-right: 8px; font-size: 1em; }
 }
