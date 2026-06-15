@@ -3,9 +3,9 @@
    ========================================================================== */
 :root {
     /* Brand Colors */
-    --purple: #4f5bd5; /* indigo-blue (primary) */
-    --pink: #6b78e8;   /* indigo-blue light (accent) */
-    --gradient: linear-gradient(135deg, var(--purple), var(--pink));
+    --primary: #ea580c; /* Orange (primary) */
+    --accent: #f97316;  /* Orange light (accent) */
+    --gradient: linear-gradient(135deg, var(--primary), var(--accent));
 
     /* Theme surfaces */
     --bg-page: #eceef1;
@@ -143,9 +143,9 @@ nav {
 .nav-items a:hover { background-color: rgba(60, 64, 67, 0.08); }
 
 .nav-items a.active {
-    color: var(--purple);
-    background-color: rgba(79, 91, 213, 0.1);
-    box-shadow: inset 0 -2px 0 var(--purple);
+    color: var(--primary);
+    background-color: rgba(234, 88, 12, 0.1);
+    box-shadow: inset 0 -2px 0 var(--primary);
 }
 
 /* Mobile Nav Backdrop */
@@ -200,7 +200,7 @@ nav {
 }
 
 .btn-hero.btn-hero-primary {
-    background: var(--purple);
+    background: var(--primary);
     color: var(--text-white) !important;
     box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
 }
@@ -208,29 +208,29 @@ nav {
 .btn-hero.btn-hero-primary i { color: var(--text-white); }
 
 .btn-hero.btn-hero-primary:hover {
-    background: #4049b8;
+    background: #c2410c;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(79, 91, 213, 0.35);
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35);
     opacity: 1;
 }
 
 .btn-hero.btn-hero-outline {
     background: transparent;
-    color: var(--purple) !important;
+    color: var(--primary) !important;
     border: 1px solid var(--border);
 }
 
-.btn-hero.btn-hero-outline i { color: var(--purple); }
+.btn-hero.btn-hero-outline i { color: var(--primary); }
 
 .btn-hero.btn-hero-outline:hover {
-    background: rgba(79, 91, 213, 0.08);
-    color: var(--purple) !important;
-    border-color: var(--purple);
+    background: rgba(234, 88, 12, 0.08);
+    color: var(--primary) !important;
+    border-color: var(--primary);
     transform: translateY(-2px);
     opacity: 1;
 }
 
-.btn-hero.btn-hero-outline:hover i { color: var(--purple); }
+.btn-hero.btn-hero-outline:hover i { color: var(--primary); }
 
 /* ==========================================================================
    5. Cards
@@ -262,7 +262,7 @@ nav {
     background: var(--gradient);
 }
 
-.card h2 i { margin-right: 10px; color: var(--purple); }
+.card h2 i { margin-right: 10px; color: var(--primary); }
 
 /* Highlights Grid */
 .highlights-grid {
@@ -274,7 +274,7 @@ nav {
 .highlight-group {
     background: var(--bg-light);
     border: 1px solid var(--border-light);
-    border-left: 4px solid var(--purple);
+    border-left: 4px solid var(--primary);
     border-radius: 8px;
     padding: 1rem 1.25rem;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -282,12 +282,12 @@ nav {
 
 .highlight-group:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 18px rgba(97, 16, 175, 0.12);
+    box-shadow: 0 8px 18px rgba(234, 88, 12, 0.12);
 }
 
 .highlight-group h3 {
     margin: 0 0 0.5rem;
-    color: var(--purple);
+    color: var(--primary);
     font-size: 1.1rem;
     display: flex;
     align-items: center;
@@ -345,7 +345,7 @@ nav {
     box-shadow: 0 10px 20px var(--shadow);
 }
 
-.item h3 { color: var(--purple); margin-top: 0; }
+.item h3 { color: var(--primary); margin-top: 0; }
 
 .item-badge {
     max-width: 175px;
@@ -442,10 +442,10 @@ nav {
 
 .project-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(97, 16, 175, 0.15);
+    box-shadow: 0 8px 16px rgba(234, 88, 12, 0.15);
 }
 
-.project-card:hover .project-header h3 { color: var(--pink); }
+.project-card:hover .project-header h3 { color: var(--accent); }
 
 .project-header {
     display: flex;
@@ -459,7 +459,7 @@ nav {
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.3;
-    color: var(--purple);
+    color: var(--primary);
 }
 
 .project-links { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -471,27 +471,27 @@ nav {
 }
 
 .project-links .btn-primary {
-    background-color: var(--purple);
-    border: 1px solid var(--purple);
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
     color: white !important;
 }
 
 .project-links .btn-primary:hover {
-    background-color: var(--pink);
-    border-color: var(--pink);
+    background-color: var(--accent);
+    border-color: var(--accent);
 }
 
 .project-links .btn-primary i { color: white; }
 
 .project-links .btn-secondary {
-    background-color: var(--pink);
-    border: 1px solid var(--pink);
+    background-color: var(--accent);
+    border: 1px solid var(--accent);
     color: white !important;
 }
 
 .project-links .btn-secondary:hover {
-    background-color: var(--purple);
-    border-color: var(--purple);
+    background-color: var(--primary);
+    border-color: var(--primary);
 }
 
 .project-links .btn-secondary i { color: white; }
@@ -565,7 +565,7 @@ nav {
 .chat-text { display: none; }
 
 #chat-button {
-    background: var(--purple);
+    background: var(--primary);
     color: var(--text-white);
     border-radius: 50%;
     width: 75px;
@@ -577,7 +577,7 @@ nav {
     cursor: pointer;
 }
 
-#chat-button:hover { background: var(--pink); }
+#chat-button:hover { background: var(--accent); }
 
 .chat-icon-d { display: none; }
 
@@ -605,7 +605,7 @@ nav {
     position: absolute;
     top: 10px;
     right: 16px;
-    background: var(--pink);
+    background: var(--accent);
     color: var(--text-white);
     border: none;
     border-radius: 50%;
@@ -619,7 +619,7 @@ nav {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-#close-chat:hover { background: var(--purple); }
+#close-chat:hover { background: var(--primary); }
 
 #chat-window iframe {
     width: 100%;
@@ -645,7 +645,7 @@ nav {
     height: 48px;
     border: none;
     border-radius: 50%;
-    background: var(--purple);
+    background: var(--primary);
     color: var(--text-white);
     font-size: 1.1rem;
     cursor: pointer;
@@ -664,7 +664,7 @@ nav {
 }
 
 #back-to-top:hover {
-    background: var(--pink);
+    background: var(--accent);
     transform: translateY(-3px);
 }
 
@@ -718,7 +718,7 @@ footer .social a {
     /* Chat Desktop */
     .chat-text {
         display: inline-block;
-        background: var(--purple);
+        background: var(--primary);
         color: var(--text-white);
         font-size: 1rem;
         font-weight: bold;
