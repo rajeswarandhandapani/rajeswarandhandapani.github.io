@@ -86,7 +86,7 @@ nav {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border);
+    border: 2px solid var(--primary);
     box-shadow: 0 2px 4px var(--shadow);
 }
 
