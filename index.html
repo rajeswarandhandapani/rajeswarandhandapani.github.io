@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>document.documentElement.classList.add('js-anim');</script>
     <meta name="description"
           content="Rajeswaran Dhandapani - Certified AI Engineer, Cloud Solutions Architect, and Full Stack Engineer with 14+ years building enterprise-scale generative AI, agentic systems, and microservices using Azure, AWS, Java, Spring Boot, and Angular.">
     <meta name="author" content="Rajeswaran Dhandapani"/>
@@ -785,6 +786,28 @@
         }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
 
         sections.forEach(section => observer.observe(section));
+    })();
+
+    // Reveal cards on scroll
+    (function () {
+        const cards = document.querySelectorAll('.card');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (reduceMotion || !('IntersectionObserver' in window)) {
+            cards.forEach(card => card.classList.add('is-visible'));
+            return;
+        }
+
+        const revealObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+        cards.forEach(card => revealObserver.observe(card));
     })();
 </script>
 

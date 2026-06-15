@@ -289,6 +289,26 @@ nav {
 
 .highlight-group li { margin-bottom: 0.3rem; }
 
+/* Scroll Reveal */
+.js-anim .card {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.js-anim .card.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .js-anim .card {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
 /* ==========================================================================
    6. Grid System
    ========================================================================== */
