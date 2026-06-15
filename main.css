@@ -348,7 +348,14 @@ nav {
 }
 
 .item-badge:hover img { transform: scale(1.12); }
-.item-badge h5 { margin: 0 5px; }
+
+.item-badge .badge-title {
+    margin: 0 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-dark);
+}
 
 .item-badge .issuer {
     font-size: 0.9rem;
