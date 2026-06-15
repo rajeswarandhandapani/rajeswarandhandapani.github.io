@@ -171,6 +171,49 @@ nav {
     box-shadow: 0 4px 8px var(--shadow);
 }
 
+/* Hero Call-to-Action Buttons */
+.hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 1.75rem;
+}
+
+.btn-hero {
+    padding: 0.7rem 1.4rem;
+    font-size: 1rem;
+    border-radius: 50px;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+
+.btn-hero-primary {
+    background: var(--text-white);
+    color: var(--purple) !important;
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+}
+
+.btn-hero-outline {
+    background: transparent;
+    color: var(--text-white) !important;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.btn-hero-outline:hover {
+    background: var(--text-white);
+    color: var(--purple) !important;
+    transform: translateY(-2px);
+    opacity: 1;
+}
+
+.btn-hero-outline:hover i { color: var(--purple); }
+
 /* ==========================================================================
    5. Cards
    ========================================================================== */
