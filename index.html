@@ -750,6 +750,10 @@
     </p>
 </footer>
 
+<button id="back-to-top" aria-label="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+
 <div id="chat-container">
     <span class="chat-text">Chat with my AI Agent</span>
     <div id="chat-button" onclick="toggleChat()">
@@ -808,6 +812,15 @@
         }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
 
         cards.forEach(card => revealObserver.observe(card));
+    })();
+
+    // Show back-to-top button after scrolling down
+    (function () {
+        const btn = document.getElementById('back-to-top');
+        if (!btn) return;
+        const toggleBtn = () => btn.classList.toggle('show', window.scrollY > 400);
+        window.addEventListener('scroll', toggleBtn, { passive: true });
+        toggleBtn();
     })();
 </script>
 

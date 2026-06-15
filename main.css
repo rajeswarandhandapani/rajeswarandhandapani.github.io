@@ -616,6 +616,38 @@ nav {
 
 #chat-window *::-webkit-scrollbar { display: none; }
 
+/* Back to Top */
+#back-to-top {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: var(--purple);
+    color: var(--text-white);
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px var(--shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s, background 0.3s;
+    z-index: 1000;
+}
+
+#back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#back-to-top:hover {
+    background: var(--pink);
+    transform: translateY(-3px);
+}
+
 /* ==========================================================================
    11. Footer
    ========================================================================== */
