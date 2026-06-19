@@ -58,18 +58,6 @@
                     inline: 'center'
                 });
             }
-            // Close mobile menu after navigation
-            closeMobileNav();
-        }
-
-        function scrollToContact() {
-            let footer = document.getElementById('footer-contact');
-            footer.scrollIntoView({
-                block: 'end',
-                behavior: 'smooth',
-                inline: 'center'
-            });
-            // Close mobile menu after navigation
             closeMobileNav();
         }
 
@@ -163,7 +151,7 @@
             <li><a href="javascript:scrollToSection('certifications');" data-section="certifications"><i class="fa-solid fa-certificate"></i> Certifications</a></li>
             <li><a href="javascript:scrollToSection('projects');" data-section="projects"><i class="fa-brands fa-github"></i> GitHub Projects</a></li>
             <li><a href="javascript:scrollToSection('experience');" data-section="experience"><i class="fa-solid fa-briefcase"></i> Professional Experience</a></li>
-            <li><a href="javascript:scrollToContact();"><i class="fa-solid fa-envelope"></i> Contact Me</a></li>
+            <li><a href="javascript:scrollToSection('footer-contact');" data-section="footer-contact"><i class="fa-solid fa-envelope"></i> Contact Me</a></li>
             <!-- Resume link intentionally disabled until the PDF is updated -->
         </ul>
     </nav>
@@ -177,7 +165,7 @@
                 <a class="btn btn-hero btn-hero-primary" href="javascript:scrollToSection('projects');">
                     <i class="fa-brands fa-github"></i> View Projects
                 </a>
-                <a class="btn btn-hero btn-hero-primary" href="javascript:scrollToContact();">
+                <a class="btn btn-hero btn-hero-primary" href="javascript:scrollToSection('footer-contact');">
                     <i class="fa-solid fa-envelope"></i> Contact Me
                 </a>
             </div>

@@ -214,24 +214,6 @@ nav {
     opacity: 1;
 }
 
-.btn-hero.btn-hero-outline {
-    background: transparent;
-    color: var(--primary) !important;
-    border: 1px solid var(--border);
-}
-
-.btn-hero.btn-hero-outline i { color: var(--primary); }
-
-.btn-hero.btn-hero-outline:hover {
-    background: rgba(234, 88, 12, 0.08);
-    color: var(--primary) !important;
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    opacity: 1;
-}
-
-.btn-hero.btn-hero-outline:hover i { color: var(--primary); }
-
 /* ==========================================================================
    5. Cards
    ========================================================================== */
@@ -326,7 +308,6 @@ nav {
    6. Grid System
    ========================================================================== */
 .grid { display: grid; gap: 2rem; }
-.grid-1col { grid-template-columns: 1fr; }
 .grid-auto { grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
 
 /* ==========================================================================
@@ -384,7 +365,7 @@ nav {
     display: inline-flex;
     align-items: center;
     padding: 0.5rem 1rem;
-    background: var(--gradient);
+    background: var(--primary);
     color: var(--text-white) !important;
     border-radius: 4px;
     font-weight: bold;
@@ -392,8 +373,6 @@ nav {
 
 .btn:hover { opacity: 0.9; }
 .btn i { margin-right: 5px; }
-
-.tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
 .tag {
     background: var(--bg-gray);
@@ -536,18 +515,6 @@ nav {
     border: 1px solid #e9ecef;
 }
 
-.scrollable-projects {
-    max-height: 600px;
-    overflow-y: auto;
-    padding-right: 10px;
-    margin-bottom: 15px;
-}
-
-.scrollable-projects::-webkit-scrollbar { width: 8px; }
-.scrollable-projects::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-.scrollable-projects::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-.scrollable-projects::-webkit-scrollbar-thumb:hover { background: #555; }
-
 /* ==========================================================================
    10. Chat Widget
    ========================================================================== */
@@ -629,13 +596,6 @@ nav {
     overflow: hidden;
 }
 
-#chat-window * {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-#chat-window *::-webkit-scrollbar { display: none; }
-
 /* Back to Top */
 #back-to-top {
     position: fixed;
@@ -694,7 +654,25 @@ footer .social a {
     display: flex;
     align-items: center;
     gap: 10px;
+    transition: color 0.3s;
 }
+
+footer .social a i {
+    color: var(--primary);
+    border-color: var(--primary);
+    transition: color 0.3s, border-color 0.3s, background-color 0.3s;
+}
+
+footer .social a:hover {
+    color: var(--primary);
+}
+
+footer .social a:hover i {
+    color: var(--text-white);
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
 
 /* ==========================================================================
    12. Media Queries - Simplified (Mobile & Non-Mobile)
@@ -708,7 +686,6 @@ footer .social a {
     .header h1 { font-size: 4rem; }
     .profile-image { transform: scale(1.4); }
     
-    .grid-1col { grid-template-columns: repeat(3, 1fr); }
     .grid-auto { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
     .projects-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .highlights-grid { grid-template-columns: repeat(2, 1fr); }
@@ -735,8 +712,6 @@ footer .social a {
         bottom: 25px;
         right: 20px;
         width: min(450px, 90vw);
-        /* height: min(750px, 85vh); */
-        /* min-height: 400px; */
         max-width: 500px;
     }
 }
@@ -810,5 +785,4 @@ footer .social a {
     }
     
     .project-links { justify-content: center; }
-    .scrollable-projects { max-height: 500px; }
 }
