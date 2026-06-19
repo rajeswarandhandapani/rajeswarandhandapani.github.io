@@ -214,6 +214,43 @@ nav {
     opacity: 1;
 }
 
+.btn-hero.btn-hero-outline {
+    background: transparent;
+    color: var(--primary) !important;
+    border: 2px solid var(--primary);
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hero.btn-hero-outline i { color: var(--primary); }
+
+.btn-hero.btn-hero-outline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(234, 88, 12, 0.1), transparent);
+    animation: btn-shimmer 2.5s ease-in-out infinite;
+}
+
+.btn-hero.btn-hero-outline:hover {
+    background: var(--primary);
+    color: var(--text-white) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35);
+}
+
+.btn-hero.btn-hero-outline:hover i { color: var(--text-white); }
+
+@keyframes btn-shimmer {
+    0%   { left: -100%; }
+    50%  { left: 100%; }
+    100% { left: 100%; }
+}
+
 /* ==========================================================================
    5. Cards
    ========================================================================== */
@@ -383,25 +420,7 @@ nav {
     border-radius: 20px;
 }
 
-/* Scroll Reveal */
-.js-anim .card {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-}
 
-.js-anim .card.is-visible {
-    opacity: 1;
-    transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .js-anim .card {
-        opacity: 1;
-        transform: none;
-        transition: none;
-    }
-}
 
 /* ==========================================================================
    6. Grid System
@@ -619,31 +638,98 @@ nav {
    ========================================================================== */
 #chat-container {
     position: fixed;
-    bottom: 0px;
-    right: 40px;
+    bottom: 24px;
+    right: 24px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     z-index: 1000;
-    overflow: hidden;
+    gap: 8px;
 }
 
-.chat-text { display: none; }
+/* Tooltip label */
+.chat-text {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    position: relative;
+}
+
+.chat-text::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: var(--bg-dark);
+    transform: rotate(45deg);
+    border-radius: 2px;
+}
+
+.chat-text.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 
 #chat-button {
     background: var(--primary);
     color: var(--text-white);
     border-radius: 50%;
-    width: 75px;
-    height: 75px;
+    width: 68px;
+    height: 68px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    animation: chat-bounce-in 0.6s ease 0.5s both;
 }
 
-#chat-button:hover { background: var(--accent); }
+#chat-button::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0.4;
+    animation: chat-pulse 2s ease-in-out infinite;
+    z-index: -1;
+}
+
+#chat-button:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+}
+
+#chat-button:hover::before {
+    animation: none;
+    opacity: 0;
+}
+
+@keyframes chat-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50%      { transform: scale(1.45); opacity: 0; }
+}
+
+@keyframes chat-bounce-in {
+    0%   { transform: scale(0); opacity: 0; }
+    50%  { transform: scale(1.15); }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1); opacity: 1; }
+}
 
 .chat-icon-d { display: none; }
 
@@ -793,18 +879,7 @@ footer .social a:hover i {
     footer .social { flex-direction: row; }
     
     /* Chat Desktop */
-    .chat-text {
-        display: inline-block;
-        background: var(--primary);
-        color: var(--text-white);
-        font-size: 1rem;
-        font-weight: bold;
-        padding: 4px 8px;
-        border-radius: 5px;
-        margin-bottom: 5px;
-    }
-    
-    #chat-button { width: 120px; height: 120px; }
+    #chat-button { width: 72px; height: 72px; }
     .chat-icon-d { display: block; }
     .chat-icon-m { display: none; }
     
