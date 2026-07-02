@@ -17,7 +17,9 @@ body {
 }
 
 .klg-navbar {
-  background: linear-gradient(90deg, var(--klg-purple), var(--klg-pink));
+  background: linear-gradient(90deg, var(--klg-purple), var(--klg-pink), var(--klg-purple));
+  background-size: 200% 200%;
+  animation: klg-gradient-shift 8s ease-in-out infinite;
 }
 
 .klg-navbar .navbar-brand {
@@ -44,6 +46,16 @@ body {
 .game-card-icon {
   font-size: 3.5rem;
   line-height: 1;
+  display: inline-block;
+  animation: klg-float 3s ease-in-out infinite;
+}
+
+.row > :nth-child(2) .game-card-icon { animation-delay: 0.4s; }
+.row > :nth-child(3) .game-card-icon { animation-delay: 0.8s; }
+.row > :nth-child(4) .game-card-icon { animation-delay: 1.2s; }
+
+.game-card:not(.game-card-disabled):hover .game-card-icon {
+  animation: klg-wiggle 0.5s ease;
 }
 
 .game-card-disabled {
@@ -180,4 +192,156 @@ body {
 .results-stars {
   font-size: 2.5rem;
   letter-spacing: 0.25rem;
+}
+
+.klg-star {
+  display: inline-block;
+  animation: klg-star-pop 0.5s ease backwards;
+}
+
+/* ---------- Engagement extras (sound, streaks, mascot, progress) ---------- */
+
+.klg-mute-btn {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 3px solid var(--klg-purple);
+  background: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+  z-index: 1050;
+}
+
+.klg-anim-in {
+  animation: klg-slide-in 0.25s ease;
+}
+
+.quiz-score-pill.klg-score-pop {
+  animation: klg-score-pop 0.35s ease;
+}
+
+.klg-streak-badge {
+  display: none;
+  width: fit-content;
+  margin: 0 auto 0.75rem;
+  padding: 0.3rem 1rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--klg-yellow), var(--klg-pink));
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.klg-streak-badge.show {
+  display: block;
+  animation: klg-streak-pop 0.4s ease;
+}
+
+.klg-mascot {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.klg-mascot.happy {
+  animation: klg-mascot-bounce 0.5s ease;
+}
+
+.klg-mascot.sad {
+  animation: klg-mascot-wobble 0.5s ease;
+}
+
+.klg-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #e9ecff;
+  overflow: hidden;
+}
+
+.klg-progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--klg-purple), var(--klg-pink));
+  transition: width 0.4s ease;
+}
+
+.klg-float-emoji {
+  position: fixed;
+  font-size: 1.6rem;
+  pointer-events: none;
+  z-index: 1060;
+  animation: klg-emoji-rise 0.8s ease forwards;
+}
+
+@keyframes klg-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes klg-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes klg-wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-10deg) scale(1.1); }
+  75% { transform: rotate(10deg) scale(1.1); }
+}
+
+@keyframes klg-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes klg-score-pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.35); background: var(--klg-green); }
+}
+
+@keyframes klg-streak-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes klg-star-pop {
+  0% { transform: scale(0) rotate(-30deg); }
+  60% { transform: scale(1.4) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes klg-mascot-bounce {
+  0%, 50%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-12px); }
+  75% { transform: translateY(-6px); }
+}
+
+@keyframes klg-mascot-wobble {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+@keyframes klg-emoji-rise {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-70px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card-icon,
+  .klg-navbar,
+  .klg-anim-in,
+  .klg-star,
+  .klg-mascot,
+  .klg-streak-badge,
+  .klg-float-emoji,
+  .quiz-score-pill,
+  .quiz-choice-btn {
+    animation: none !important;
+  }
 }
