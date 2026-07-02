@@ -110,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (score === total) {
         if (best === null || elapsedMs < best) {
           saveBestMs(storageKey, elapsedMs);
+          if (window.KlgSounds) KlgSounds.newRecord();
           timeEl.textContent = `⏱️ ${formatSeconds(elapsedMs)} — 🏅 New best time!`;
         } else {
           timeEl.textContent = `⏱️ ${formatSeconds(elapsedMs)} • Best: ${formatSeconds(best)}`;
@@ -124,11 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("start-btn").addEventListener("click", () => {
+    if (window.KlgSounds) KlgSounds.click();
     document.getElementById("start-screen").classList.add("d-none");
     quiz.start();
   });
 
   document.getElementById("play-again-btn").addEventListener("click", () => {
+    if (window.KlgSounds) KlgSounds.click();
     quiz.start();
   });
 });

@@ -62,13 +62,22 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span class="quiz-progress-text">Question <span id="question-number">1</span> / <span id="total-questions">30</span></span>
-          <span id="score-pill" class="quiz-score-pill">Score: 0</span>
+          <div class="d-flex align-items-center gap-2">
+            <span id="quiz-mascot" class="klg-mascot" aria-hidden="true">🐵</span>
+            <span id="score-pill" class="quiz-score-pill">Score: 0</span>
+          </div>
+        </div>
+
+        <div class="klg-progress-track mb-2">
+          <div id="progress-fill" class="klg-progress-fill"></div>
         </div>
 
         <div class="quiz-timer-bar mb-1">
           <div id="timer-fill" class="quiz-timer-bar-fill"></div>
         </div>
         <div class="text-end mb-4"><small id="timer-text" class="text-muted">10s</small></div>
+
+        <div id="streak-badge" class="klg-streak-badge"></div>
 
         <p id="question-text" class="quiz-question tamil-glyph mb-4">அ</p>
 
@@ -99,6 +108,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="../../assets/js/sounds.js"></script>
   <script src="../../assets/js/quiz-engine.js"></script>
   <script src="game.js"></script>
 </body>

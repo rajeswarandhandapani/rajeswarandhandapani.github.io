@@ -18,6 +18,12 @@
  *   #timer-fill, #timer-text, #question-text, #choices-container,
  *   #results-screen, #results-score, #results-emoji, #results-stars,
  *   #results-message, #results-review
+ *
+ * Optional elements (skipped if absent):
+ *   #streak-badge, #quiz-mascot, #progress-fill
+ *
+ * Sound effects come from window.KlgSounds (assets/js/sounds.js) when loaded;
+ * the engine works silently without it.
  */
 class QuizEngine {
   constructor(options) {
@@ -31,6 +37,8 @@ class QuizEngine {
 
     this.currentIndex = 0;
     this.score = 0;
+    this.streak = 0;
+    this.bestStreak = 0;
     this.askedPrompts = new Set();
     this.wrongAnswers = [];
     this.timerInterval = null;
@@ -58,6 +66,9 @@ class QuizEngine {
       resultsStars: document.getElementById("results-stars"),
       resultsMessage: document.getElementById("results-message"),
       resultsReview: document.getElementById("results-review"),
+      streakBadge: document.getElementById("streak-badge"),
+      mascot: document.getElementById("quiz-mascot"),
+      progressFill: document.getElementById("progress-fill"),
     };
     this.el.totalQuestions.textContent = this.totalQuestions;
   }
@@ -65,12 +76,17 @@ class QuizEngine {
   start() {
     this.currentIndex = 0;
     this.score = 0;
+    this.streak = 0;
+    this.bestStreak = 0;
     this.askedPrompts.clear();
     this.wrongAnswers = [];
     this.elapsedMs = 0;
     this.el.resultsScreen.classList.add("d-none");
     this.el.quizScreen.classList.remove("d-none");
     this._updateScorePill();
+    this._hideStreakBadge();
+    this._setMascot("🐵");
+    if (this.el.progressFill) this.el.progressFill.style.width = "0%";
     this._nextQuestion();
   }
 
@@ -85,6 +101,12 @@ class QuizEngine {
     this.el.questionNumber.textContent = this.currentIndex;
     this.el.questionText.textContent = this.currentQuestion.prompt;
     this._renderChoices(this.currentQuestion.choices);
+    this._replayAnimation(this.el.questionText, "klg-anim-in");
+    this._replayAnimation(this.el.choicesContainer, "klg-anim-in");
+    if (this.el.progressFill) {
+      const pct = ((this.currentIndex - 1) / this.totalQuestions) * 100;
+      this.el.progressFill.style.width = pct + "%";
+    }
     this._startTimer();
     this.questionStartMs = Date.now();
   }
@@ -121,6 +143,8 @@ class QuizEngine {
       this._renderTimer();
       if (this.timeRemaining <= 0) {
         this._handleAnswer(null, null);
+      } else if (this.timeRemaining <= 3 && window.KlgSounds) {
+        KlgSounds.tick();
       }
     }, 1000);
   }
@@ -142,7 +166,16 @@ class QuizEngine {
     const isCorrect = selected !== null && selected === correct;
     if (isCorrect) {
       this.score += 1;
+      this.streak += 1;
+      this.bestStreak = Math.max(this.bestStreak, this.streak);
+      this._celebrateCorrect(btnEl);
     } else {
+      this.streak = 0;
+      this._hideStreakBadge();
+      this._setMascot("😢", "sad");
+      if (window.KlgSounds) {
+        selected === null ? KlgSounds.timeUp() : KlgSounds.wrong();
+      }
       this.wrongAnswers.push({
         prompt: this.currentQuestion.prompt,
         correctAnswer: this.formatAnswer(correct),
@@ -168,13 +201,75 @@ class QuizEngine {
     this.el.scorePill.textContent = `Score: ${this.score}`;
   }
 
+  _celebrateCorrect(btnEl) {
+    if (window.KlgSounds) KlgSounds.correct(this.streak);
+    this._setMascot("😄", "happy");
+    this._replayAnimation(this.el.scorePill, "klg-score-pop");
+
+    if (btnEl) {
+      const rect = btnEl.getBoundingClientRect();
+      this._spawnFloatEmoji(rect);
+      if (typeof confetti === "function") {
+        const burst =
+          this.streak === 10 ? 80 : this.streak === 5 ? 40 : 14;
+        confetti({
+          particleCount: burst,
+          spread: 55,
+          scalar: 0.7,
+          ticks: 50,
+          origin: {
+            x: (rect.left + rect.width / 2) / window.innerWidth,
+            y: (rect.top + rect.height / 2) / window.innerHeight,
+          },
+        });
+      }
+    }
+
+    if (this.streak >= 3 && this.el.streakBadge) {
+      this.el.streakBadge.textContent = `🔥 ${this.streak} in a row!`;
+      this._replayAnimation(this.el.streakBadge, "show");
+    }
+  }
+
+  _spawnFloatEmoji(rect) {
+    const span = document.createElement("span");
+    span.className = "klg-float-emoji";
+    span.textContent = "✨";
+    span.style.left = rect.left + rect.width / 2 - 12 + "px";
+    span.style.top = rect.top - 10 + "px";
+    document.body.appendChild(span);
+    setTimeout(() => span.remove(), 900);
+  }
+
+  _hideStreakBadge() {
+    if (this.el.streakBadge) this.el.streakBadge.classList.remove("show");
+  }
+
+  _setMascot(face, mood) {
+    if (!this.el.mascot) return;
+    this.el.mascot.textContent = face;
+    this.el.mascot.classList.remove("happy", "sad");
+    if (mood) {
+      void this.el.mascot.offsetWidth;
+      this.el.mascot.classList.add(mood);
+    }
+  }
+
+  /** Remove and re-add a class so its CSS animation restarts. */
+  _replayAnimation(el, className) {
+    if (!el) return;
+    el.classList.remove(className);
+    void el.offsetWidth;
+    el.classList.add(className);
+  }
+
   _finish() {
     clearInterval(this.timerInterval);
     this.el.quizScreen.classList.add("d-none");
     this.el.resultsScreen.classList.remove("d-none");
 
     const pct = this.score / this.totalQuestions;
-    this.el.resultsScore.textContent = `${this.score} / ${this.totalQuestions}`;
+    this._animateScoreCountUp();
 
     let emoji, message, stars, launchConfetti;
     if (pct >= 0.9) {
@@ -200,15 +295,46 @@ class QuizEngine {
     }
     this.el.resultsEmoji.textContent = emoji;
     this.el.resultsMessage.textContent = message;
-    this.el.resultsStars.textContent = stars;
+    this._renderStars([...stars].length);
 
-    if (launchConfetti && typeof confetti === "function") {
-      this._launchConfetti();
+    if (launchConfetti) {
+      if (window.KlgSounds) KlgSounds.fanfare();
+      if (typeof confetti === "function") this._launchConfetti();
     }
 
     this._renderReview();
 
-    this.onFinish({ score: this.score, total: this.totalQuestions, elapsedMs: this.elapsedMs });
+    this.onFinish({
+      score: this.score,
+      total: this.totalQuestions,
+      elapsedMs: this.elapsedMs,
+      bestStreak: this.bestStreak,
+    });
+  }
+
+  _renderStars(count) {
+    this.el.resultsStars.innerHTML = "";
+    for (let i = 0; i < count; i += 1) {
+      const star = document.createElement("span");
+      star.className = "klg-star";
+      star.textContent = "⭐";
+      star.style.animationDelay = i * 0.3 + "s";
+      this.el.resultsStars.appendChild(star);
+    }
+  }
+
+  _animateScoreCountUp() {
+    const target = this.score;
+    const total = this.totalQuestions;
+    const duration = 800;
+    const startTime = performance.now();
+    const step = (now) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const value = Math.round(target * progress);
+      this.el.resultsScore.textContent = `${value} / ${total}`;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   _renderReview() {
