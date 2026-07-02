@@ -7,7 +7,9 @@
  *     timePerQuestion: 10,
  *     generateQuestion: (askedSet) => ({ prompt, correctAnswer, choices }),
  *     formatAnswer: (value) => String(value),   // optional
- *     onFinish: (result) => { ... },            // optional
+ *     onFinish: (result) => { ... },            // optional, receives
+ *       { score, total, elapsedMs } — elapsedMs is time spent answering
+ *       (question shown -> answered), excluding feedback pauses
  *   });
  *   quiz.start();
  *
@@ -34,6 +36,8 @@ class QuizEngine {
     this.timerInterval = null;
     this.timeRemaining = this.timePerQuestion;
     this.locked = false;
+    this.elapsedMs = 0;
+    this.questionStartMs = 0;
 
     this._cacheDom();
   }
@@ -63,6 +67,7 @@ class QuizEngine {
     this.score = 0;
     this.askedPrompts.clear();
     this.wrongAnswers = [];
+    this.elapsedMs = 0;
     this.el.resultsScreen.classList.add("d-none");
     this.el.quizScreen.classList.remove("d-none");
     this._updateScorePill();
@@ -81,6 +86,7 @@ class QuizEngine {
     this.el.questionText.textContent = this.currentQuestion.prompt;
     this._renderChoices(this.currentQuestion.choices);
     this._startTimer();
+    this.questionStartMs = Date.now();
   }
 
   _makeUniqueQuestion() {
@@ -130,6 +136,7 @@ class QuizEngine {
     if (this.locked) return;
     this.locked = true;
     clearInterval(this.timerInterval);
+    this.elapsedMs += Date.now() - this.questionStartMs;
 
     const correct = this.currentQuestion.correctAnswer;
     const isCorrect = selected !== null && selected === correct;
@@ -201,7 +208,7 @@ class QuizEngine {
 
     this._renderReview();
 
-    this.onFinish({ score: this.score, total: this.totalQuestions });
+    this.onFinish({ score: this.score, total: this.totalQuestions, elapsedMs: this.elapsedMs });
   }
 
   _renderReview() {
