@@ -111,6 +111,17 @@ body {
   font-size: 1.6rem;
 }
 
+/* For single-glyph prompts (clock emoji, picture questions). */
+.quiz-question.quiz-question-xl {
+  font-size: 4.5rem;
+}
+
+/* Tamil word prompts: Tamil font at a size where whole words still fit. */
+.quiz-question.tamil-word {
+  font-family: "Noto Sans Tamil", "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+  font-size: 2.5rem;
+}
+
 .tamil-glyph,
 .tamil-glyph .fw-bold {
   font-family: "Noto Sans Tamil", "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
