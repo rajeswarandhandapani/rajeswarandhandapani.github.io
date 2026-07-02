@@ -1,0 +1,174 @@
+/* Shared styles for all Kid Learning Games */
+
+:root {
+  --klg-purple: #6c5ce7;
+  --klg-pink: #ff6b9d;
+  --klg-yellow: #ffd93d;
+  --klg-green: #4caf50;
+  --klg-red: #ff5252;
+  --klg-blue: #4dabf7;
+  --klg-bg: #f0f4ff;
+}
+
+body {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0e9ff 100%);
+  font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+  min-height: 100vh;
+}
+
+.klg-navbar {
+  background: linear-gradient(90deg, var(--klg-purple), var(--klg-pink));
+}
+
+.klg-navbar .navbar-brand {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- Landing page game cards ---------- */
+
+.game-card {
+  border: none;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(108, 92, 231, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  height: 100%;
+}
+
+.game-card:not(.game-card-disabled):hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(108, 92, 231, 0.25);
+}
+
+.game-card-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.game-card-disabled {
+  opacity: 0.55;
+  filter: grayscale(0.4);
+}
+
+/* ---------- Quiz layout ---------- */
+
+.quiz-shell {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.quiz-card {
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(108, 92, 231, 0.18);
+}
+
+.quiz-progress-text {
+  font-weight: 700;
+  color: var(--klg-purple);
+}
+
+.quiz-timer-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #e9ecff;
+  overflow: hidden;
+}
+
+.quiz-timer-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--klg-green), var(--klg-yellow));
+  transition: width 1s linear, background-color 0.3s ease;
+}
+
+.quiz-timer-bar-fill.warn {
+  background: linear-gradient(90deg, var(--klg-yellow), var(--klg-red));
+}
+
+.quiz-question {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #2d2d3f;
+  text-align: center;
+}
+
+.quiz-choice-btn {
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 3px solid #e0e0f5;
+  background: #fff;
+  color: #2d2d3f;
+  transition: all 0.12s ease;
+}
+
+.quiz-choice-btn:hover:not(:disabled) {
+  border-color: var(--klg-purple);
+  background: #f4f1ff;
+}
+
+.quiz-choice-btn:disabled {
+  cursor: default;
+}
+
+.quiz-choice-btn.correct {
+  background: var(--klg-green);
+  border-color: var(--klg-green);
+  color: #fff;
+  animation: klg-pop 0.3s ease;
+}
+
+.quiz-choice-btn.incorrect {
+  background: var(--klg-red);
+  border-color: var(--klg-red);
+  color: #fff;
+  animation: klg-shake 0.4s ease;
+}
+
+.quiz-score-pill {
+  background: var(--klg-purple);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+}
+
+@keyframes klg-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes klg-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ---------- Results screen ---------- */
+
+.results-card {
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(108, 92, 231, 0.18);
+  text-align: center;
+}
+
+.results-emoji {
+  font-size: 5rem;
+  line-height: 1;
+}
+
+.results-score {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--klg-purple);
+}
+
+.results-stars {
+  font-size: 2.5rem;
+  letter-spacing: 0.25rem;
+}
