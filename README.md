@@ -102,12 +102,38 @@ Practice one skill with `?type=coins` or `?type=change`.
 
 The next step after the alphabets quiz: ~95 everyday words (animals, food,
 nature, body parts, things, family, colors) with an emoji for each, stored
-as data in `game.js`. Two kinds: picture → Tamil word (🐘 → யானை) and
+in `assets/js/tamil-words-data.js` (shared with the Tamil Word Builder
+quiz). Two kinds: picture → Tamil word (🐘 → யானை) and
 Tamil word → English meaning. Wrong choices are drawn from the same
 category so the quiz tests real word recognition. 20 questions, 10 seconds
 each; pick a kind with `?type=picture` or `?type=meaning`.
 
-All three quizzes track per-mode best-time records with the same
+## Tamil Word Builder Quiz
+
+Fill in the missing letter: a word from the shared vocabulary is shown with
+one letter blanked out plus its emoji as a hint (யா__னை 🐘). Words are
+split into letter clusters in code (base letter + vowel sign / புள்ளி), so
+தேங்காய் becomes தே / ங் / கா / ய். Distractors are real clusters from
+other words that share the answer's consonant (யா vs யி) or vowel sign
+(யா vs கா), and a distractor is never allowed to complete a *different*
+word from the vocabulary. 20 questions, 15 seconds each.
+
+## Number Sounds Quiz (pre-K)
+
+A listening game — no reading needed. The browser's built-in speech
+synthesis (Web Speech API, no server or audio files) says a number out
+loud; the child taps the matching numeral on extra-large buttons. Tapping
+the 🔊 prompt repeats the number. The range is picked on the start screen
+(1–5, 1–10, 1–20, 1–50, 1–100) or via `?max=N` (clamped to 4–100); each
+number is asked at most once per round. Distractors prefer real mix-ups:
+neighbours (6 vs 7) and teen/-ty pairs (13 vs 30). If speech is
+unavailable the prompt falls back to the number word ("seven").
+
+Because every audio question displays the same 🔊 prompt, the quiz engine
+supports an optional `dedupeKey` on generated questions, used instead of
+the prompt to prevent repeats.
+
+All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.
 
 ## Running locally

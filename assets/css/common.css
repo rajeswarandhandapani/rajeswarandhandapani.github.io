@@ -122,6 +122,17 @@ body {
   font-size: 2.5rem;
 }
 
+/* Prompts that can be tapped (e.g. 🔊 replays the spoken number). */
+.quiz-question.klg-tappable {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Extra-large answer buttons for pre-K games. */
+.quiz-choices-big .quiz-choice-btn {
+  font-size: 2.5rem;
+}
+
 .tamil-glyph,
 .tamil-glyph .fw-bold {
   font-family: "Noto Sans Tamil", "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
