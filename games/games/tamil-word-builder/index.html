@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tamil Words Quiz | Kid Learning Games</title>
-  <meta name="description" content="Tamil vocabulary quiz for kids — match pictures to Tamil words and Tamil words to their meanings." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐘</text></svg>" />
+  <title>Tamil Word Builder Quiz | Kid Learning Games</title>
+  <meta name="description" content="Tamil word builder quiz for kids — fill in the missing letter to complete the word." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,7 +20,7 @@
   <nav class="navbar navbar-dark klg-navbar mb-4">
     <div class="container">
       <a class="navbar-brand" href="../../index.html">&larr; Kid Learning Games</a>
-      <span class="navbar-text text-white">🐘 Tamil Words</span>
+      <span class="navbar-text text-white">🧩 Tamil Word Builder</span>
     </div>
   </nav>
 
@@ -28,20 +28,17 @@
     <!-- Start screen -->
     <div id="start-screen" class="card quiz-card p-4 text-center">
       <div class="card-body">
-        <div class="game-card-icon mb-2">🐘</div>
-        <h1 class="h3 fw-bold">Tamil Words Quiz</h1>
+        <div class="game-card-icon mb-2">🧩</div>
+        <h1 class="h3 fw-bold">Tamil Word Builder</h1>
         <p class="text-muted" id="mode-label"></p>
-        <div id="mode-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-          <a class="btn btn-sm btn-outline-secondary" href="index.html">Mix of both</a>
-          <a class="btn btn-sm btn-outline-secondary" href="?type=picture">Picture &rarr; Word 🐘</a>
-          <a class="btn btn-sm btn-outline-secondary" href="?type=meaning">Word &rarr; Meaning 📖</a>
-        </div>
-        <p>20 questions &bull; 10 seconds each &bull; multiple choice</p>
+        <p>20 questions &bull; 15 seconds each &bull; multiple choice</p>
         <p class="text-muted mb-1"><small>
-          Everyday words — animals, food, nature, body parts, family and
-          colors. Wrong choices come from the same group, so look carefully:
-          <span class="tamil-glyph fw-bold">யானை</span> or
-          <span class="tamil-glyph fw-bold">குதிரை</span>?
+          A word is shown with one letter missing, like
+          <span class="tamil-glyph fw-bold">யா__னை</span> 🐘 — pick the letter
+          that completes it. Watch the vowel signs:
+          <span class="tamil-glyph fw-bold">யா</span>, not
+          <span class="tamil-glyph fw-bold">யி</span> or
+          <span class="tamil-glyph fw-bold">யூ</span>!
         </small></p>
         <p id="best-time-note" class="fw-bold" style="color: var(--klg-purple);"></p>
         <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
@@ -68,13 +65,13 @@
         <div class="quiz-timer-bar mb-1">
           <div id="timer-fill" class="quiz-timer-bar-fill"></div>
         </div>
-        <div class="text-end mb-4"><small id="timer-text" class="text-muted">10s</small></div>
+        <div class="text-end mb-4"><small id="timer-text" class="text-muted">15s</small></div>
 
         <div id="streak-badge" class="klg-streak-badge"></div>
 
-        <p id="question-text" class="quiz-question mb-4">🐘</p>
+        <p id="question-text" class="quiz-question tamil-word mb-4">யா__னை 🐘</p>
 
-        <div id="choices-container" class="row justify-content-center g-2"></div>
+        <div id="choices-container" class="row justify-content-center g-2 tamil-glyph"></div>
       </div>
     </div>
 

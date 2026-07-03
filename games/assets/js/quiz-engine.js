@@ -6,6 +6,9 @@
  *     totalQuestions: 25,
  *     timePerQuestion: 10,
  *     generateQuestion: (askedSet) => ({ prompt, correctAnswer, choices }),
+ *       // optional: dedupeKey — used instead of prompt to avoid repeats,
+ *       // for games where the visible prompt isn't unique (e.g. audio
+ *       // questions that all display 🔊)
  *     formatAnswer: (value) => String(value),   // optional
  *     onFinish: (result) => { ... },            // optional, receives
  *       { score, total, elapsedMs } — elapsedMs is time spent answering
@@ -113,12 +116,14 @@ class QuizEngine {
 
   _makeUniqueQuestion() {
     let question;
+    let key;
     let attempts = 0;
     do {
       question = this.generateQuestion(this.askedPrompts);
+      key = question.dedupeKey !== undefined ? question.dedupeKey : question.prompt;
       attempts += 1;
-    } while (this.askedPrompts.has(question.prompt) && attempts < 50);
-    this.askedPrompts.add(question.prompt);
+    } while (this.askedPrompts.has(key) && attempts < 50);
+    this.askedPrompts.add(key);
     return question;
   }
 
