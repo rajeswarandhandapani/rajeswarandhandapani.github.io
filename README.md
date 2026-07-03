@@ -133,6 +133,28 @@ Because every audio question displays the same 🔊 prompt, the quiz engine
 supports an optional `dedupeKey` on generated questions, used instead of
 the prompt to prevent repeats.
 
+## English Alphabets Quiz
+
+Four modes, picked on the start screen or via `?mode=`:
+
+- **Listen & Find** (default): speech synthesis says a letter name out
+  loud, the child taps the matching letter — the alphabet counterpart of
+  the Number Sounds game (10 questions, 15s each, tap the 🔊 to repeat).
+- **BIG & small** (`?mode=case`): match a capital letter to its lowercase
+  shape and vice versa (each direction is a separate question).
+- **ABC Order** (`?mode=order`): a run of three letters is shown with a
+  blank at the start or end (C D E __) — tap the missing letter.
+- **First Letters** (`?mode=phonics`): a picture is shown and its word
+  spoken ("apple") — tap the letter it starts with. One picture word per
+  letter, A–Z.
+
+Distractors mirror real kid mix-ups: rhyming letter *names* in listen mode
+(B/C/D/E/G/P/T/V/Z, A/J/K, F/L/M/N/S/X…), lookalike *shapes* in case mode
+(b/d/p/q, m/n/w, i/l/j), and alphabet neighbours in order mode. Phonics
+mode never offers a distractor that makes the same starting sound as the
+answer (C/K/Q, G/J, S/C). Without speech synthesis the audio modes degrade
+into reading practice, like Number Sounds.
+
 All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.
 
