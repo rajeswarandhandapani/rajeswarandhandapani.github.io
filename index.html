@@ -80,8 +80,19 @@
             navBackdrop.classList.remove('nav-open');
         }
 
+        let chatUserToggled = false;
+
+        function loadChatFrame() {
+            const chatFrame = document.getElementById('chat-frame');
+            if (!chatFrame.src) {
+                chatFrame.src = chatFrame.dataset.src;
+            }
+        }
+
         function toggleChat() {
+            chatUserToggled = true;
             const chatWindow = document.getElementById('chat-window');
+            loadChatFrame();
             if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
                 chatWindow.style.display = 'block';
             } else {
@@ -804,7 +815,7 @@
 <!-- Chatbot Iframe -->
 <div id="chat-window">
     <button id="close-chat" onclick="toggleChat()">X</button>
-    <iframe src="https://rajeswarandhandapani-career-conversation-ai-agen-8248a3e.hf.space"></iframe>
+    <iframe id="chat-frame" data-src="https://rajeswarandhandapani-career-conversation-ai-agen-8248a3e.hf.space"></iframe>
 </div>
 
 <script>
@@ -855,6 +866,20 @@
         // Re-show on hover over the chat area
         chatContainer.addEventListener('mouseenter', () => chatText.classList.add('show'));
         chatContainer.addEventListener('mouseleave', () => chatText.classList.remove('show'));
+    })();
+
+    // Auto-engage the chat: preload everywhere at 2s, open it on desktop at 4s
+    (function () {
+        const isDesktop = window.matchMedia('(min-width: 993px)').matches;
+
+        setTimeout(loadChatFrame, 2000);
+
+        if (isDesktop) {
+            setTimeout(() => {
+                if (chatUserToggled) return;
+                document.getElementById('chat-window').style.display = 'block';
+            }, 4000);
+        }
     })();
 </script>
 
