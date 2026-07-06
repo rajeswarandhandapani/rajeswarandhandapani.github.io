@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rajeswarandhandapani.github.io/sitemap.xml
+Sitemap: https://rajeswarandhandapani.com/sitemap.xml
