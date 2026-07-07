@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const quiz = new QuizEngine({
     totalQuestions,
-    timePerQuestion: 10,
+    timePerQuestion: 120,
     generateQuestion: () => kinds[randomInt(0, kinds.length - 1)](max),
     formatAnswer,
     onFinish: ({ score, total, elapsedMs }) => {

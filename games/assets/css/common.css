@@ -153,6 +153,16 @@ body {
   transition: all 0.12s ease;
 }
 
+/* Bootstrap's bare .btn:hover resolves to a transparent background and
+   border, and touchscreens keep :hover stuck on the last tap position — so
+   the freshly rendered button under the old tap lost its box. Pin the
+   resting look on :hover, then restore the highlight for real pointers. */
+.quiz-choice-btn:hover:not(:disabled) {
+  border-color: #e0e0f5;
+  background: #fff;
+  color: #2d2d3f;
+}
+
 /* Hover-capable devices only: on touchscreens the browser keeps :hover on
    the last tap position, which made freshly rendered choice buttons look
    pre-selected on the next question. */
