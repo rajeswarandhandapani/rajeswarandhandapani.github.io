@@ -38,13 +38,26 @@ only on a perfect score, so guessing fast never beats getting them right.
 ## Tamil Alphabets Quiz
 
 Covers the 12 vowels (உயிர் எழுத்துக்கள்), 18 consonants (மெய் எழுத்துக்கள்)
-and the 216 compound letters (உயிர்மெய் எழுத்துக்கள்), 10 seconds per
+and the 216 compound letters (உயிர்மெய் எழுத்துக்கள்), 2 minutes per
 question, 4-choice multiple choice matching the Tamil letter to its
 romanized sound. Vowel/consonant quizzes ask one question per letter;
 the compound-letter quiz asks 30 random letters out of the 216. Pick a
 group with the buttons on the start screen or via a query param:
 `?type=vowels`, `?type=consonants`, `?type=uyirmei`, or practice a single
 consonant's row of 12 with `?type=uyirmei&base=க`.
+
+Two play directions, combinable with any letter group: **Read & Match**
+(default — see the letter, tap its sound) and **Listen & Find**
+(`?mode=listen` — the browser says the letter in Tamil and the child taps
+the matching glyph, no reading required). Listening needs a Tamil (ta-*)
+speech-synthesis voice on the device: Android, iOS and Edge ship one,
+Windows needs the Tamil language pack, and desktop Chrome's built-in
+Google voices don't include Tamil. When no Tamil voice is found the game
+warns on the start screen and shows the romanized sound as the prompt
+instead, so it stays playable everywhere. Wrong choices in listen mode
+always sound different from the answer (ந்/ன் are never offered against
+each other) and the short/long partner (அ/ஆ, கி/கீ) is always among the
+choices, since that's the classic listening mix-up.
 
 Sound conventions: vowels use English phonics (ee as in "see", oh as in
 "go"); மெய் letters carry the புள்ளி (dot) and therefore map to the *pure*
@@ -81,7 +94,7 @@ mode with the same rules as the multiplication quiz (perfect scores only).
 
 ## Time & Elapsed Time Quiz
 
-15 questions, 20 seconds each, 4-choice multiple choice. Mixes four kinds:
+15 questions, 2 minutes each, 4-choice multiple choice. Mixes four kinds:
 reading clock faces (the 24 clock emoji 🕐–🕧 cover every hour and
 half-hour, so no images are needed), end times ("Soccer practice starts at
 4:30 PM and lasts 45 minutes — when does it end?"), elapsed time ("How much
@@ -92,7 +105,7 @@ free. Practice one skill with `?type=clock` or `?type=elapsed`.
 
 ## Money & Making Change Quiz
 
-15 questions, 20 seconds each (US coins and dollars, all arithmetic in
+15 questions, 2 minutes each (US coins and dollars, all arithmetic in
 whole cents). Mixes coin counting ("How much money is 2 quarters, 1 dime
 and 3 pennies?"), making change, adding two prices, and dollars→cents
 conversion. Amounts under a dollar display as "63¢", the rest as "$1.15".
@@ -105,7 +118,7 @@ nature, body parts, things, family, colors) with an emoji for each, stored
 in `assets/js/tamil-words-data.js` (shared with the Tamil Word Builder
 quiz). Two kinds: picture → Tamil word (🐘 → யானை) and
 Tamil word → English meaning. Wrong choices are drawn from the same
-category so the quiz tests real word recognition. 20 questions, 10 seconds
+category so the quiz tests real word recognition. 20 questions, 2 minutes
 each; pick a kind with `?type=picture` or `?type=meaning`.
 
 ## Tamil Word Builder Quiz
@@ -154,6 +167,106 @@ Distractors mirror real kid mix-ups: rhyming letter *names* in listen mode
 mode never offers a distractor that makes the same starting sound as the
 answer (C/K/Q, G/J, S/C). Without speech synthesis the audio modes degrade
 into reading practice, like Number Sounds.
+
+## Spelling Bee
+
+Speech synthesis says a word out loud (tap the 🔊 to repeat it) and the
+child picks the correct spelling from four choices. Three levels via the
+start-screen buttons or `?level=1|2|3`: short phonetic words (cat, ship),
+longer everyday words (banana, school) and tricky spellings (because,
+knight, scissors) — 24 words per level, 15 questions per round.
+
+Wrong choices are misspellings generated in code, ordered by how
+convincing they are: sound-alike substitutions kids actually write
+(freind, elefant, becauze, enuff), dropped unstressed vowels (choclate),
+doubling errors (scisors, beautifull), dropped silent e, and
+adjacent-letter swaps as filler. A generated misspelling is never allowed
+to be a real word — "meet" must not offer "meat" — checked against all
+game words plus a homophone list. Without speech synthesis the prompt
+degrades to the word's emoji and a clue ("🐱 a pet that says meow").
+
+## World Capitals Quiz
+
+~70 countries with flag emoji, grouped by continent. Two directions via
+`?mode=` (country → capital by default, `?mode=country` for capital →
+country) and a continent filter via `?region=asia|europe|africa|americas|
+oceania`; direction and region combine freely. Distractors prefer capitals
+from the same continent, and countries whose most famous city is *not*
+the capital carry a trap city (Australia → Sydney, Turkey → Istanbul,
+Canada → Toronto…) that is always among the choices in capital mode —
+that's the mix-up everyone actually makes.
+
+## Counting Quiz (pre-K)
+
+A cluster of identical emoji is shown (🍎🍎🍎🍎🍎 🍎🍎) and the child taps
+how many there are, on extra-large buttons. Groups bigger than five are
+split into rows of five so kids can count in fives. The range is picked on
+the start screen (1–5, 1–10, 1–20) or with `?max=N`; each count is asked at
+most once per round (via `dedupeKey`, since the same count can appear with
+different emoji). Distractors are the neighbours (n±1, n±2) — where you
+land when you skip or double-count one. 20 seconds per question (30 for
+the 1–20 range).
+
+## Comparing Numbers Quiz
+
+Three kinds: tap the **biggest** of four numbers, tap the **smallest**, and
+pick the right **< > = sign** for a pair ("37 __ 73", with equal pairs
+showing up often enough that = stays a live option). Pick a kind with
+`?type=biggest|smallest|symbol` and a range with `?max=10|100|1000`
+(default 100); both have start-screen buttons and combine freely. The
+numbers are built to be tricky: half the sets use the same digits scrambled
+(37, 73, 33, 77) — the classic compare-the-wrong-digit-first trap — and the
+rest are close neighbours. 15 questions, 10 seconds each.
+
+## Addition & Subtraction Facts Quiz
+
+The step before the multiplication tables: 20 questions, plain facts like
+"7 + 8" and "52 − 38". Pick the operation (`?op=add|sub`, default mixes
+both) and the range (`?max=10|20|100`, default 20 — 100 means two-digit
+problems at 15 seconds instead of 10). Distractors mirror real kid slips:
+off-by-one/two everywhere, forgetting the carry or borrow (±10) on
+two-digit problems, and the classic column-subtraction error of
+subtracting the smaller digit from the larger in each column (52 − 38
+→ 26).
+
+## Calendar Quiz
+
+15 questions, 15 seconds each. Day questions: what comes after/before a
+day, "if today is Friday, what was yesterday?", the nth day of the week
+(weeks start on Sunday, like a wall calendar — and the counted-from-Monday
+answer is always among the wrong choices), days in a week/weekend. Month
+questions: after/before, the nth month, how many days a month has
+(February is asked as "the shortest month" instead, so leap years never
+make an answer wrong), months in a year, days in a year (with 356 — the
+scrambled 365 — as a distractor). Wrap-arounds (after Saturday, after
+December) come up deliberately often. Practice one half with `?type=days`
+or `?type=months`.
+
+## Fractions Quiz
+
+15 questions, 20 seconds each, four kinds: read a fraction picture built
+from squares (🟩🟩🟩⬜⬜ — what fraction is green?), find the **equivalent**
+fraction ("Which equals 1/2?"), **compare** four fractions (same
+denominator, or same numerator — where "bigger denominator means bigger
+piece" is exactly the trap), and **add & subtract** with like denominators.
+Distractors are the real mistakes: counting the white squares (2/5),
+part-over-part (3/2), flipping the fraction (5/3), adding tops *and*
+bottoms (1/4 + 2/4 = 3/8), and adding instead of multiplying to grow an
+equivalent (1/2 → 2/3). A distractor is never allowed to *equal* the
+correct answer in value (2/4 is never offered against 1/2), checked by
+cross-multiplication. Practice one kind with
+`?type=identify|equivalent|compare|add`.
+
+## Baby Animals Quiz
+
+~27 animals with emoji, two directions mixed by default: "What is a baby
+cow called? 🐮" and "Which animal has a baby called a joey?" (practice one
+with `?mode=baby` or `?mode=animal`). Shared and synonymous baby names are
+handled so exactly one offered answer is ever right: a calf is a baby cow,
+elephant *and* whale, a cub belongs to bears, lions and tigers, and a baby
+fox answers to kit, cub or pup — each animal carries an avoid-list and a
+choice set never mixes two animals that share a name. 15 questions,
+15 seconds each.
 
 All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.

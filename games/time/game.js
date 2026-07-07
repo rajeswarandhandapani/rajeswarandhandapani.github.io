@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const quiz = new QuizEngine({
     totalQuestions,
-    timePerQuestion: 20,
+    timePerQuestion: 120,
     generateQuestion: () => {
       const q = kinds[randomInt(0, kinds.length - 1)]();
       // Clock-emoji prompts render as one big glyph; sentences render small.
