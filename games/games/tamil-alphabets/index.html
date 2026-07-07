@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tamil Alphabets Quiz | Kid Learning Games</title>
-  <meta name="description" content="Tamil alphabet quiz for kids — match உயிர் and மெய் letters to their sounds." />
+  <meta name="description" content="Tamil alphabet quiz for kids — read or listen to உயிர் and மெய் letters and match them to their sounds." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>அ</text></svg>" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,13 +31,19 @@
         <div class="game-card-icon mb-2">அ</div>
         <h1 class="h3 fw-bold">Tamil Alphabets Quiz</h1>
         <p class="text-muted" id="letters-label"></p>
+        <div id="sound-mode-links" class="d-flex flex-wrap justify-content-center gap-2 mb-2">
+          <a class="btn btn-sm btn-outline-secondary" href="index.html">📖 Read &amp; Match</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?mode=listen">🔊 Listen &amp; Find</a>
+        </div>
         <div id="mode-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
           <a class="btn btn-sm btn-outline-secondary" href="index.html">All (உயிர் + மெய்)</a>
           <a class="btn btn-sm btn-outline-secondary" href="?type=vowels">Vowels (உயிர்)</a>
           <a class="btn btn-sm btn-outline-secondary" href="?type=consonants">Consonants (மெய்)</a>
           <a class="btn btn-sm btn-outline-secondary" href="?type=uyirmei">Compound (உயிர்மெய்)</a>
         </div>
-        <p><span id="question-count-label">One question per letter</span> &bull; 10 seconds each &bull; multiple choice</p>
+        <p><span id="question-count-label">One question per letter</span> &bull; 2 minutes each &bull; multiple choice</p>
+        <p class="text-muted mb-1"><small id="mode-desc"></small></p>
+        <p id="speech-note" class="text-danger fw-bold small mb-1"></p>
         <p class="text-muted mb-1"><small>
           மெய் letters carry the dot (புள்ளி), so they make the <em>pure</em> sound:
           <span class="tamil-glyph fw-bold">க்</span> = "k" &mdash; but உயிர்மெய்
@@ -75,7 +81,7 @@
         <div class="quiz-timer-bar mb-1">
           <div id="timer-fill" class="quiz-timer-bar-fill"></div>
         </div>
-        <div class="text-end mb-4"><small id="timer-text" class="text-muted">10s</small></div>
+        <div class="text-end mb-4"><small id="timer-text" class="text-muted">120s</small></div>
 
         <div id="streak-badge" class="klg-streak-badge"></div>
 

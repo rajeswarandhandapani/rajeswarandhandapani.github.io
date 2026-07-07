@@ -1,8 +1,18 @@
 /**
- * Tamil alphabet question generator.
+ * Tamil alphabet question generator. Two modes, picked with ?mode=:
+ *
+ *  - read (default): a Tamil letter is shown and the child taps its sound
+ *    (transliteration like "aa" or "ki").
+ *  - listen: the browser's speech synthesis says the letter in Tamil and the
+ *    child taps the matching glyph — no reading required (same pattern as
+ *    the English Alphabets listen mode). Tap the 🔊 to hear it again. If the
+ *    device has no Tamil voice, the prompt degrades to the transliterated
+ *    sound as text (the reverse of read mode).
+ *
  * Reads ?type=vowels|consonants|uyirmei from the URL to restrict practice to
  * one group of letters; defaults to vowels + consonants. In uyirmei mode an
- * optional ?base=க narrows practice to one consonant's row of 12.
+ * optional ?base=க narrows practice to one consonant's row of 12. mode and
+ * type combine freely.
  *
  * Sound mapping notes:
  *  - Vowels use kid-friendly English phonics (ee as in "see", oh as in "go").
@@ -104,6 +114,36 @@ const UYIRMEI_LETTERS = CONSONANT_BASES.flatMap((c) =>
   }))
 );
 
+/* --- Tamil speech ---------------------------------------------------------
+ * The Web Speech API can speak Tamil, but only when the device actually has
+ * a Tamil (ta-*) voice installed: Android and iOS ship one, Windows needs
+ * the Tamil language pack (Microsoft Valluvar), and Edge always has online
+ * Tamil voices. Desktop Chrome's built-in Google voices do NOT include
+ * Tamil, so we must scan getVoices() for a ta-* voice instead of trusting
+ * `"speechSynthesis" in window` — with no Tamil voice the default voice
+ * can't read Tamil script at all. Voices load asynchronously, so the list
+ * is re-checked on every question and on the voiceschanged event.
+ */
+const hasSpeech = "speechSynthesis" in window;
+if (hasSpeech) speechSynthesis.getVoices(); // kick off the async voice load
+
+function findTamilVoice() {
+  if (!hasSpeech) return null;
+  const voices = speechSynthesis.getVoices();
+  return voices.find((v) => v.lang && v.lang.toLowerCase().startsWith("ta")) || null;
+}
+
+function speakTamil(text) {
+  const voice = findTamilVoice();
+  if (!voice) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voice;
+  utterance.lang = voice.lang;
+  utterance.rate = 0.8;
+  speechSynthesis.speak(utterance);
+}
+
 function getSelectedLetters() {
   const params = new URLSearchParams(window.location.search);
   const type = params.get("type");
@@ -165,11 +205,83 @@ function generateTamilQuestion(letters) {
   };
 }
 
+// Short/long vowel partners (அ/ஆ, இ/ஈ, கி/கீ…) sound most alike — the
+// classic listening mix-up, so the partner is always offered as a choice.
+const VOWEL_PAIRS = {
+  a: "aa", aa: "a", i: "ee", ee: "i", u: "oo", oo: "u",
+  e: "ay", ay: "e", o: "oh", oh: "o",
+};
+
+function lengthPartner(letter, pool) {
+  if (letter.base) {
+    const paired = VOWEL_PAIRS[letter.vowelSound];
+    return paired
+      ? pool.find((l) => l.base === letter.base && l.vowelSound === paired)
+      : null;
+  }
+  const paired = VOWEL_PAIRS[letter.sound];
+  return paired
+    ? pool.find((l) => l.type === letter.type && l.sound === paired)
+    : null;
+}
+
+/**
+ * Listen mode: the browser says the letter in Tamil and the child taps the
+ * matching glyph. Falls back to showing the transliterated sound as the
+ * prompt (the reverse of read mode) when no Tamil voice exists.
+ */
+function generateTamilListenQuestion(letters) {
+  return (askedSet) => {
+    const remaining = letters.filter((l) => !askedSet.has(l.tamil));
+    const pool = remaining.length ? remaining : letters;
+    const letter = pool[randomInt(0, pool.length - 1)];
+
+    // Wrong choices must *sound* different — ந்/ன் both say "n", so one can
+    // never be a distractor for the other.
+    let distractorPool = letters.filter((l) => l.sound !== letter.sound);
+    if (letter.base) {
+      const related = distractorPool.filter(
+        (l) => l.base === letter.base || l.vowelSound === letter.vowelSound
+      );
+      if (new Set(related.map((l) => l.sound)).size >= 3) {
+        distractorPool = related;
+      }
+    }
+
+    const chosen = [letter];
+    const chosenSounds = new Set([letter.sound]);
+    const partner = lengthPartner(letter, distractorPool);
+    if (partner) {
+      chosen.push(partner);
+      chosenSounds.add(partner.sound);
+    }
+    const uniqueSounds = new Set(distractorPool.map((l) => l.sound));
+    while (chosen.length < 4 && chosen.length < uniqueSounds.size + 1) {
+      const pick = distractorPool[randomInt(0, distractorPool.length - 1)];
+      if (!chosenSounds.has(pick.sound)) {
+        chosen.push(pick);
+        chosenSounds.add(pick.sound);
+      }
+    }
+
+    const canSpeak = !!findTamilVoice();
+    if (canSpeak) speakTamil(letter.tamil);
+    return {
+      prompt: canSpeak ? "🔊" : letter.sound,
+      dedupeKey: letter.tamil,
+      correctAnswer: letter.tamil,
+      choices: shuffle(chosen.map((l) => l.tamil)),
+      speech: letter.tamil,
+    };
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const letters = getSelectedLetters();
   const params = new URLSearchParams(window.location.search);
   const type = params.get("type");
   const base = params.get("base");
+  const isListen = params.get("mode") === "listen";
   const label =
     type === "vowels"
       ? "Vowels (உயிர் எழுத்துக்கள்)"
@@ -182,24 +294,77 @@ document.addEventListener("DOMContentLoaded", () => {
           : "All letters (உயிர் + மெய்)";
   document.getElementById("letters-label").textContent = label;
 
-  // 216 uyirmei letters is too long for one sitting — quiz a random 30.
-  const totalQuestions = Math.min(letters.length, 30);
+  // 216 uyirmei letters is too long for one sitting — quiz a random subset.
+  // Listening takes longer per question, so listen rounds are shorter.
+  const totalQuestions = Math.min(letters.length, isListen ? 15 : 30);
+  const timePerQuestion = 120;
   document.getElementById("question-count-label").textContent =
     totalQuestions < letters.length
       ? `${totalQuestions} random letters out of ${letters.length}`
       : "One question per letter";
 
+  const questionText = document.getElementById("question-text");
+  const speechNote = document.getElementById("speech-note");
+  let currentSpeech = null;
+
+  if (isListen) {
+    questionText.className = "quiz-question quiz-question-xl klg-tappable tamil-glyph mb-4";
+    questionText.title = "Tap to hear again";
+    document
+      .getElementById("choices-container")
+      .classList.add("tamil-glyph", "quiz-choices-big");
+    document.getElementById("mode-desc").textContent =
+      "Listen 👂 — a Tamil letter is said out loud. Tap the 🔊 any time to " +
+      "hear it again, then tap the matching letter. Turn your sound on!";
+    questionText.addEventListener("click", () => {
+      if (currentSpeech) speakTamil(currentSpeech);
+    });
+  }
+
+  function updateSpeechNote() {
+    if (!isListen) return;
+    speechNote.textContent = findTamilVoice()
+      ? ""
+      : '⚠️ No Tamil voice found on this device — questions will show the sound (like "aa") as text instead.';
+  }
+  updateSpeechNote();
+  if (hasSpeech) speechSynthesis.addEventListener("voiceschanged", updateSpeechNote);
+
+  // The two choices (letter group × read/listen) are independent: letter
+  // group links carry the current mode, mode links carry the current group.
   document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkType = new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, "")).get("type");
+    const p = new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, ""));
+    const linkType = p.get("type");
+    if (isListen) p.set("mode", "listen");
+    link.setAttribute("href", p.toString() ? "index.html?" + p.toString() : "index.html");
     if (linkType === type) {
       link.classList.replace("btn-outline-secondary", "btn-secondary");
     }
   });
+  document.querySelectorAll("#sound-mode-links a").forEach((link) => {
+    const linkIsListen =
+      new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, "")).get("mode") === "listen";
+    const p = new URLSearchParams(window.location.search);
+    if (linkIsListen) p.set("mode", "listen");
+    else p.delete("mode");
+    link.setAttribute("href", p.toString() ? "index.html?" + p.toString() : "index.html");
+    if (linkIsListen === isListen) {
+      link.classList.replace("btn-outline-secondary", "btn-secondary");
+    }
+  });
+
+  const generate = isListen
+    ? generateTamilListenQuestion(letters)
+    : generateTamilQuestion(letters);
 
   const quiz = new QuizEngine({
     totalQuestions,
-    timePerQuestion: 10,
-    generateQuestion: generateTamilQuestion(letters),
+    timePerQuestion,
+    generateQuestion: (askedSet) => {
+      const q = generate(askedSet);
+      currentSpeech = q.speech || null;
+      return q;
+    },
   });
 
   document.getElementById("start-btn").addEventListener("click", () => {

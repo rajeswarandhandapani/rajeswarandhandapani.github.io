@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const quiz = new QuizEngine({
     totalQuestions,
-    timePerQuestion: 10,
+    timePerQuestion: 120,
     generateQuestion: () => {
       const q = kinds[randomInt(0, kinds.length - 1)]();
       // Emoji prompts render huge with Tamil choices; Tamil-word prompts
