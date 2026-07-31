@@ -7,11 +7,53 @@ step, no server — deployable straight to GitHub Pages.
 ## Structure
 
 ```
-index.html                 landing page listing all games
+index.html                 landing page — games grouped into four levels
 assets/css/common.css      shared styling used by every game
 assets/js/quiz-engine.js   reusable QuizEngine (timer, scoring, results screen)
+assets/js/progress.js      KlgProgress — XP, ranks, stars, day streak, badges
+assets/js/home.js          landing page: player card, daily challenge, stars
+assets/js/sounds.js        KlgSounds — synthesized sound effects + mute button
 games/<game-name>/         one folder per game (index.html + game.js)
 ```
+
+## Levels
+
+The landing page sorts every game into four levels, roughly by age. Levels
+are a property of the landing page only — each game is still a standalone
+page you can link to directly.
+
+| Level | Name | Ages | Games |
+| ----- | ---- | ---- | ----- |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals |
+| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words |
+| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder |
+| 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals |
+
+## Progress, ranks and badges
+
+Every finished quiz is banked by `assets/js/progress.js` in one
+`localStorage` record (`klg-progress-v1`), and the results screen shows what
+it earned:
+
+- **XP** — 10 a correct answer, +50 for a perfect round, +20/+50 for streaks
+  of 5/10. Effort always earns something; accuracy earns much more.
+- **Ranks** — 🐣 Curious Chick → ✨ Bright Spark → ⭐ Star Learner →
+  🧠 Quiz Whiz → 🏆 Brain Champ → 🚀 Mega Mind → 👑 Grand Legend, with a
+  confetti burst and fanfare on each promotion.
+- **Stars** — up to 3 a game (90% / 70% / 50%), shown on the game's card.
+- **Day streak** — consecutive days played, so coming back tomorrow counts.
+- **Badges** — 12 one-off unlocks (first quiz, perfect score, 10 in a row,
+  full marks under 4s a question, 5 and 12 games tried, 25 and 100 quizzes,
+  3- and 7-day streaks).
+
+The landing page turns that into a player card, a **daily challenge** (the
+same game for the whole day, a different one tomorrow), a **🎲 Surprise me**
+button, and a per-card star rating with a `MASTERED` flag at 3 stars.
+"Start over" clears everything on that device.
+
+The engine wires this up itself — no per-game code. Games only need to load
+`progress.js` before `quiz-engine.js`, and the game id comes from the folder
+name in the URL.
 
 ## Adding a new game
 
@@ -21,7 +63,15 @@ games/<game-name>/         one folder per game (index.html + game.js)
    `(askedSet) => ({ prompt, correctAnswer, choices })`.
 3. Instantiate `QuizEngine({ totalQuestions, timePerQuestion, generateQuestion })`
    and call `.start()`.
-4. Add a card for it on the root `index.html`.
+4. Add a card for it on the root `index.html` inside the right `#level-N`
+   section, with `data-game="<name>"` on the `.game-card` — that attribute is
+   what wires up stars, the daily challenge and "Surprise me".
+
+Two rules worth keeping when writing a generator: never ask for more unique
+questions than the data can supply (cap `totalQuestions` by pool size), and
+never offer a wrong choice that is quietly also correct — the games with
+overlapping data (baby animals, opposites, rhymes) each carry an explicit
+"also right" list for exactly this.
 
 ## Multiplication Tables Quiz
 
@@ -267,6 +317,84 @@ elephant *and* whale, a cub belongs to bears, lions and tigers, and a baby
 fox answers to kit, cub or pup — each animal carries an avoid-list and a
 choice set never mixes two animals that share a name. 15 questions,
 15 seconds each.
+
+## Shapes & Colors Quiz (pre-K)
+
+Name the shape you see (🔺 → triangle), find a named shape among four
+pictures, name colors, and say how many sides or corners a shape has —
+mix by default, or `?mode=shape`, `?mode=color`, `?mode=sides`. Sides and
+corners are asked in words so pentagons, hexagons and octagons can join in
+without needing an emoji. Everyday objects appear too ("what shape is a
+stop sign 🛑?"). 12 questions, 20 seconds each.
+
+## Rhyming Words Quiz
+
+Words are grouped by the **sound** they end with, not the spelling — night,
+light and kite are one family, tail and whale another — so a wrong choice
+can never secretly rhyme with the answer. Three kinds mixed by default:
+find the rhyme (`?mode=rhyme`), spot the word that does not rhyme
+(`?mode=odd`), and finish a little rhyme whose last word is missing
+(`?mode=finish`, 18 hand-written lines). 12 questions, 20 seconds each.
+
+## Patterns & Skip Counting Quiz
+
+What comes next? Counting on and back in 2s, 3s, 5s, 10s and 25s
+(`?mode=skip`); add/subtract, doubling and halving rules plus a missing
+number in the middle of the run (`?mode=numbers`); and repeating picture
+patterns — ABAB, AABB, ABB, ABC — with a letter sequence mixed in
+(`?mode=shapes`). Wrong choices are the real mistakes: the wrong step size,
+the wrong direction, or repeating the previous term. 12 questions,
+20 seconds each.
+
+## Opposites Quiz
+
+52 opposite pairs and 41 similar-meaning pairs, asked both ways: "what is
+the opposite of X?" (`?mode=opposite`) and "which word means almost the
+SAME as X?" (`?mode=similar`). Because "short" is the opposite of both long
+and tall, and a synonym of the answer is just as correct an answer, every
+decoy is checked against both maps plus an explicit also-right list
+(silent/loud, below/up, unhappy/happy). In same-meaning questions the
+word's opposite is deliberately offered as the trap. 15 questions,
+15 seconds each.
+
+## Division Quiz
+
+Three levels: `?level=1` divides by 2–5 with sharing word problems,
+`?level=2` (default) adds divisors to 10 and missing-number facts
+(`? ÷ 4 = 5`), `?level=3` brings in remainders (`17 ÷ 5 = 3 r 2`). Narrow
+the divisors with `?tables=6,7,8`, like the multiplication quiz.
+Distractors mirror real division slips: the quotient one step out, the
+product instead of the quotient, and the numbers swapped. 20 questions,
+20 seconds each.
+
+## Measurement Quiz
+
+Metric by default, US customary with `?units=us`. Pick the sensible unit
+for an object and estimate its size (`?mode=unit`), convert between units
+(`?mode=convert`), and compare three amounts written in two different units
+(`?mode=compare`). Comparisons are computed in one base unit so two amounts
+are never accidentally equal, and the smaller-unit amounts stay friendly
+(75 cm, 250 ml) rather than arithmetic-generated. 15 questions,
+25 seconds each.
+
+## Solar System Quiz
+
+Ordering questions are generated from the planet list — position from the
+Sun, which planet comes next, which of two is closer — so they can never
+contradict each other, and 25 written questions cover the Sun, moons,
+gravity, the asteroid belt and the first Moon walk. Genuinely contested
+facts are avoided rather than guessed at (there's no "coldest planet"
+question, and Jupiter is never offered against Saturn for most moons).
+`?mode=order` or `?mode=facts`. 15 questions, 25 seconds each.
+
+## Science Quiz
+
+Four topics, mixed by default and playable alone: animal groups
+(`?mode=animals`), the human body (`?mode=body`), plants (`?mode=plants`)
+and matter, weather and forces (`?mode=matter`). Each question carries its
+own three wrong answers rather than sharing a pool, because in a bank this
+broad a generic decoy is too often quietly correct. A single-topic round is
+capped at the size of that topic's bank. 15 questions, 25 seconds each.
 
 All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.

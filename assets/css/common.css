@@ -63,6 +63,145 @@ body {
   filter: grayscale(0.4);
 }
 
+/* ---------- Landing page: player card, levels, card badges ---------- */
+
+.klg-player-card {
+  border: none;
+  border-radius: 1.5rem;
+  background: linear-gradient(135deg, var(--klg-purple), #8f7bff 60%, var(--klg-pink));
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(108, 92, 231, 0.3);
+}
+
+.klg-player-rank {
+  font-size: 2.75rem;
+  line-height: 1;
+}
+
+.klg-player-card .klg-xp-track {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.klg-player-card .klg-xp-fill {
+  background: linear-gradient(90deg, var(--klg-yellow), #fff);
+}
+
+.klg-player-stat {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 1rem;
+  padding: 0.5rem 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.klg-badge-shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.klg-badge-chip {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 1.3rem;
+  box-shadow: 0 3px 8px rgba(108, 92, 231, 0.25);
+  cursor: help;
+}
+
+.klg-badge-chip.locked {
+  background: #e9ecff;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.klg-level-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  border-left: 6px solid var(--klg-purple);
+  padding-left: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.klg-level-1 { border-left-color: var(--klg-green); }
+.klg-level-2 { border-left-color: var(--klg-blue); }
+.klg-level-3 { border-left-color: var(--klg-purple); }
+.klg-level-4 { border-left-color: var(--klg-pink); }
+
+.klg-level-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--klg-purple);
+  letter-spacing: 0.03em;
+}
+
+.klg-level-1 .klg-level-pill { background: var(--klg-green); }
+.klg-level-2 .klg-level-pill { background: var(--klg-blue); }
+.klg-level-3 .klg-level-pill { background: var(--klg-purple); }
+.klg-level-4 .klg-level-pill { background: var(--klg-pink); }
+
+.klg-level-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background: rgba(240, 244, 255, 0.92);
+  backdrop-filter: blur(6px);
+  padding: 0.6rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.klg-level-nav .btn {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.game-card {
+  position: relative;
+}
+
+.klg-card-flag {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  background: var(--klg-yellow);
+  color: #6b4f00;
+}
+
+.klg-card-stars {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.15rem;
+}
+
+.game-card .card-body {
+  padding-bottom: 2.2rem !important;
+}
+
+.klg-daily-card {
+  border: 3px dashed var(--klg-pink);
+  border-radius: 1.25rem;
+  background: #fff;
+}
+
 /* ---------- Quiz layout ---------- */
 
 .quiz-shell {
@@ -246,6 +385,79 @@ body {
   animation: klg-star-pop 0.5s ease backwards;
 }
 
+/* ---------- Rewards panel (XP, rank, badges) ---------- */
+
+.klg-reward {
+  max-width: 480px;
+  margin: 1.25rem auto 0;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: #f6f4ff;
+  text-align: center;
+}
+
+.klg-xp-line {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--klg-purple);
+}
+
+.klg-xp-rank {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b6b85;
+}
+
+.klg-xp-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #e0e0f5;
+  overflow: hidden;
+  margin: 0.6rem 0 0.35rem;
+}
+
+.klg-xp-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--klg-purple), var(--klg-pink));
+  transition: width 0.8s ease;
+}
+
+.klg-xp-caption,
+.klg-day-streak {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b6b85;
+}
+
+.klg-day-streak {
+  margin-top: 0.4rem;
+  color: #d9480f;
+}
+
+.klg-rank-up {
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(90deg, var(--klg-yellow), var(--klg-pink));
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  margin-bottom: 0.6rem;
+  animation: klg-streak-pop 0.5s ease;
+}
+
+.klg-badge-unlock {
+  margin-top: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: #fff;
+  font-weight: 800;
+  color: var(--klg-purple);
+  box-shadow: 0 3px 10px rgba(108, 92, 231, 0.2);
+  animation: klg-streak-pop 0.5s ease backwards;
+}
+
 /* ---------- Engagement extras (sound, streaks, mascot, progress) ---------- */
 
 .klg-mute-btn {
@@ -388,7 +600,13 @@ body {
   .klg-streak-badge,
   .klg-float-emoji,
   .quiz-score-pill,
-  .quiz-choice-btn {
+  .quiz-choice-btn,
+  .klg-rank-up,
+  .klg-badge-unlock {
     animation: none !important;
+  }
+
+  .klg-xp-fill {
+    transition: none !important;
   }
 }

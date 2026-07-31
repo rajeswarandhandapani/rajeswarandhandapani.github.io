@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kid Learning Games</title>
-  <meta name="description" content="Quick, timed quiz games for kids — multiplication tables, Tamil alphabets, and more." />
+  <meta name="description" content="Quick, timed quiz games for kids, sorted into four levels — counting and alphabets through to times tables, fractions and space." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link
@@ -21,219 +21,404 @@
   </nav>
 
   <div class="container pb-5">
-    <div class="text-center mb-5">
-      <h1 class="fw-bold">Ready to play? Pick a game! 🚀</h1>
-      <p class="text-muted">Quick quizzes to help you learn and remember new things.</p>
+    <!-- Player card: rank, XP bar, streak and badges (filled in by home.js) -->
+    <div class="card klg-player-card mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div id="player-rank-emoji" class="klg-player-rank">🐣</div>
+          <div class="flex-grow-1" style="min-width: 220px;">
+            <div class="h4 fw-bold mb-1" id="player-rank-name">Curious Chick</div>
+            <div class="klg-xp-track">
+              <div id="player-xp-fill" class="klg-xp-fill"></div>
+            </div>
+            <div class="small fw-bold mt-1" id="player-xp-caption">Play a game to start earning XP!</div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap" id="player-stats"></div>
+        </div>
+
+        <div class="klg-badge-shelf mt-3" id="player-badges"></div>
+        <div class="text-center mt-2">
+          <button id="reset-progress" type="button" class="btn btn-sm btn-link text-white-50 p-0">
+            Start over
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="row g-4 justify-content-center">
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/number-sounds/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🔊</div>
-              <h2 class="h4 fw-bold text-dark">Number Sounds</h2>
-              <p class="text-muted mb-0">Hear the number, tap the numeral (pre-K)</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/counting/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🍎</div>
-              <h2 class="h4 fw-bold text-dark">Counting</h2>
-              <p class="text-muted mb-0">Count the pictures, tap the number (pre-K)</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/comparing-numbers/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">⚖️</div>
-              <h2 class="h4 fw-bold text-dark">Comparing Numbers</h2>
-              <p class="text-muted mb-0">Biggest, smallest &amp; the &lt; &gt; = signs</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/english-alphabets/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🔤</div>
-              <h2 class="h4 fw-bold text-dark">English Alphabets</h2>
-              <p class="text-muted mb-0">Hear, match &amp; order letters A&ndash;Z</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/tamil-alphabets/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">அ</div>
-              <h2 class="h4 fw-bold text-dark">Tamil Alphabets</h2>
-              <p class="text-muted mb-0">Read or listen &mdash; vowels, consonants &amp; compound letters</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/tamil-words/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🐘</div>
-              <h2 class="h4 fw-bold text-dark">Tamil Words</h2>
-              <p class="text-muted mb-0">Match pictures &amp; meanings to Tamil words</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/tamil-word-builder/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🧩</div>
-              <h2 class="h4 fw-bold text-dark">Tamil Word Builder</h2>
-              <p class="text-muted mb-0">Fill in the missing Tamil letter</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/addition-subtraction/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">➕</div>
-              <h2 class="h4 fw-bold text-dark">Addition &amp; Subtraction</h2>
-              <p class="text-muted mb-0">Facts within 10, 20 or two-digit</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/multiplication/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">✖️</div>
-              <h2 class="h4 fw-bold text-dark">Multiplication Tables</h2>
-              <p class="text-muted mb-0">25 timed questions on tables 1-11</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/rounding-place-value/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🔢</div>
-              <h2 class="h4 fw-bold text-dark">Rounding &amp; Place Value</h2>
-              <p class="text-muted mb-0">Nearest 10/100/1,000 &amp; digit values</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/fractions/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🍕</div>
-              <h2 class="h4 fw-bold text-dark">Fractions</h2>
-              <p class="text-muted mb-0">Pictures, equivalents, comparing &amp; adding</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/time/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🕒</div>
-              <h2 class="h4 fw-bold text-dark">Time &amp; Elapsed Time</h2>
-              <p class="text-muted mb-0">Read clocks &amp; work out end times</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/calendar/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">📅</div>
-              <h2 class="h4 fw-bold text-dark">Calendar</h2>
-              <p class="text-muted mb-0">Days of the week &amp; months of the year</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/money/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">💰</div>
-              <h2 class="h4 fw-bold text-dark">Money &amp; Making Change</h2>
-              <p class="text-muted mb-0">Count coins &amp; make change</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/spelling-bee/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🐝</div>
-              <h2 class="h4 fw-bold text-dark">Spelling Bee</h2>
-              <p class="text-muted mb-0">Hear the word, pick the right spelling</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/baby-animals/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🐣</div>
-              <h2 class="h4 fw-bold text-dark">Baby Animals</h2>
-              <p class="text-muted mb-0">A baby cow is a&hellip;? Name them all!</p>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <a href="games/world-capitals/index.html" class="text-decoration-none">
-          <div class="card game-card">
-            <div class="card-body text-center p-4">
-              <div class="game-card-icon mb-3">🌎</div>
-              <h2 class="h4 fw-bold text-dark">World Capitals</h2>
-              <p class="text-muted mb-0">Match countries to their capital cities</p>
-            </div>
-          </div>
+    <!-- Daily challenge -->
+    <div class="card klg-daily-card mb-4">
+      <div class="card-body d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <div>
+          <div class="fw-bold" style="color: var(--klg-pink);">🎯 Today's Challenge</div>
+          <div class="h5 fw-bold mb-0" id="daily-name">&nbsp;</div>
+          <div class="text-muted small" id="daily-note">Beat it once a day to keep your streak alive.</div>
+        </div>
+        <a id="daily-link" class="btn btn-lg text-white fw-bold px-4" style="background: var(--klg-pink);" href="#">
+          Play it
         </a>
       </div>
     </div>
+
+    <div class="text-center mb-3">
+      <h1 class="h3 fw-bold">Pick a level, pick a game! 🚀</h1>
+      <p class="text-muted mb-0">Games get harder as the levels go up — start where you feel comfy.</p>
+    </div>
+
+    <!-- Level jump bar -->
+    <div class="klg-level-nav text-center">
+      <div class="d-inline-flex flex-wrap justify-content-center gap-2">
+        <a href="#level-1" class="btn btn-sm btn-outline-success">1 · First Steps</a>
+        <a href="#level-2" class="btn btn-sm btn-outline-info">2 · Building Blocks</a>
+        <a href="#level-3" class="btn btn-sm btn-outline-primary">3 · Level Up</a>
+        <a href="#level-4" class="btn btn-sm btn-outline-danger">4 · Brain Boost</a>
+        <button id="surprise-btn" type="button" class="btn btn-sm btn-warning fw-bold">🎲 Surprise me</button>
+      </div>
+    </div>
+
+    <!-- ---------------- Level 1 ---------------- -->
+    <section id="level-1" class="mb-5">
+      <div class="klg-level-heading klg-level-1">
+        <span class="klg-level-pill">LEVEL 1</span>
+        <h2 class="h4 fw-bold mb-0">First Steps 🐣</h2>
+        <span class="text-muted small">Ages 3–5 · listening, counting and letters</span>
+      </div>
+      <div class="row g-4 justify-content-center mt-1">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/number-sounds/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="number-sounds">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🔊</div>
+                <h3 class="h4 fw-bold text-dark">Number Sounds</h3>
+                <p class="text-muted mb-0">Hear the number, tap the numeral</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/counting/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="counting">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🍎</div>
+                <h3 class="h4 fw-bold text-dark">Counting</h3>
+                <p class="text-muted mb-0">Count the pictures, tap the number</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/shapes-colors/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="shapes-colors">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🔷</div>
+                <h3 class="h4 fw-bold text-dark">Shapes &amp; Colors</h3>
+                <p class="text-muted mb-0">Name shapes, colors, sides &amp; corners</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/english-alphabets/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="english-alphabets">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🔤</div>
+                <h3 class="h4 fw-bold text-dark">English Alphabets</h3>
+                <p class="text-muted mb-0">Hear, match &amp; order letters A&ndash;Z</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/tamil-alphabets/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="tamil-alphabets">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">அ</div>
+                <h3 class="h4 fw-bold text-dark">Tamil Alphabets</h3>
+                <p class="text-muted mb-0">Read or listen &mdash; vowels, consonants &amp; more</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/rhyming-words/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="rhyming-words">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🎵</div>
+                <h3 class="h4 fw-bold text-dark">Rhyming Words</h3>
+                <p class="text-muted mb-0">Cat, hat, bat &mdash; find the rhyme</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/baby-animals/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="baby-animals">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🐣</div>
+                <h3 class="h4 fw-bold text-dark">Baby Animals</h3>
+                <p class="text-muted mb-0">A baby cow is a&hellip;? Name them all!</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- Level 2 ---------------- -->
+    <section id="level-2" class="mb-5">
+      <div class="klg-level-heading klg-level-2">
+        <span class="klg-level-pill">LEVEL 2</span>
+        <h2 class="h4 fw-bold mb-0">Building Blocks 🧱</h2>
+        <span class="text-muted small">Ages 5–7 · first sums, words and patterns</span>
+      </div>
+      <div class="row g-4 justify-content-center mt-1">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/comparing-numbers/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="comparing-numbers">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">⚖️</div>
+                <h3 class="h4 fw-bold text-dark">Comparing Numbers</h3>
+                <p class="text-muted mb-0">Biggest, smallest &amp; the &lt; &gt; = signs</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/addition-subtraction/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="addition-subtraction">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">➕</div>
+                <h3 class="h4 fw-bold text-dark">Addition &amp; Subtraction</h3>
+                <p class="text-muted mb-0">Facts within 10, 20 or two-digit</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/patterns/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="patterns">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🔁</div>
+                <h3 class="h4 fw-bold text-dark">Patterns &amp; Skip Counting</h3>
+                <p class="text-muted mb-0">2, 4, 6&hellip; what comes next?</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/opposites/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="opposites">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">↔️</div>
+                <h3 class="h4 fw-bold text-dark">Opposites</h3>
+                <p class="text-muted mb-0">Opposite words &amp; words that match</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/calendar/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="calendar">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">📅</div>
+                <h3 class="h4 fw-bold text-dark">Calendar</h3>
+                <p class="text-muted mb-0">Days of the week &amp; months of the year</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/tamil-words/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="tamil-words">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🐘</div>
+                <h3 class="h4 fw-bold text-dark">Tamil Words</h3>
+                <p class="text-muted mb-0">Match pictures &amp; meanings to Tamil words</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- Level 3 ---------------- -->
+    <section id="level-3" class="mb-5">
+      <div class="klg-level-heading klg-level-3">
+        <span class="klg-level-pill">LEVEL 3</span>
+        <h2 class="h4 fw-bold mb-0">Level Up 🚀</h2>
+        <span class="text-muted small">Ages 7–9 · tables, fractions, time and money</span>
+      </div>
+      <div class="row g-4 justify-content-center mt-1">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/multiplication/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="multiplication">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">✖️</div>
+                <h3 class="h4 fw-bold text-dark">Multiplication Tables</h3>
+                <p class="text-muted mb-0">25 timed questions on tables 1-11</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/division/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="division">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">➗</div>
+                <h3 class="h4 fw-bold text-dark">Division</h3>
+                <p class="text-muted mb-0">Share it out &mdash; facts &amp; remainders</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/fractions/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="fractions">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🍕</div>
+                <h3 class="h4 fw-bold text-dark">Fractions</h3>
+                <p class="text-muted mb-0">Pictures, equivalents, comparing &amp; adding</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/time/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="time">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🕒</div>
+                <h3 class="h4 fw-bold text-dark">Time &amp; Elapsed Time</h3>
+                <p class="text-muted mb-0">Read clocks &amp; work out end times</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/money/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="money">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">💰</div>
+                <h3 class="h4 fw-bold text-dark">Money &amp; Making Change</h3>
+                <p class="text-muted mb-0">Count coins &amp; make change</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/measurement/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="measurement">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">📏</div>
+                <h3 class="h4 fw-bold text-dark">Measurement</h3>
+                <p class="text-muted mb-0">Units, converting &amp; comparing sizes</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/spelling-bee/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="spelling-bee">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🐝</div>
+                <h3 class="h4 fw-bold text-dark">Spelling Bee</h3>
+                <p class="text-muted mb-0">Hear the word, pick the right spelling</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/tamil-word-builder/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="tamil-word-builder">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🧩</div>
+                <h3 class="h4 fw-bold text-dark">Tamil Word Builder</h3>
+                <p class="text-muted mb-0">Fill in the missing Tamil letter</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- Level 4 ---------------- -->
+    <section id="level-4" class="mb-5">
+      <div class="klg-level-heading klg-level-4">
+        <span class="klg-level-pill">LEVEL 4</span>
+        <h2 class="h4 fw-bold mb-0">Brain Boost 🧠</h2>
+        <span class="text-muted small">Ages 9+ · big numbers and big ideas</span>
+      </div>
+      <div class="row g-4 justify-content-center mt-1">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/rounding-place-value/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="rounding-place-value">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🔢</div>
+                <h3 class="h4 fw-bold text-dark">Rounding &amp; Place Value</h3>
+                <p class="text-muted mb-0">Nearest 10/100/1,000 &amp; digit values</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/solar-system/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="solar-system">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🪐</div>
+                <h3 class="h4 fw-bold text-dark">Solar System</h3>
+                <p class="text-muted mb-0">Planet order, moons &amp; space facts</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/science-quiz/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="science-quiz">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🔬</div>
+                <h3 class="h4 fw-bold text-dark">Science Quiz</h3>
+                <p class="text-muted mb-0">Animals, body, plants &amp; matter</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="games/world-capitals/index.html" class="text-decoration-none">
+            <div class="card game-card" data-game="world-capitals">
+              <div class="card-body text-center p-4">
+                <div class="game-card-icon mb-3">🌎</div>
+                <h3 class="h4 fw-bold text-dark">World Capitals</h3>
+                <p class="text-muted mb-0">Match countries to their capital cities</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/sounds.js"></script>
+  <script src="assets/js/progress.js"></script>
+  <script src="assets/js/home.js"></script>
 </body>
 </html>
