@@ -26,7 +26,10 @@
  *   #streak-badge, #quiz-mascot, #progress-fill
  *
  * Sound effects come from window.KlgSounds (assets/js/sounds.js) when loaded;
- * the engine works silently without it.
+ * the engine works silently without it. Likewise, when
+ * assets/js/progress.js is loaded every finished quiz is banked with
+ * window.KlgProgress and the XP/rank/badges panel is injected into the
+ * results screen; without it the results screen is unchanged.
  */
 class QuizEngine {
   constructor(options) {
@@ -314,6 +317,93 @@ class QuizEngine {
       total: this.totalQuestions,
       elapsedMs: this.elapsedMs,
       bestStreak: this.bestStreak,
+    });
+
+    this._recordProgress();
+  }
+
+  /**
+   * Bank the round with KlgProgress (XP, stars, day streak, badges) and show
+   * what was earned above the review list. Silently skipped when
+   * assets/js/progress.js isn't loaded.
+   */
+  _recordProgress() {
+    if (!window.KlgProgress) return;
+    const reward = KlgProgress.record({
+      score: this.score,
+      total: this.totalQuestions,
+      elapsedMs: this.elapsedMs,
+      bestStreak: this.bestStreak,
+    });
+    this._renderReward(reward);
+    if (reward.rankUp) {
+      if (window.KlgSounds) KlgSounds.newRecord();
+      if (typeof confetti === "function") this._launchConfetti();
+    }
+  }
+
+  _renderReward(reward) {
+    let panel = document.getElementById("klg-reward");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "klg-reward";
+      panel.className = "klg-reward";
+      const review = this.el.resultsReview;
+      if (review && review.parentNode) {
+        review.parentNode.insertBefore(panel, review);
+      } else {
+        this.el.resultsScreen.appendChild(panel);
+      }
+    }
+    panel.innerHTML = "";
+
+    if (reward.rankUp) {
+      const banner = document.createElement("div");
+      banner.className = "klg-rank-up";
+      banner.textContent = `${reward.rank.emoji} Level up — you're a ${reward.rank.name}!`;
+      panel.appendChild(banner);
+    }
+
+    const xpLine = document.createElement("div");
+    xpLine.className = "klg-xp-line";
+    xpLine.textContent = `+${reward.xp} XP`;
+    const rankSpan = document.createElement("span");
+    rankSpan.className = "klg-xp-rank";
+    rankSpan.textContent = ` ${reward.rank.emoji} ${reward.rank.name} • ${reward.totalXp} XP total`;
+    xpLine.appendChild(rankSpan);
+    panel.appendChild(xpLine);
+
+    const next = reward.rank.next;
+    const track = document.createElement("div");
+    track.className = "klg-xp-track";
+    const fill = document.createElement("div");
+    fill.className = "klg-xp-fill";
+    const span = next ? next.min - reward.rank.min : 1;
+    const into = reward.totalXp - reward.rank.min;
+    fill.style.width = (next ? Math.min(100, (into / span) * 100) : 100) + "%";
+    track.appendChild(fill);
+    panel.appendChild(track);
+
+    const caption = document.createElement("div");
+    caption.className = "klg-xp-caption";
+    caption.textContent = next
+      ? `${reward.toNextRank} XP to ${next.emoji} ${next.name}`
+      : "Top rank reached — you legend! 👑";
+    panel.appendChild(caption);
+
+    if (reward.dayStreak >= 2) {
+      const days = document.createElement("div");
+      days.className = "klg-day-streak";
+      days.textContent = `🔥 ${reward.dayStreak}-day streak — come back tomorrow to keep it!`;
+      panel.appendChild(days);
+    }
+
+    reward.newBadges.forEach((badge, i) => {
+      const chip = document.createElement("div");
+      chip.className = "klg-badge-unlock";
+      chip.style.animationDelay = i * 0.25 + "s";
+      chip.textContent = `${badge.emoji} New badge: ${badge.name}`;
+      panel.appendChild(chip);
     });
   }
 
