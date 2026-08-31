@@ -1,109 +1,44 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description"
-          content="Rajeswaran Dhandapani - Certified AI Engineer, Cloud Solutions Architect, and Full Stack Engineer with 14+ years building enterprise-scale generative AI, agentic systems, and microservices using Azure, AWS, Java, Spring Boot, and Angular.">
-    <meta name="author" content="Rajeswaran Dhandapani"/>
+    <meta name="description" content="Rajeswaran Dhandapani is an AI-Enabled Technical Lead with 15+ years of financial-services engineering experience across Java, Spring Boot, Angular, Kafka, enterprise GenAI, RAG, and Azure AI.">
+    <meta name="author" content="Rajeswaran Dhandapani">
     <link rel="canonical" href="https://rajeswarandhandapani.com/">
     <link rel="icon" type="image/jpeg" href="images/rajes.jpeg">
     <link rel="apple-touch-icon" href="images/rajes.jpeg">
-    <meta name="theme-color" content="#ea580c">
+    <meta name="theme-color" content="#c2410c">
 
-    <!-- Open Graph / Facebook / LinkedIn -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://rajeswarandhandapani.com/">
-    <meta property="og:title" content="Rajeswaran Dhandapani | Certified AI & Full Stack Engineer | Cloud Solutions Architect">
-    <meta property="og:description" content="Certified AI Engineer, Cloud Solutions Architect, and Full Stack Engineer with 14+ years building enterprise-scale generative AI, agentic systems, and microservices.">
+    <meta property="og:title" content="Rajeswaran Dhandapani | AI-Enabled Technical Lead">
+    <meta property="og:description" content="AI-Enabled Technical Lead with 15+ years delivering Java platforms, full-stack applications, and enterprise AI solutions for financial services.">
     <meta property="og:image" content="https://rajeswarandhandapani.com/images/rajes.jpeg">
     <meta property="og:image:alt" content="Rajeswaran Dhandapani">
     <meta property="og:site_name" content="Rajeswaran Dhandapani">
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Rajeswaran Dhandapani | Certified AI & Full Stack Engineer | Cloud Solutions Architect">
-    <meta name="twitter:description" content="Certified AI Engineer, Cloud Solutions Architect, and Full Stack Engineer with 14+ years building enterprise-scale generative AI, agentic systems, and microservices.">
+    <meta name="twitter:title" content="Rajeswaran Dhandapani | AI-Enabled Technical Lead">
+    <meta name="twitter:description" content="15+ years delivering Java platforms, full-stack applications, and enterprise AI solutions for financial services.">
     <meta name="twitter:image" content="https://rajeswarandhandapani.com/images/rajes.jpeg">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/415902d2e8.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.css?v=20260831d">
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-52Z4BEKPKK"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-
         gtag('config', 'G-52Z4BEKPKK');
     </script>
 
-    <script>
-        function scrollToSection(sectionId) {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.scrollIntoView({
-                    block: 'start',
-                    behavior: 'smooth',
-                    inline: 'center'
-                });
-            }
-            closeMobileNav();
-        }
+    <title>Rajeswaran Dhandapani | AI-Enabled Technical Lead | Java &amp; Enterprise AI</title>
 
-        function toggleMobileNav() {
-            const navItems = document.querySelector('.nav-items');
-            const navToggle = document.querySelector('.nav-toggle');
-            const navBackdrop = document.querySelector('.nav-backdrop');
-            
-            navItems.classList.toggle('nav-open');
-            navToggle.classList.toggle('nav-toggle-open');
-            navBackdrop.classList.toggle('nav-open');
-        }
-
-        function closeMobileNav() {
-            const navItems = document.querySelector('.nav-items');
-            const navToggle = document.querySelector('.nav-toggle');
-            const navBackdrop = document.querySelector('.nav-backdrop');
-            
-            navItems.classList.remove('nav-open');
-            navToggle.classList.remove('nav-toggle-open');
-            navBackdrop.classList.remove('nav-open');
-        }
-
-        let chatUserToggled = false;
-
-        function loadChatFrame() {
-            const chatFrame = document.getElementById('chat-frame');
-            if (!chatFrame.src) {
-                chatFrame.src = chatFrame.dataset.src;
-            }
-        }
-
-        function toggleChat() {
-            chatUserToggled = true;
-            const chatWindow = document.getElementById('chat-window');
-            loadChatFrame();
-            if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
-                chatWindow.style.display = 'block';
-            } else {
-                chatWindow.style.display = 'none';
-            }
-        }
-    </script>
-
-    <title>Rajeswaran Dhandapani | Certified AI & Full Stack Engineer | Certified Solution Architect</title>
-
-    <!-- Structured Data: Person -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -111,779 +46,363 @@
       "name": "Rajeswaran Dhandapani",
       "url": "https://rajeswarandhandapani.com/",
       "image": "https://rajeswarandhandapani.com/images/rajes.jpeg",
-      "jobTitle": "Certified AI Engineer | Cloud Solutions Architect | Full Stack Engineer",
+      "jobTitle": "AI-Enabled Technical Lead",
+      "description": "Technical lead with 15+ years of financial-services engineering experience across Java platforms, full-stack delivery, and enterprise AI.",
       "email": "mailto:prorajeswaran@gmail.com",
       "sameAs": [
         "https://www.linkedin.com/in/rajeswaran-dhandapani",
         "https://github.com/rajeswarandhandapani"
       ],
       "knowsAbout": [
-        "Generative AI",
-        "Agentic AI",
-        "Multi-Agent Systems",
-        "LLM",
-        "RAG pipelines",
-        "Retrieval-Augmented Generation (RAG)",
-        "Computer Vision",
-        "Natural Language Processing",
-        "Azure AI",
-        "AWS",
-        "Java",
-        "Spring Boot",
-        "Microservices",
-        "Angular",
-        "TypeScript",
-        "Apache Kafka",
-        "Docker"
+        "Java", "Spring Boot", "Angular", "Apache Kafka", "Microservices",
+        "System Architecture", "Generative AI", "Retrieval-Augmented Generation",
+        "Python", "LangChain", "LangGraph", "Azure AI", "Financial Services"
       ]
     }
     </script>
-
 </head>
-
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
-<div class="container">
-
-    <div class="nav-backdrop" onclick="closeMobileNav()"></div>
-
-    <nav>
-        <div class="nav-brand">
-            <img src="images/rajes.jpeg" alt="Rajeswaran Dhandapani" class="nav-logo" width="40" height="40">
-            <span class="nav-brand-text">Rajeswaran Dhandapani</span>
-        </div>
-        <button class="nav-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation">
-            <span class="hamburger"></span>
-            <span class="hamburger"></span>
-            <span class="hamburger"></span>
+<nav class="site-nav" aria-label="Primary navigation">
+    <div class="nav-inner">
+        <a class="nav-brand" href="#top" aria-label="Rajeswaran Dhandapani, home">
+            <img src="images/rajes.jpeg" alt="" class="nav-logo" width="40" height="40">
+            <span>Rajeswaran Dhandapani</span>
+        </a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Open navigation">
+            <span></span><span></span><span></span>
         </button>
-        <ul class="nav-items">
-            <li><a href="javascript:scrollToSection('certifications');" data-section="certifications"><i class="fa-solid fa-certificate"></i> Certifications</a></li>
-            <li><a href="javascript:scrollToSection('projects');" data-section="projects"><i class="fa-brands fa-github"></i> GitHub Projects</a></li>
-            <li><a href="javascript:scrollToSection('experience');" data-section="experience"><i class="fa-solid fa-briefcase"></i> Professional Experience</a></li>
-            <li><a href="javascript:scrollToSection('footer-contact');" data-section="footer-contact"><i class="fa-solid fa-envelope"></i> Contact Me</a></li>
-            <!-- Resume link intentionally disabled until the PDF is updated -->
+        <ul class="nav-menu" id="nav-menu">
+            <li><a href="#impact">Impact</a></li>
+            <li><a href="#projects">Case Studies</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#capabilities">Capabilities</a></li>
+            <li><a href="#contact">Contact</a></li>
         </ul>
-    </nav>
+    </div>
+</nav>
 
-    <main>
-        <header class="header text-center">
-            <img src="images/rajes.jpeg" alt="Rajeswaran Dhandapani" class="profile-image" width="125" height="125">
-            <h1>Hi, I'm Rajeswaran Dhandapani</h1>
-            <h2 class="role">Certified AI Engineer | Cloud Solutions Architect | Full Stack Engineer</h2>
-            <div class="hero-cta">
-                <a class="btn btn-hero btn-hero-outline" href="javascript:void(0);" onclick="toggleChat();">
-                    <i class="fa-solid fa-user"></i> Chat with my AI Twin
+<main id="main-content">
+    <header class="hero" id="top">
+        <div class="page-shell hero-grid">
+            <div class="hero-content">
+                <p class="eyebrow">Financial Services · Enterprise Engineering · Nationwide Relocation</p>
+                <h1>AI-Enabled Technical Lead</h1>
+                <p class="hero-name">Rajeswaran Dhandapani</p>
+                <p class="hero-stack">Java, Spring Boot &amp; Kafka <span>·</span> Python, LangChain, LangGraph &amp; RAG <span>·</span> Angular &amp; Azure AI</p>
+                <p class="hero-summary">15+ years designing secure, scalable financial-services platforms and guiding full-stack delivery from architecture through production.</p>
+                <div class="hero-actions" aria-label="Contact and profile links">
+                    <a class="button button-primary" href="mailto:prorajeswaran@gmail.com" data-analytics="email-hero"><i class="fa-solid fa-envelope" aria-hidden="true"></i>Email Me</a>
+                    <a class="button button-secondary" href="https://www.linkedin.com/in/rajeswaran-dhandapani" target="_blank" rel="noopener" data-analytics="linkedin-hero"><i class="fa-brands fa-linkedin" aria-hidden="true"></i>LinkedIn</a>
+                    <a class="button button-quiet" href="https://github.com/rajeswarandhandapani" target="_blank" rel="noopener" data-analytics="github-hero"><i class="fa-brands fa-github" aria-hidden="true"></i>GitHub</a>
+                    <button class="button button-quiet" type="button" data-chat-toggle aria-expanded="false" aria-controls="chat-window"><i class="fa-solid fa-comments" aria-hidden="true"></i>Ask My AI Twin</button>
+                </div>
+            </div>
+            <div class="hero-portrait" aria-label="Portrait of Rajeswaran Dhandapani">
+                <div class="portrait-frame">
+                    <img src="images/rajes.jpeg" alt="Rajeswaran Dhandapani" width="280" height="280">
+                </div>
+                <p><strong>Enterprise platform leadership</strong><br>with practical AI delivery</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="section" id="impact">
+        <div class="page-shell">
+            <div class="section-heading">
+                <p class="section-kicker">Career impact</p>
+                <h2>Architecture judgment backed by hands-on delivery</h2>
+                <p>I connect durable Java platform engineering with modern AI capabilities, helping teams move from technical ambiguity to secure, maintainable production solutions.</p>
+            </div>
+            <div class="impact-grid">
+                <article class="impact-item"><strong>15+</strong><span>Years in enterprise software engineering</span></article>
+                <article class="impact-item"><strong>Financial services</strong><span>Banking, asset servicing, recovery and regulated workflows</span></article>
+                <article class="impact-item"><strong>End-to-end</strong><span>System design, APIs, user experience, testing and delivery</span></article>
+                <article class="impact-item"><strong>AI-enabled</strong><span>Document intelligence, LLM workflows, RAG and evaluation</span></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-tinted" id="projects">
+        <div class="page-shell">
+            <div class="section-heading">
+                <p class="section-kicker">Selected case studies</p>
+                <h2>Evidence aligned with lead engineering roles</h2>
+                <p>Focused demonstrations of enterprise AI, Java platform engineering and distributed-system design.</p>
+            </div>
+            <div class="case-study-grid">
+                <article class="case-study">
+                    <div class="case-study-number">01</div>
+                    <h3>AI Loan Processing Engine</h3>
+                    <dl>
+                        <div><dt>Problem</dt><dd>Turn fragmented loan intake and document review into a guided, explainable workflow.</dd></div>
+                        <div><dt>Approach</dt><dd>Agent orchestration with LangGraph, Azure Document Intelligence, Azure AI Search grounding and model-backed eligibility analysis.</dd></div>
+                        <div><dt>Business relevance</dt><dd>Demonstrates how enterprise AI can reduce manual review while retaining validation and decision boundaries.</dd></div>
+                    </dl>
+                    <ul class="tag-list" aria-label="Technology stack"><li>Python</li><li>FastAPI</li><li>Angular</li><li>LangChain</li><li>LangGraph</li><li>Azure AI</li><li>RAG</li></ul>
+                    <div class="card-actions">
+                        <a href="https://github.com/rajeswarandhandapani/ai-loan-processing-engine" target="_blank" rel="noopener" data-analytics="project-loan-github">Repository <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                        <a href="https://www.linkedin.com/posts/rajeswaran-dhandapani_ai-azure-azurefoundry-activity-7411873388882898944-oDIr" target="_blank" rel="noopener" data-analytics="project-loan-linkedin">Project overview</a>
+                    </div>
+                </article>
+
+                <article class="case-study">
+                    <div class="case-study-number">02</div>
+                    <h3>AI Banking Service</h3>
+                    <dl>
+                        <div><dt>Problem</dt><dd>Give customers a conversational path to banking information without bypassing secure application services.</dd></div>
+                        <div><dt>Approach</dt><dd>Spring AI function calling over authenticated account, transaction, payment and notification APIs with controlled chat memory.</dd></div>
+                        <div><dt>Business relevance</dt><dd>Shows how Java teams can introduce LLM interactions while preserving service boundaries and authorization.</dd></div>
+                    </dl>
+                    <ul class="tag-list" aria-label="Technology stack"><li>Java</li><li>Spring Boot</li><li>Spring AI</li><li>Function Calling</li><li>JWT</li><li>WebClient</li></ul>
+                    <div class="card-actions">
+                        <a href="https://github.com/rajeswarandhandapani/ai-banking-service" target="_blank" rel="noopener" data-analytics="project-banking-github">Repository <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                        <a href="https://www.linkedin.com/posts/rajeswaran-dhandapani_ai-machinelearning-banking-activity-7360421438446600192-Smnq" target="_blank" rel="noopener" data-analytics="project-banking-linkedin">Project overview</a>
+                    </div>
+                </article>
+
+                <article class="case-study">
+                    <div class="case-study-number">03</div>
+                    <h3>Saga-Orchestrated BaaS</h3>
+                    <dl>
+                        <div><dt>Problem</dt><dd>Maintain reliable multi-service banking operations when a distributed transaction partially fails.</dd></div>
+                        <div><dt>Approach</dt><dd>A centralized, type-safe saga framework coordinating Kafka events, service state and automatic compensation.</dd></div>
+                        <div><dt>Business relevance</dt><dd>Demonstrates the architectural tradeoffs behind resilient onboarding, accounts and payment workflows.</dd></div>
+                    </dl>
+                    <ul class="tag-list" aria-label="Technology stack"><li>Java 21</li><li>Spring Boot</li><li>Spring Cloud</li><li>Kafka</li><li>Keycloak</li><li>Docker</li></ul>
+                    <div class="card-actions">
+                        <a href="https://github.com/rajeswarandhandapani/saga-orchestrated-banking-as-service" target="_blank" rel="noopener" data-analytics="project-saga-github">Repository <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                    </div>
+                </article>
+            </div>
+            <p class="all-projects"><a class="button button-secondary" href="https://github.com/rajeswarandhandapani?tab=repositories" target="_blank" rel="noopener" data-analytics="github-all-projects">View all projects on GitHub <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></p>
+        </div>
+    </section>
+
+    <section class="section" id="experience">
+        <div class="page-shell">
+            <div class="section-heading">
+                <p class="section-kicker">Professional experience</p>
+                <h2>Financial-services engineering from architecture to production</h2>
+                <p>Current client assignments are shown separately from Suniksha Infotech, my legal employer, for a clear and accurate employment history.</p>
+            </div>
+            <div class="timeline">
+                <article class="timeline-item timeline-current">
+                    <div class="timeline-meta"><span>Apr 2025–Present</span><span>Current client assignment</span></div>
+                    <div class="timeline-content">
+                        <h3>Technical Lead / Senior Full-Stack Engineer</h3>
+                        <p class="organization">BNY · Client assignment through Suniksha Infotech · Pittsburgh, PA</p>
+                        <ul>
+                            <li>Lead system design and delivery for secure, AI-enabled financial-services workflows.</li>
+                            <li>Build Java and Spring Boot APIs, Angular interfaces, Kafka integrations and SQL/NoSQL solutions.</li>
+                            <li>Develop document classification and extraction capabilities using Python, LLMs, LangChain, LangGraph and RAG.</li>
+                            <li>Guide technical design, engineering quality and cross-functional delivery without formal direct-report responsibility.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item timeline-current">
+                    <div class="timeline-meta"><span>Dec 2023–Present</span><span>Legal employer</span></div>
+                    <div class="timeline-content">
+                        <h3>Full Stack Engineer</h3>
+                        <p class="organization">Suniksha Infotech</p>
+                        <p>Legal employer for enterprise client assignments across financial services and insurance, providing Java/Spring Boot, Angular, Kafka, Python and enterprise AI delivery.</p>
+                    </div>
+                </article>
+
+                <article class="timeline-item">
+                    <div class="timeline-meta"><span>Jan 2024–Apr 2025</span><span>Previous client assignment</span></div>
+                    <div class="timeline-content">
+                        <h3>Senior Software Engineer / Full-Stack Engineer</h3>
+                        <p class="organization">Arbitration Forums, Inc. · Client assignment through Suniksha Infotech</p>
+                        <ul>
+                            <li>Delivered Java and Spring Boot REST microservices with Angular 17 applications for insurance recovery workflows.</li>
+                            <li>Modernized the front end with Bootstrap 5 and reusable components, expanding Cypress component and end-to-end coverage.</li>
+                            <li>Applied transaction-management, SQL, Docker, CI/CD and OWASP-aligned secure-development practices.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item">
+                    <div class="timeline-meta"><span>Aug 2019–Nov 2023</span><span>Full-time</span></div>
+                    <div class="timeline-content">
+                        <h3>Vice President | Full-Stack Engineer</h3>
+                        <p class="organization">BNY Mellon · United States</p>
+                        <ul>
+                            <li>Led system design and delivery of a scalable white-label platform supporting multiple branded financial-services websites.</li>
+                            <li>Built Java, Spring Boot and Spring Cloud microservices with REST APIs and SQL/NoSQL integrations.</li>
+                            <li>Developed Angular and TypeScript interfaces, integrated SiteMinder authentication and supported CI/CD release coordination.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item">
+                    <div class="timeline-meta"><span>Aug 2011–Aug 2019</span><span>Full-time</span></div>
+                    <div class="timeline-content">
+                        <h3>Technical Lead</h3>
+                        <p class="organization">iNautix Technologies · Chennai, India</p>
+                        <ul>
+                            <li>Modernized a monolithic enterprise application into Java and Spring Boot microservices with REST integrations.</li>
+                            <li>Designed a scalable CRM platform with SQL persistence and enterprise-system integrations.</li>
+                            <li>Built Angular and TypeScript interfaces and supported code reviews, CI/CD, releases and Agile delivery.</li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-dark" id="capabilities">
+        <div class="page-shell">
+            <div class="section-heading">
+                <p class="section-kicker">Technical capabilities</p>
+                <h2>Enterprise engineering depth with full-stack and AI range</h2>
+                <p>Capabilities are organized around delivery outcomes rather than an undifferentiated technology inventory.</p>
+            </div>
+            <div class="capability-grid">
+                <article><i class="fa-brands fa-java" aria-hidden="true"></i><h3>Java platform engineering</h3><p>Java, Spring Boot, Spring Cloud, REST APIs, microservices, Kafka, SQL/NoSQL and transaction design.</p></article>
+                <article><i class="fa-solid fa-laptop-code" aria-hidden="true"></i><h3>Full-stack delivery</h3><p>Angular, TypeScript, reusable UI architecture, Cypress, responsive design and secure API integration.</p></article>
+                <article><i class="fa-solid fa-brain" aria-hidden="true"></i><h3>Enterprise AI</h3><p>Python, LLM workflows, LangChain, LangGraph, RAG, document intelligence, prompt evaluation and responsible controls.</p></article>
+                <article><i class="fa-solid fa-diagram-project" aria-hidden="true"></i><h3>Architecture &amp; DevOps</h3><p>System architecture, distributed transactions, OAuth/OIDC, OWASP, Docker, CI/CD, Azure and AWS.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="certifications">
+        <div class="page-shell">
+            <div class="section-heading">
+                <p class="section-kicker">Selected credentials</p>
+                <h2>Certifications supporting the delivery story</h2>
+                <p>Role-relevant credentials are prioritized; foundational and course certificates remain available below.</p>
+            </div>
+            <div class="credential-grid">
+                <a class="credential" href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/37F1C34C5B9A7780?sharingId=976895D61207725" target="_blank" rel="noopener" data-analytics="credential-ai102">
+                    <img src="images/azure-ai-engineer-associate.png" alt="Microsoft Azure AI Engineer Associate badge" width="110" height="110">
+                    <span><strong>Microsoft Azure AI Engineer Associate</strong><small>AI-102</small></span>
+                </a>
+                <a class="credential" href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/F83B863CBFA955F6?sharingId=976895D61207725" target="_blank" rel="noopener" data-analytics="credential-az204">
+                    <img src="images/azure-developer-associate-600x600.png" alt="Microsoft Azure Developer Associate badge" width="110" height="110">
+                    <span><strong>Microsoft Azure Developer Associate</strong><small>AZ-204</small></span>
+                </a>
+                <a class="credential" href="https://www.credly.com/badges/07c167e3-b40a-445b-9de6-9f8e2ef5fd26/public_url" target="_blank" rel="noopener" data-analytics="credential-aws">
+                    <img src="images/aws-certified-solutions-architect-associate.png" alt="AWS Solutions Architect Associate badge" width="110" height="110">
+                    <span><strong>AWS Solutions Architect – Associate</strong><small>SAA-C03</small></span>
                 </a>
             </div>
-        </header>
+            <details class="secondary-credentials">
+                <summary>View foundational and course credentials</summary>
+                <ul>
+                    <li><a href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/A88508577E1499B8?sharingId=976895D61207725" target="_blank" rel="noopener">Microsoft Azure AI Fundamentals (AI-900)</a></li>
+                    <li><a href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/C2ABB9AA3723B649?sharingId=976895D61207725" target="_blank" rel="noopener">Microsoft Azure Fundamentals (AZ-900)</a></li>
+                    <li><a href="images/AgenticAI.jpg" target="_blank" rel="noopener">The Complete Agentic AI Engineering</a></li>
+                    <li><a href="https://coursera.org/share/945aad9b690df11897d311a57a8760d9" target="_blank" rel="noopener">Generative AI for Software Developers</a></li>
+                    <li><a href="https://coursera.org/share/d1994913c5d41d45468c01003bfce6ef" target="_blank" rel="noopener">Generative AI Prompt Engineering</a></li>
+                    <li><a href="images/udemy-microservices.jpg" target="_blank" rel="noopener">Microservices with Spring Boot and Spring Cloud</a></li>
+                </ul>
+            </details>
+        </div>
+    </section>
 
-        <section class="card">
-            <h2><i class="fa-solid fa-user"></i> About Me</h2>
-            <p>
-                Certified <strong>AI Engineer</strong> and <strong>Cloud Solutions Architect</strong> with <strong>14 years of expertise</strong> in architecting and delivering enterprise-scale AI solutions and full-stack applications. Specialized in <strong>generative AI</strong>, <strong>agentic and multi-agent systems</strong>, <strong>computer vision</strong>, <strong>natural language processing</strong>, and <strong>knowledge mining</strong> solutions using cloud-native technologies.<br><br>
-                Expert in leading cross-functional teams to build intelligent applications with <strong>responsible AI principles</strong>. Strong full-stack development skills across front-end (Angular, TypeScript, JavaScript) and back-end (Java, Spring Boot, Node.js, Microservices, Kafka) technologies. Hands-on experience in <strong>cloud-native development</strong>, <strong>AI/ML model deployment</strong>, <strong>DevOps</strong>, and <strong>workflow automation</strong>.<br><br>
-                Passionate about leveraging cutting-edge AI technologies to solve complex business problems and drive digital transformation. Seeking challenging opportunities to combine technical leadership and AI expertise to deliver innovative, scalable solutions.
-            </p>
-        </section>
-
-        <section class="card">
-            <h2><i class="fa-solid fa-star"></i> Core Competencies</h2>
-
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <span class="stat-value">14+</span>
-                    <span class="stat-label">Years of Experience</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fa-solid fa-certificate"></i>
-                    <span class="stat-value">5</span>
-                    <span class="stat-label">Cloud Certifications</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fa-solid fa-code-branch"></i>
-                    <span class="stat-value">9</span>
-                    <span class="stat-label">GitHub Projects</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fa-solid fa-cloud"></i>
-                    <span class="stat-value">Multi</span>
-                    <span class="stat-label">Cloud Platforms</span>
-                </div>
+    <section class="section section-tinted" id="background">
+        <div class="page-shell background-grid">
+            <div>
+                <p class="section-kicker">Professional background</p>
+                <h2>Technical leadership grounded in implementation</h2>
             </div>
-
-            <div class="competency-grid">
-                <div class="competency-pillar">
-                    <div class="pillar-content">
-                        <div class="pillar-header">
-                            <div class="pillar-icon"><i class="fa-solid fa-robot"></i></div>
-                            <h3>AI & Intelligent Systems</h3>
-                        </div>
-                        <ul>
-                            <li>Architected enterprise-scale generative AI solutions using RAG patterns, prompt engineering, and fine-tuned models</li>
-                            <li>Built agentic and multi-agent systems with Semantic Kernel, Spring AI, CrewAI, and LangGraph</li>
-                            <li>Delivered computer vision, NLP, and knowledge mining solutions using Azure AI services</li>
-                            <li>Implemented responsible AI principles across planning, deployment, and monitoring</li>
-                        </ul>
-                    </div>
-                    <div class="pillar-tags">
-                        <span class="tag">Generative AI</span>
-                        <span class="tag">RAG</span>
-                        <span class="tag">Agentic AI</span>
-                        <span class="tag">Computer Vision</span>
-                        <span class="tag">NLP</span>
-                        <span class="tag">Azure AI</span>
-                        <span class="tag">LangChain</span>
-                    </div>
-                </div>
-
-                <div class="competency-pillar">
-                    <div class="pillar-content">
-                        <div class="pillar-header">
-                            <div class="pillar-icon"><i class="fa-solid fa-server"></i></div>
-                            <h3>Platform & Distributed Systems Architecture</h3>
-                        </div>
-                        <ul>
-                            <li>Designed distributed microservices architectures with saga orchestration patterns and event-driven communication</li>
-                            <li>Architected high-throughput systems using Apache Kafka, Spring Cloud, and reactive patterns</li>
-                            <li>Engineered secure platforms with OAuth/OpenID, OWASP-compliant development, and role-based access control</li>
-                            <li>Led workflow automation using Camunda BPMN integrated with enterprise rules engines</li>
-                        </ul>
-                    </div>
-                    <div class="pillar-tags">
-                        <span class="tag">Java</span>
-                        <span class="tag">Spring Boot</span>
-                        <span class="tag">Kafka</span>
-                        <span class="tag">Microservices</span>
-                        <span class="tag">Saga Patterns</span>
-                        <span class="tag">OAuth</span>
-                        <span class="tag">SQL Server</span>
-                        <span class="tag">MongoDB</span>
-                    </div>
-                </div>
-
-                <div class="competency-pillar">
-                    <div class="pillar-content">
-                        <div class="pillar-header">
-                            <div class="pillar-icon"><i class="fa-solid fa-laptop-code"></i></div>
-                            <h3>Full-Stack Engineering & UI Architecture</h3>
-                        </div>
-                        <ul>
-                            <li>Built enterprise Angular applications with component-driven architecture and comprehensive Cypress E2E testing</li>
-                            <li>Led front-end modernization initiatives including Bootstrap 5 and Angular 17 migrations</li>
-                            <li>Established development practices including TDD, code review culture, and CI/CD integration</li>
-                        </ul>
-                    </div>
-                    <div class="pillar-tags">
-                        <span class="tag">Angular</span>
-                        <span class="tag">TypeScript</span>
-                        <span class="tag">Bootstrap</span>
-                        <span class="tag">Cypress</span>
-                        <span class="tag">TDD</span>
-                        <span class="tag">Agile/Scrum</span>
-                    </div>
-                </div>
-
-                <div class="competency-pillar">
-                    <div class="pillar-content">
-                        <div class="pillar-header">
-                            <div class="pillar-icon"><i class="fa-solid fa-cloud"></i></div>
-                            <h3>Cloud Infrastructure & DevOps</h3>
-                        </div>
-                        <ul>
-                            <li>Certified across Azure (AI Engineer, Developer, Fundamentals) and AWS (Solutions Architect)</li>
-                            <li>Containerized and deployed production applications using Docker across public and private cloud environments</li>
-                            <li>Implemented CI/CD pipelines for automated testing, building, and deployment workflows</li>
-                        </ul>
-                    </div>
-                    <div class="pillar-tags">
-                        <span class="tag">Azure</span>
-                        <span class="tag">AWS</span>
-                        <span class="tag">Docker</span>
-                        <span class="tag">CI/CD</span>
-                        <span class="tag">Cloud-Native</span>
-                    </div>
-                </div>
+            <div>
+                <p>I have spent more than fifteen years building and modernizing enterprise applications, from Java and Spring platforms to Angular experiences and event-driven integrations. My strongest contribution is connecting architecture decisions to the code, delivery practices and operational realities that make systems sustainable.</p>
+                <p>Today, I extend that foundation with enterprise AI patterns—including document processing, model evaluation, RAG and agent workflows—while keeping security, traceability and human validation central to the solution.</p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="card" id="certifications">
-            <h2><i class="fa-solid fa-trophy"></i> Hall Of Fame <small>(Certifications)</small></h2>
-            <div class="grid grid-auto">
-                <div class="item item-badge">
-                    <a target="_blank"
-                       href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/37F1C34C5B9A7780?sharingId=976895D61207725">
-                        <p class="issuer">Issuer: Microsoft</p>
-                        <img src="images/azure-ai-engineer-associate.png" width="110" height="110"
-                             alt="Microsoft Certified: Azure AI Engineer Associate">
-                        <h3 class="badge-title">AI-102 : Microsoft Certified: Azure AI Engineer Associate</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank"
-                       href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/F83B863CBFA955F6?sharingId=976895D61207725">
-                        <p class="issuer">Issuer: Microsoft</p>
-                        <img src="images/azure-developer-associate-600x600.png" width="110" height="110"
-                             alt="Microsoft Certified: Azure Developer Associate">
-                        <h3 class="badge-title">AZ-204 : Microsoft Certified: Azure Developer Associate</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank"
-                       href="https://www.credly.com/badges/07c167e3-b40a-445b-9de6-9f8e2ef5fd26/public_url">
-                        <p class="issuer">Issuer: AWS</p>
-                        <img src="images/aws-certified-solutions-architect-associate.png" width="110" height="110"
-                             alt="AWS Certified Solution Architect Associate">
-                        <h3 class="badge-title">SAA-C03 : AWS Certified Solution Architect Associate</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank"
-                       href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/A88508577E1499B8?sharingId=976895D61207725">
-                        <p class="issuer">Issuer: Microsoft</p>
-                        <img src="images/azure-ai-fundamentals-600x600.png" width="110" height="110"
-                             alt="Microsoft Certified: Azure AI Fundamentals">
-                        <h3 class="badge-title">AI-900 : Microsoft Certified: Azure AI Fundamentals</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank"
-                       href="https://learn.microsoft.com/api/credentials/share/en-us/RajeswaranDhandapani-6124/C2ABB9AA3723B649?sharingId=976895D61207725">
-                        <p class="issuer">Issuer: Microsoft</p>
-                        <img src="images/azure-fundamentals.png" width="110" height="110" alt="Microsoft Certified: Azure Fundamentals">
-                        <h3 class="badge-title">AZ-900 : Microsoft Certified: Azure Fundamentals</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank" href="images/AgenticAI.jpg">
-                        <p class="issuer">Issuer: Udemy</p>
-                        <img src="images/AgenticAIBadge.png" width="110" height="110" alt="The Complete Agentic AI Engineering Course">
-                        <h3 class="badge-title">The Complete Agentic AI Engineering</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank" href="https://coursera.org/share/945aad9b690df11897d311a57a8760d9">
-                        <p class="issuer">Issuer: IBM</p>
-                        <img src="images/genaifordevelopers1.png" width="110" height="110" alt="Generative AI for Software Developers">
-                        <h3 class="badge-title">Generative AI for Software Developers Specialization</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank" href="https://coursera.org/share/d1994913c5d41d45468c01003bfce6ef">
-                        <p class="issuer">Issuer: IBM</p>
-                        <img src="images/prompt-engineering.JPG" width="110" height="110" alt="Prompt Engineering">
-                        <h3 class="badge-title">Generative AI Prompt Engineering</h3>
-                    </a>
-                </div>
-                <div class="item item-badge">
-                    <a target="_blank" href="images/udemy-microservices.jpg">
-                        <p class="issuer">Issuer: Udemy</p>
-                        <img src="images/udemy-microservices.jpg" width="110" height="110" alt="Microservices with Spring Boot and Spring Cloud">
-                        <h3 class="badge-title">Microservices with Spring Boot and Spring Cloud</h3>
-                    </a>
-                </div>
+    <section class="section contact-section" id="contact">
+        <div class="page-shell contact-grid">
+            <div>
+                <p class="section-kicker">Contact</p>
+                <h2>Looking for a technical lead who bridges enterprise platforms and AI?</h2>
+                <p>I am exploring stable full-time opportunities across the United States and am open to nationwide relocation for the right role.</p>
             </div>
-        </section>
-
-        <section class="card" id="projects">
-            <h2><i class="fa-brands fa-github"></i> Featured GitHub Projects</h2>
-            <div class="projects-container projects-grid">
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>AI Loan Processing Engine</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/ai-loan-processing-engine" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                            <a href="https://www.linkedin.com/posts/rajeswaran-dhandapani_ai-azure-azurefoundry-activity-7411873388882898944-oDIr?utm_source=share&utm_medium=member_desktop&rcm=ACoAABhjTIcBp2xAGPvUYTYtucenBwBLE2uvcEk" target="_blank" class="btn btn-secondary">
-                                <i class="fa-brands fa-linkedin"></i> LinkedIn Post
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>An intelligent small business loan automation system demonstrating advanced cloud-native AI engineering skills aligned with <strong>Microsoft Certified: Azure AI Engineer Associate</strong>. Acts as a virtual loan officer that interviews applicants via natural language chat, analyzes financial documents using <strong>Azure Document Intelligence</strong>, validates eligibility using <strong>Azure AI Search (RAG)</strong>, and makes pre-qualification decisions using <strong>Azure OpenAI</strong> or <strong>Anthropic Claude</strong>. Built with <strong>LangChain</strong> and <strong>LangGraph</strong> for sophisticated agent orchestration.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Python</span>
-                        <span class="tag">FastAPI</span>
-                        <span class="tag">Angular 21</span>
-                        <span class="tag">Azure OpenAI</span>
-                        <span class="tag">Azure Document Intelligence</span>
-                        <span class="tag">Azure AI Search</span>
-                        <span class="tag">Azure AI Language</span>
-                        <span class="tag">LangChain</span>
-                        <span class="tag">LangGraph</span>
-                        <span class="tag">RAG</span>
-                        <span class="tag">Anthropic Claude</span>
-                        <span class="tag">Agentic AI</span>
-                        <span class="tag">TypeScript</span>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>AI Banking Service</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/ai-banking-service" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                            <a href="https://www.linkedin.com/posts/rajeswaran-dhandapani_ai-machinelearning-banking-activity-7360421438446600192-Smnq?utm_source=share&utm_medium=member_desktop&rcm=ACoAABhjTIcBp2xAGPvUYTYtucenBwBLE2uvcEk" target="_blank" class="btn btn-secondary">
-                                <i class="fa-brands fa-linkedin"></i> LinkedIn Post
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p><strong>𝗥𝗲𝗱𝗲𝗳𝗶𝗻𝗶𝗻𝗴 𝗕𝗮𝗻𝗸𝗶𝗻𝗴: 𝗙𝗿𝗼𝗺 𝗖𝗹𝗶𝗰𝗸𝘀 𝘁𝗼 𝗖𝗼𝗻𝘃𝗲𝗿𝘀𝗮𝘁𝗶𝗼𝗻𝘀</strong> - An intelligent AI-powered banking assistant service built with <strong>Spring AI</strong> framework. Features conversational AI that can access user accounts, transactions, payments, and notifications through function calling. Includes JWT authentication, chat memory, and secure banking API integration.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Java</span>
-                        <span class="tag">Spring Boot</span>
-                        <span class="tag">Spring AI</span>
-                        <span class="tag">ChatClient</span>
-                        <span class="tag">Function Calling</span>
-                        <span class="tag">LLM Custom Tools</span>
-                        <span class="tag">JWT Authentication</span>
-                        <span class="tag">Banking API</span>
-                        <span class="tag">WebClient</span>
-                        <span class="tag">Chat Memory</span>
-                        <span class="tag">AI Assistant</span>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>AI-Powered Career Conversation Agent</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/career-conversation-AI-agent-chatbot"
-                               target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                            <a href="https://rajeswarandhandapani-career-conversation-ai-agen-8248a3e.hf.space"
-                               target="_blank" class="btn btn-secondary">
-                                <i class="fa-solid fa-link"></i> Live Demo
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>An intelligent conversational AI agent built with OpenAI GPT-4o-mini that provides real-time
-                            answers about my professional background, skills, and experience. The chatbot extracts
-                            information from my LinkedIn profile and career summary, features user engagement tracking, and
-                            includes notification systems for visitor interactions.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Python</span>
-                        <span class="tag">OpenAI GPT-4</span>
-                        <span class="tag">Gradio</span>
-                        <span class="tag">HuggingFace</span>
-                        <span class="tag">PDF Processing</span>
-                        <span class="tag">Pushover API</span>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>Multi-Agent Debate Platform with CrewAI</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/crewai_multi_agent_debate" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>An advanced debate platform leveraging <strong>CrewAI</strong> to orchestrate multiple AI agents in structured debates. Features agent role assignment, real-time argument generation, and automated moderation for insightful, dynamic discussions. Ideal for research, education, and AI-driven collaborative problem-solving.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Python</span>
-                        <span class="tag">CrewAI</span>
-                        <span class="tag">Multi-Agent Systems</span>
-                        <span class="tag">LLM</span>
-                        <span class="tag">Prompt Engineering</span>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>Saga Orchestrated Banking as a Service (BaaS) Platform</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/saga-orchestrated-banking-as-service" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>A production-ready Banking as a Service platform featuring modern <strong>Saga Orchestration Pattern</strong> for centralized distributed transaction management. Implements abstract saga framework with type-safe lifecycle management, centralized orchestrator service, event-driven communication via Apache Kafka, and comprehensive banking operations including user onboarding, account management, payment processing, and transaction recording with automatic compensation logic.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Java 21</span>
-                        <span class="tag">Spring Boot 3.x</span>
-                        <span class="tag">Spring Cloud</span>
-                        <span class="tag">Spring Cloud Gateway</span>
-                        <span class="tag">Service Discovery</span>
-                        <span class="tag">Spring Cloud Streams</span>
-                        <span class="tag">Cloud Functions</span>
-                        <span class="tag">Saga Orchestration</span>
-                        <span class="tag">Apache Kafka</span>
-                        <span class="tag">MySQL</span>
-                        <span class="tag">Keycloak OAuth</span>
-                        <span class="tag">Docker</span>
-                        <span class="tag">Microservices</span>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>Choreographed Banking as a Service (BaaS) Platform</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/choreographed-banking-as-service" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>A comprehensive microservices-based banking platform demonstrating advanced distributed systems architecture. Features 9 Spring Boot microservices with <strong>Saga Choreography Pattern</strong> for distributed transactions, Keycloak authentication, Apache Kafka event-driven communication, and complete user onboarding and payment processing workflows.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Java 21</span>
-                        <span class="tag">Spring Boot</span>
-                        <span class="tag">Spring Cloud</span>
-                        <span class="tag">Spring Cloud Gateway</span>
-                        <span class="tag">Service Discovery</span>
-                        <span class="tag">Spring Cloud Streams</span>
-                        <span class="tag">Cloud Functions</span>
-                        <span class="tag">Microservices</span>
-                        <span class="tag">Apache Kafka</span>
-                        <span class="tag">Keycloak</span>
-                        <span class="tag">Saga Choreography</span>
-                        <span class="tag">Maven</span>
-                        <span class="tag">Docker</span>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>BaaS Bank UI - Frontend Application</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/baas-bank-ui" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>A comprehensive banking frontend application built with Angular and Bootstrap that provides a
-                            complete banking interface for customers and administrators. Features role-based authentication
-                            via Keycloak, reactive forms, real-time account management, payment processing, transaction
-                            history, and dedicated admin dashboard with audit trail access.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Angular</span>
-                        <span class="tag">Bootstrap</span>
-                        <span class="tag">TypeScript</span>
-                        <span class="tag">Keycloak OAuth</span>
-                        <span class="tag">Reactive Forms</span>
-                        <span class="tag">JWT Auth</span>
-                        <span class="tag">Cypress E2E</span>
-                        <span class="tag">SCSS</span>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>Database Locking Strategies Demo</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/db-locking-strategies" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>A comprehensive demonstration of various database locking strategies and concurrency control mechanisms. Implements <strong>optimistic locking</strong>, <strong>pessimistic locking</strong>, and various isolation levels using Spring Boot and JPA. Features practical examples of handling concurrent database operations, race conditions, and transaction management in enterprise applications.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">Java</span>
-                        <span class="tag">Spring Boot</span>
-                        <span class="tag">JPA</span>
-                        <span class="tag">Database Locking</span>
-                        <span class="tag">Concurrency Control</span>
-                        <span class="tag">Transaction Management</span>
-                        <span class="tag">MySQL</span>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-header">
-                        <h3>Portfolio Website - Personal Portfolio</h3>
-                        <div class="project-links">
-                            <a href="https://github.com/rajeswarandhandapani/rajeswarandhandapani.github.io" target="_blank" class="btn btn-primary">
-                                <i class="fa-brands fa-github"></i> Repository
-                            </a>
-                            <a href="https://rajeswarandhandapani.com" target="_blank" class="btn btn-secondary">
-                                <i class="fa-solid fa-link"></i> Live Website
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-description">
-                        <p>A modern, responsive personal portfolio website showcasing professional experience, skills, certifications, and projects. Built with vanilla HTML, CSS, and JavaScript, featuring a clean design with gradient themes, smooth navigation, interactive elements, and an integrated AI chatbot for visitor engagement. Hosted on GitHub Pages with custom domain support.</p>
-                    </div>
-                    <div class="project-tags">
-                        <span class="tag">HTML5</span>
-                        <span class="tag">CSS3</span>
-                        <span class="tag">JavaScript</span>
-                        <span class="tag">Responsive Design</span>
-                        <span class="tag">GitHub Pages</span>
-                        <span class="tag">FontAwesome</span>
-                        <span class="tag">Custom CSS Variables</span>
-                        <span class="tag">Mobile-First</span>
-                    </div>
-                </div>
+            <div class="contact-actions">
+                <a class="button button-primary" href="mailto:prorajeswaran@gmail.com" data-analytics="email-contact"><i class="fa-solid fa-envelope" aria-hidden="true"></i>prorajeswaran@gmail.com</a>
+                <a class="button button-secondary" href="https://www.linkedin.com/in/rajeswaran-dhandapani" target="_blank" rel="noopener" data-analytics="linkedin-contact"><i class="fa-brands fa-linkedin" aria-hidden="true"></i>Connect on LinkedIn</a>
+                <a class="button button-quiet" href="https://github.com/rajeswarandhandapani" target="_blank" rel="noopener" data-analytics="github-contact"><i class="fa-brands fa-github" aria-hidden="true"></i>Review my GitHub</a>
             </div>
-        </section>
+        </div>
+    </section>
+</main>
 
-        <section class="card" id="experience">
-            <h2><i class="fa-solid fa-briefcase"></i> Professional Experience</h2>
-            <ul>
-                <li>
-                    <strong>Senior Full Stack Engineer | Suniksha Infotech | <small><em>Dec 2023 - Present</em></small>
-                    </strong>
-                    <ul>
-                        <li>
-                            <strong>Client: Arbitration Forums | <small> Florida</small></strong>
-                            <ul>
-                                <li>Worked on both back-end and front-end aspects of development.</li>
-                                <li>Developed RESTful microservices using Spring Boot, ensuring efficient and scalable
-                                    communication between services.
-                                </li>
-                                <li>Worked on a Java backend application with complex transaction management, ensuring
-                                    data
-                                    integrity and consistency across multiple services.
-                                </li>
-                                <li>Utilized Docker for containerization, enabling consistent and portable deployment
-                                    across
-                                    different environments.
-                                </li>
-                                <li>Utilized Cypress to create comprehensive component and end-to-end tests during the
-                                    migration to Bootstrap 5 and Angular 17.
-                                </li>
-                                <li>
-                                    <strong>Key Project: Total Recovery Solutions (TRS)</strong>
-                                    <ul>
-                                        <li>Arbitration Forums offers a solution called the Total Recovery Solution
-                                            (TRS), which is designed to assist insurance companies in recovering costs
-                                            associated with subrogation claims more effectively. Subrogation is the
-                                            process by which an insurance company seeks reimbursement from a third party
-                                            responsible for causing an insurance loss.
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <br>
-                        <li>
-                            <strong>Client: Bank of New York (BNY) | <small>Pittsburgh</small></strong>
-                            <ul>
-                                <li>Working as an AI-focused Full Stack Engineer, integrating generative AI capabilities into enterprise financial applications.</li>
-                                <li>Developing AI-powered solutions for document processing, classification, and intelligent data extraction using LLMs.</li>
-                                <li>Implementing RAG patterns and prompt engineering techniques to optimize AI model outputs and reduce hallucination.</li>
-                                <li>Building end-to-end applications with Spring Boot APIs and Angular interfaces to deliver AI-enhanced financial services.</li>
-                                <li>
-                                    <strong>Key Project: Depository Receipts</strong>
-                                    <ul>
-                                        <li>Depository Receipts is a comprehensive platform that provides custody and asset servicing solutions for institutional investors, enabling secure management of financial assets.</li>
-                                        <li>Developed features for asset tracking, settlement processing, and corporate actions management.</li>
-                                        <li>Implemented secure data handling and compliance features to meet regulatory requirements.</li>
-                                        <li>Built responsive UI components using Angular and TypeScript for enhanced user experience.</li>
-                                        <li>Led AI initiative to extract and classify documents, significantly reducing back-office manual effort and improving operational efficiency.</li>
-                                        <li>Worked on prompt engineering and model evaluation metrics to ensure accurate and reliable AI outputs.</li>
-                                        <li>Optimized LLM output by grounding data using RAG (Retrieval-Augmented Generation) pattern, effectively reducing hallucination and improving response accuracy.</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <br>
-                <li>
-                    <strong>Vice-President | Full-Stack Engineer | Bank of New York (BNY) | <small>Pittsburgh, USA |
-                        <em>Aug 2019 - Nov 2023</em></small></strong>
-                    <br>
-                    <ul>
-                        <li>Designing websites, portals, and large-scale web applications for diverse clients.</li>
-                        <li>Working on both back-end and front-end aspects of development.</li>
-                        <li>Collaborating with UX team members to create user-friendly and intuitive designs, site
-                            interactions, and exceptional user experiences.
-                        </li>
-                        <li>Developing RESTful microservices using Spring Cloud and Docker Container patterns.</li>
-                        <li>Translating concepts into wireframes, mock-ups, and prototypes.</li>
-                        <li>
-                            <strong>Key Project: White Label Website Platform</strong>
-                            <ul>
-                                <li>Designed and developed a highly scalable white label website platform, enabling
-                                    multiple
-                                    customers to have their own branded websites using a single code base.
-                                </li>
-                                <li>Implemented a flexible and customizable theme engine that allowed customers to
-                                    personalize their website's appearance and branding elements.
-                                </li>
-                                <li>Developed a robust content management system (CMS) that enabled customers to manage
-                                    their
-                                    website content, including pages, articles, and media assets.
-                                </li>
-                                <li>Utilized Angular for the front-end, providing a responsive and intuitive user
-                                    interface
-                                    for website customization.
-                                </li>
-                                <li>Leveraged Spring Boot and microservices architecture to ensure a modular and
-                                    extensible
-                                    platform, allowing for easy onboarding of new customers.
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <br>
-                <li>
-                    <strong>Technical Project Lead | BNY Mellon Technology Pvt. Ltd <small>(Inautix Technologies)</small> | <small>Chennai, India | <em> Aug 2011 - Aug
-                        2019</em></small></strong>
-                    <ul>
-                        <li>Led a team of developers to ensure efficient and timely completion of projects.</li>
-                        <li>Modernized a monolithic application by breaking it down into smaller microservices using
-                            Spring
-                            Boot.
-                        </li>
-                        <li>Contributed to the design of reusable UI components using Angular, enhancing application
-                            efficiency through asynchronous REST API calls.
-                        </li>
-                        <li>Participated in code reviews and played a pivotal role in planning system updates as part of
-                            a
-                            Scrum team.
-                        </li>
-                        <li>
-                            <strong>Key Project: Customer Relationship Management (CRM) System</strong>
-                            <ul>
-                                <li>Led the development and implementation of a comprehensive CRM system for a major
-                                    client.
-                                </li>
-                                <li>Collaborated with stakeholders to gather requirements and define system
-                                    architecture.
-                                </li>
-                                <li>Developed scalable and maintainable microservices using Spring Boot, enabling
-                                    seamless
-                                    data management and integration with third-party systems.
-                                </li>
-                                <li>Designed and implemented an intuitive user interface using Angular, improving user
-                                    productivity and data visualization.
-                                </li>
-                                <li>Managed the project timeline, resources, and deliverables to ensure successful
-                                    deployment
-                                    of the CRM system.
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </section>
-
-    </main>
-
-</div>
-
-<footer id="footer-contact">
-    <div class="social">
-        <a href="https://www.linkedin.com/in/rajeswaran-dhandapani" target="_blank" rel="noopener"><i
-                class="fa-brands fa-linkedin fa-border fa-2x"> </i> Rajeswaran Dhandapani</a>
-        <a href="https://github.com/rajeswarandhandapani" target="_blank" rel="noopener"><i
-                class="fa-brands fa-github fa-border fa-2x"></i> rajeswarandhandapani</a>
-        <a href="mailTo:prorajeswaran@gmail.com"><i class="fa-solid fa-envelope fa-border fa-2x"></i>
-            prorajeswaran@gmail.com</a>
+<footer>
+    <div class="page-shell footer-inner">
+        <p>© <span id="current-year"></span> Rajeswaran Dhandapani</p>
+        <p>AI-Enabled Technical Lead · Java &amp; Enterprise AI</p>
     </div>
-    <p>
-        Copyright © 2026. Rajeswaran Dhandapani
-    </p>
 </footer>
 
-<button id="back-to-top" aria-label="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
-    <i class="fa-solid fa-arrow-up"></i>
+<button class="chat-launcher" type="button" data-chat-toggle aria-expanded="false" aria-controls="chat-window">
+    <i class="fa-solid fa-comments" aria-hidden="true"></i><span>Ask my AI Twin</span>
 </button>
 
-<div id="chat-container">
-    <span class="chat-text">Chat with my AI Agent</span>
-    <div id="chat-button" onclick="toggleChat()">
-        <i class="chat-icon-d fa-solid fa-user fa-2x"></i>
-        <i class="chat-icon-m fa-solid fa-user fa-xl"></i>
+<section class="chat-window" id="chat-window" role="dialog" aria-modal="true" aria-labelledby="chat-title" hidden>
+    <div class="chat-header">
+        <div><strong id="chat-title">Rajeswaran's AI Twin</strong><span>Ask about experience, skills and projects</span></div>
+        <button type="button" class="chat-close" data-chat-close aria-label="Close AI Twin"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>
-</div>
-
-<!-- Chatbot Iframe -->
-<div id="chat-window">
-    <button id="close-chat" onclick="toggleChat()">X</button>
-    <iframe id="chat-frame" data-src="https://rajeswarandhandapani-career-ai-agent-chatbot.hf.space?__theme=light"></iframe>
-</div>
+    <iframe id="chat-frame" title="Rajeswaran's AI career assistant" data-src="https://rajeswarandhandapani-career-ai-agent-chatbot.hf.space?__theme=light"></iframe>
+</section>
 
 <script>
-    // Highlight the nav link of the section currently in view
-    (function () {
-        const navLinks = document.querySelectorAll('.nav-items a[data-section]');
-        const sections = [...navLinks]
-            .map(link => document.getElementById(link.dataset.section))
-            .filter(Boolean);
+    (() => {
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+        const chatWindow = document.getElementById('chat-window');
+        const chatFrame = document.getElementById('chat-frame');
+        const chatToggles = document.querySelectorAll('[data-chat-toggle]');
+        const chatClose = document.querySelector('[data-chat-close]');
+        let lastChatTrigger = null;
 
-        if (!('IntersectionObserver' in window) || sections.length === 0) return;
-
-        const setActive = (id) => {
-            navLinks.forEach(link =>
-                link.classList.toggle('active', link.dataset.section === id));
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) setActive(entry.target.id);
-            });
-        }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
-
-        sections.forEach(section => observer.observe(section));
-    })();
-
-
-    // Show back-to-top button after scrolling down
-    (function () {
-        const btn = document.getElementById('back-to-top');
-        if (!btn) return;
-        const toggleBtn = () => btn.classList.toggle('show', window.scrollY > 400);
-        window.addEventListener('scroll', toggleBtn, { passive: true });
-        toggleBtn();
-    })();
-
-    // Auto-show chat tooltip to draw visitor attention
-    (function () {
-        const chatText = document.querySelector('.chat-text');
-        const chatContainer = document.getElementById('chat-container');
-        if (!chatText || !chatContainer) return;
-
-        // Show tooltip after 2 seconds
-        setTimeout(() => chatText.classList.add('show'), 2000);
-        // Hide it after 8 seconds
-        setTimeout(() => chatText.classList.remove('show'), 10000);
-
-        // Re-show on hover over the chat area
-        chatContainer.addEventListener('mouseenter', () => chatText.classList.add('show'));
-        chatContainer.addEventListener('mouseleave', () => chatText.classList.remove('show'));
-    })();
-
-    // Auto-engage the chat: preload everywhere at 2s, open it on desktop at 4s
-    (function () {
-        const isDesktop = window.matchMedia('(min-width: 993px)').matches;
-
-        setTimeout(loadChatFrame, 2000);
-
-        if (isDesktop) {
-            setTimeout(() => {
-                if (chatUserToggled) return;
-                document.getElementById('chat-window').style.display = 'block';
-            }, 4000);
+        function setNav(open) {
+            navToggle.setAttribute('aria-expanded', String(open));
+            navToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+            navMenu.classList.toggle('is-open', open);
         }
+
+        function setChat(open, trigger) {
+            if (open && !chatFrame.src) chatFrame.src = chatFrame.dataset.src;
+            chatWindow.hidden = !open;
+            chatToggles.forEach(button => button.setAttribute('aria-expanded', String(open)));
+            if (open) {
+                lastChatTrigger = trigger || document.activeElement;
+                chatClose.focus();
+                if (typeof gtag === 'function') gtag('event', 'recruiter_action', { action_name: 'ai-twin-open' });
+            } else if (lastChatTrigger) {
+                lastChatTrigger.focus();
+            }
+        }
+
+        navToggle.addEventListener('click', () => setNav(navToggle.getAttribute('aria-expanded') !== 'true'));
+        navMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setNav(false)));
+        chatToggles.forEach(button => button.addEventListener('click', () => setChat(chatWindow.hidden, button)));
+        chatClose.addEventListener('click', () => setChat(false));
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                setNav(false);
+                if (!chatWindow.hidden) setChat(false);
+            }
+        });
+
+        document.querySelectorAll('[data-analytics]').forEach(element => {
+            element.addEventListener('click', () => {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'recruiter_action', { action_name: element.dataset.analytics });
+                }
+            });
+        });
+
+        document.getElementById('current-year').textContent = new Date().getFullYear();
     })();
 </script>
-
 </body>
-
 </html>
-
