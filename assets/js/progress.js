@@ -136,10 +136,23 @@
       var raw = localStorage.getItem(KEY);
       if (!raw) return blank();
       var data = JSON.parse(raw);
+      if (!data || typeof data !== "object" || Array.isArray(data)) return blank();
       var base = blank();
       for (var k in base) {
         if (data[k] === undefined) data[k] = base[k];
       }
+      ["xp", "plays", "streak", "bestStreak"].forEach(function (key) {
+        if (!Number.isFinite(data[key]) || data[key] < 0) data[key] = 0;
+      });
+      ["games", "badges"].forEach(function (key) {
+        if (!data[key] || typeof data[key] !== "object" || Array.isArray(data[key])) data[key] = {};
+      });
+      Object.keys(data.games).forEach(function (key) {
+        var game = data.games[key];
+        if (!game || typeof game !== "object") { delete data.games[key]; return; }
+        game.bestStars = Math.max(0, Math.min(3, Math.floor(Number(game.bestStars) || 0)));
+      });
+      if (typeof data.lastDay !== "string") data.lastDay = "";
       return data;
     } catch (e) {
       return blank();
@@ -208,7 +221,7 @@
     return {
       xp: data.xp,
       plays: data.plays,
-      dayStreak: data.streak,
+      dayStreak: data.lastDay && daysBetween(data.lastDay, today()) <= 1 ? data.streak : 0,
       bestDayStreak: data.bestStreak,
       gamesPlayed: ids.length,
       stars: stars,
@@ -230,9 +243,9 @@
     var data = load();
     var beforeRank = rankFor(data.xp);
 
-    // XP rewards effort first (10 a question), then accuracy and streaks —
+    // XP rewards finishing (10 XP), then accuracy and streaks —
     // a shaky round still earns something, a perfect one earns a lot more.
-    var xp = score * 10;
+    var xp = total > 0 ? 10 + score * 10 : 0;
     if (score === total && total > 0) xp += 50;
     if (bestStreak >= 5) xp += 20;
     if (bestStreak >= 10) xp += 30;

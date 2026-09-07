@@ -1,0 +1,5 @@
+node_modules/
+artifacts/*.png
+artifacts/*.json
+site-output/
+dist/

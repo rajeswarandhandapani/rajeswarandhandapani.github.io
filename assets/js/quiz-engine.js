@@ -54,6 +54,9 @@ class QuizEngine {
     this.questionStartMs = 0;
 
     this._cacheDom();
+    this.practice = true;
+    this.transitionTimer = null;
+    this._installLearningControls();
   }
 
   _cacheDom() {
@@ -79,7 +82,64 @@ class QuizEngine {
     this.el.totalQuestions.textContent = this.totalQuestions;
   }
 
+  _installLearningControls() {
+    const startButton = document.getElementById('start-btn');
+    const settings = document.createElement('div');
+    settings.className = 'quiz-settings';
+    settings.innerHTML = '<label>How would you like to play?<select id="play-mode"><option value="practice">Practice · no timer</option><option value="challenge">Challenge · timed</option></select></label>';
+    startButton.before(settings);
+    const info = document.getElementById('quiz-info');
+    const originalInfo = info ? info.textContent : '';
+    const refreshMode = () => {
+      const practice = settings.querySelector('select').value === 'practice';
+      if (info) info.textContent = practice ? originalInfo.replace(/\d+ seconds (each|per question)/g, 'no time limit').replace(/timed /gi, '') : originalInfo;
+      const best = document.getElementById('best-time-note');
+      if (best) best.hidden = practice;
+    };
+    settings.querySelector('select').addEventListener('change', refreshMode);
+    refreshMode();
+    const feedback = document.createElement('p');
+    feedback.className = 'quiz-feedback';
+    feedback.id = 'quiz-feedback';
+    feedback.setAttribute('role', 'status');
+    this.el.choicesContainer.after(feedback);
+    this.feedback = feedback;
+    this.nextButton = document.createElement('button');
+    this.nextButton.className = 'quiz-next';
+    this.nextButton.textContent = 'Next question →';
+    this.nextButton.hidden = true;
+    feedback.after(this.nextButton);
+    this.nextButton.addEventListener('click', () => { if (this.locked) { clearTimeout(this.transitionTimer); this._nextQuestion(); } });
+    this.el.questionText.tabIndex = -1;
+    this.el.questionText.addEventListener('keydown', event => {
+      if (this.el.questionText.classList.contains('klg-tappable') && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); this.el.questionText.click(); }
+    });
+    this.el.resultsScreen.tabIndex = -1;
+    const tools = document.createElement('div');
+    tools.className = 'quiz-tools';
+    tools.innerHTML = '<button type="button" id="quiz-exit">← Change activity</button><span class="small text-muted">Take your time. You’re learning!</span>';
+    this.el.quizScreen.prepend(tools);
+    tools.querySelector('button').addEventListener('click', () => {
+      clearInterval(this.timerInterval);
+      clearTimeout(this.transitionTimer);
+      this.locked = true;
+      if (window.speechSynthesis) speechSynthesis.cancel();
+      this.el.quizScreen.classList.add('d-none');
+      document.getElementById('start-screen').classList.remove('d-none');
+      startButton.focus();
+    });
+    // A hidden tab must not use up a child's answering time.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.hiddenAt = Date.now();
+      else if (this.hiddenAt) { const away = Date.now() - this.hiddenAt; this.questionStartMs += away; if (this.deadline) this.deadline += away; this.hiddenAt = 0; }
+    });
+  }
+
   start() {
+    clearInterval(this.timerInterval);
+    clearTimeout(this.transitionTimer);
+    this.practice = document.getElementById('play-mode').value === 'practice';
+    this.el.quizScreen.querySelector('.quiz-tools span').textContent = this.practice ? 'Take your time. You’re learning!' : 'Timed challenge · give it a try!';
     this.currentIndex = 0;
     this.score = 0;
     this.streak = 0;
@@ -102,10 +162,16 @@ class QuizEngine {
       return;
     }
     this.locked = false;
+    this.feedback.textContent = '';
+    this.nextButton.hidden = true;
     this.currentIndex += 1;
     this.currentQuestion = this._makeUniqueQuestion();
     this.el.questionNumber.textContent = this.currentIndex;
     this.el.questionText.textContent = this.currentQuestion.prompt;
+    const tappable = this.el.questionText.classList.contains('klg-tappable');
+    this.el.questionText.tabIndex = tappable ? 0 : -1;
+    if (tappable) { this.el.questionText.setAttribute('role', 'button'); this.el.questionText.setAttribute('aria-label', 'Listen again: ' + this.currentQuestion.prompt); }
+    else { this.el.questionText.removeAttribute('role'); this.el.questionText.removeAttribute('aria-label'); }
     this._renderChoices(this.currentQuestion.choices);
     this._replayAnimation(this.el.questionText, "klg-anim-in");
     this._replayAnimation(this.el.choicesContainer, "klg-anim-in");
@@ -115,6 +181,7 @@ class QuizEngine {
     }
     this._startTimer();
     this.questionStartMs = Date.now();
+    this.el.questionText.focus({ preventScroll: true });
   }
 
   _makeUniqueQuestion() {
@@ -145,9 +212,13 @@ class QuizEngine {
   _startTimer() {
     clearInterval(this.timerInterval);
     this.timeRemaining = this.timePerQuestion;
+    this.el.timerFill.parentElement.hidden = this.practice;
+    if (this.practice) { this.el.timerText.textContent = 'Practice · no timer'; return; }
     this._renderTimer();
+    this.deadline = Date.now() + this.timePerQuestion * 1000;
     this.timerInterval = setInterval(() => {
-      this.timeRemaining -= 1;
+      if (document.hidden) return;
+      this.timeRemaining = Math.max(0, Math.ceil((this.deadline - Date.now()) / 1000));
       this._renderTimer();
       if (this.timeRemaining <= 0) {
         this._handleAnswer(null, null);
@@ -180,12 +251,12 @@ class QuizEngine {
     } else {
       this.streak = 0;
       this._hideStreakBadge();
-      this._setMascot("😢", "sad");
+      this._setMascot("🌱");
       if (window.KlgSounds) {
         selected === null ? KlgSounds.timeUp() : KlgSounds.wrong();
       }
       this.wrongAnswers.push({
-        prompt: this.currentQuestion.prompt,
+        prompt: this.currentQuestion.reviewPrompt || this.currentQuestion.prompt,
         correctAnswer: this.formatAnswer(correct),
         givenAnswer: selected === null ? "No answer (time's up)" : this.formatAnswer(selected),
       });
@@ -202,7 +273,14 @@ class QuizEngine {
       }
     });
 
-    setTimeout(() => this._nextQuestion(), isCorrect ? this.correctDelay : this.incorrectDelay);
+    this.feedback.textContent = (isCorrect ? 'Yes! Well done. ' : `Good try! The answer is ${this.formatAnswer(correct)}. `) + (this.currentQuestion.explanation || '');
+    if (this.practice) {
+      this.nextButton.textContent = this.currentIndex === this.totalQuestions ? 'See my stars →' : 'Next question →';
+      this.nextButton.hidden = false;
+      this.nextButton.focus({ preventScroll: true });
+    } else {
+      this.transitionTimer = setTimeout(() => this._nextQuestion(), isCorrect ? this.correctDelay : Math.max(this.incorrectDelay, 3500));
+    }
   }
 
   _updateScorePill() {
@@ -217,7 +295,7 @@ class QuizEngine {
     if (btnEl) {
       const rect = btnEl.getBoundingClientRect();
       this._spawnFloatEmoji(rect);
-      if (typeof confetti === "function") {
+      if (typeof confetti === "function" && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const burst =
           this.streak === 10 ? 80 : this.streak === 5 ? 40 : 14;
         confetti({
@@ -240,6 +318,7 @@ class QuizEngine {
   }
 
   _spawnFloatEmoji(rect) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const span = document.createElement("span");
     span.className = "klg-float-emoji";
     span.textContent = "✨";
@@ -275,6 +354,8 @@ class QuizEngine {
     clearInterval(this.timerInterval);
     this.el.quizScreen.classList.add("d-none");
     this.el.resultsScreen.classList.remove("d-none");
+    this.el.resultsScreen.focus({ preventScroll: true });
+    if (this.el.progressFill) this.el.progressFill.style.width = "100%";
 
     const pct = this.score / this.totalQuestions;
     this._animateScoreCountUp();
@@ -312,13 +393,17 @@ class QuizEngine {
 
     this._renderReview();
 
-    this.onFinish({
+    if (!this.practice) this.onFinish({
       score: this.score,
       total: this.totalQuestions,
       elapsedMs: this.elapsedMs,
       bestStreak: this.bestStreak,
     });
 
+    if (this.practice) {
+      const time = document.getElementById('results-time');
+      if (time) time.textContent = 'Practice complete · every little step counts.';
+    }
     this._recordProgress();
   }
 
@@ -332,7 +417,7 @@ class QuizEngine {
     const reward = KlgProgress.record({
       score: this.score,
       total: this.totalQuestions,
-      elapsedMs: this.elapsedMs,
+      elapsedMs: this.practice ? 0 : this.elapsedMs,
       bestStreak: this.bestStreak,
     });
     this._renderReward(reward);
@@ -477,6 +562,7 @@ class QuizEngine {
   }
 
   _launchConfetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const duration = 2000;
     const end = Date.now() + duration;
     (function frame() {

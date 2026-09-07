@@ -103,7 +103,7 @@
         stars.textContent =
           "⭐".repeat(stats.bestStars) + "☆".repeat(3 - stats.bestStars);
         if (stats.bestStars === 3) {
-          flag.textContent = "MASTERED";
+          flag.textContent = "3 STARS";
           card.appendChild(flag);
         }
       }
@@ -132,7 +132,7 @@
 
   function wireButtons() {
     document.getElementById("surprise-btn").addEventListener("click", function () {
-      var all = cards().map(cardInfo);
+      var all = cards().filter(function (card) { return !card.closest(".game-tile").hidden; }).map(cardInfo);
       if (!all.length) return;
       if (window.KlgSounds) KlgSounds.click();
       window.location.href = all[Math.floor(Math.random() * all.length)].href;
@@ -157,3 +157,73 @@
     wireButtons();
   });
 })();
+
+// Library discovery stays independent of progress storage.
+document.addEventListener('DOMContentLoaded', () => {
+  const tiles = [...document.querySelectorAll('.game-card[data-game]')];
+  const groups = {
+    language: ['english-alphabets','tamil-alphabets','rhyming-words','opposites','tamil-words','spelling-bee','tamil-word-builder','reading-stories','tamil-sentence-words','tamil-missing-letters'],
+    world: ['baby-animals','calendar','solar-system','science-quiz','world-capitals','animal-habitats'],
+    logic: ['patterns','memory-match']
+  };
+  let favorites = [];
+  try { const saved = JSON.parse(localStorage.getItem('klg-favorites') || '[]'); if (Array.isArray(saved)) favorites = saved.filter(id => typeof id === 'string'); } catch (_) {}
+  let subject = 'all';
+  const search = document.getElementById('game-search');
+  const level = document.getElementById('level-filter');
+  function filter() {
+    let count = 0;
+    tiles.forEach(card => {
+      const matches = card.textContent.toLowerCase().includes(search.value.trim().toLowerCase()) &&
+        (level.value === 'all' || card.closest('section').id === 'level-' + level.value) &&
+        (subject === 'all' || (subject === 'favorites' ? favorites.includes(card.dataset.game) : card.dataset.subject === subject));
+      card.closest('.game-tile').hidden = !matches;
+      if (matches) count++;
+    });
+    document.querySelectorAll('section[id^="level-"]').forEach(section => {
+      section.hidden = ![...section.querySelectorAll('.game-tile')].some(tile => !tile.hidden);
+    });
+    document.getElementById('filter-status').textContent = `${count} ${count === 1 ? 'game' : 'games'} to explore · Choose what sparks your curiosity`;
+    document.getElementById('empty-games').hidden = count !== 0;
+    document.getElementById('surprise-btn').disabled = count === 0;
+  }
+  tiles.forEach(card => {
+    const id = card.dataset.game;
+    card.dataset.subject = Object.keys(groups).find(key => groups[key].includes(id)) || 'math';
+    const tile = card.closest('a').parentElement;
+    tile.classList.add('game-tile');
+    const favorite = document.createElement('button');
+    favorite.className = 'favorite-button';
+    favorite.type = 'button';
+    function paint() { const selected = favorites.includes(id); favorite.textContent = selected ? '♥' : '♡'; favorite.setAttribute('aria-pressed', String(selected)); favorite.setAttribute('aria-label', `Favorite ${card.querySelector('h3').textContent}`); }
+    paint();
+    favorite.addEventListener('click', () => { favorites = favorites.includes(id) ? favorites.filter(value => value !== id) : [...favorites,id]; try { localStorage.setItem('klg-favorites', JSON.stringify(favorites)); } catch (_) {} paint(); filter(); });
+    tile.appendChild(favorite);
+  });
+  search.addEventListener('input', filter);
+  level.addEventListener('change', filter);
+  document.querySelectorAll('.subject-tabs button').forEach(button => button.addEventListener('click', () => {
+    subject = button.dataset.subject;
+    document.querySelectorAll('.subject-tabs button').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
+    filter();
+  }));
+  document.getElementById('clear-filters').addEventListener('click', () => { search.value = ''; level.value = 'all'; document.querySelector('[data-subject="all"]').click(); search.focus(); });
+  const dialog = document.getElementById('parent-dialog');
+  document.getElementById('parent-open').addEventListener('click', () => {
+    const summary = KlgProgress.summary();
+    document.getElementById('parent-summary').textContent = `${summary.gamesPlayed} activities explored · ${summary.plays} rounds completed · ${summary.stars} stars earned.`;
+    const shelf = document.getElementById('player-badges');
+    dialog.appendChild(shelf);
+    shelf.classList.add('parent-badges');
+    shelf.replaceChildren();
+    KlgProgress.BADGES.forEach(badge => {
+      const item = document.createElement('div');
+      item.className = 'parent-badge';
+      item.textContent = badge.emoji + ' ' + badge.name + (summary.badges[badge.id] ? ' · earned' : ' · ' + badge.hint);
+      shelf.appendChild(item);
+    });
+    dialog.showModal();
+  });
+  document.getElementById('parent-close').addEventListener('click', () => dialog.close());
+  filter();
+});
