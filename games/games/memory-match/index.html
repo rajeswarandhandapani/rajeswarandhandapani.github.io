@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Garden | Kid Learning Games</title>
+  <meta name="description" content="Memory Garden game for pre-K kids — count the pictures and tap the right number!" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌻</text></svg>" />
+  <link
+    href="../../assets/vendor/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link href="../../assets/css/common.css" rel="stylesheet" />
+</head>
+<body>
+  <a class="skip-link" href="#start-btn">Skip to activity</a>
+  <nav class="navbar navbar-dark klg-navbar mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="../../index.html">&larr; Kid Learning Games</a>
+      <span class="navbar-text text-white">🌻 Memory Garden</span>
+    </div>
+  </nav>
+
+  <div class="container quiz-shell pb-5">
+    <!-- Start screen -->
+    <div id="start-screen" class="card quiz-card p-4 text-center">
+      <div class="card-body">
+        <div class="game-card-icon mb-2">🌻</div>
+        <h1 class="h3 fw-bold">Memory Garden</h1>
+        <p class="text-muted" id="mode-label"></p>
+<p id="quiz-info">Turn over two cards. Match the pictures and discover all six pairs.</p>
+        <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
+          Start Game
+        </button>
+      </div>
+    </div>
+
+    <section id="memory-screen" class="card quiz-card p-4 d-none"><div class="memory-toolbar"><h2>Memory Garden</h2><button id="restart-memory" class="surprise-button">Start again</button></div><p id="memory-status" role="status">0 of 6 pairs found · 0 turns</p><div id="memory-board" class="memory-board" aria-label="Matching cards"></div><p id="memory-feedback" role="status">Choose two cards to find a pair.</p><a class="primary-link" href="../../index.html">Explore more games →</a></section>
+  </div>
+
+  <script src="../../assets/vendor/confetti.browser.min.js"></script>
+  <script src="../../assets/js/sounds.js"></script>
+  <script src="../../assets/js/progress.js"></script>
+
+  <script src="game.js"></script>
+</body>
+</html>

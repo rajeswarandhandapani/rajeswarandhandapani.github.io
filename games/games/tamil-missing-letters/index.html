@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamil Missing Letters | Little Learners</title>
+  <meta name="description" content="Read the sentence and type only the missing Tamil letter, including its vowel sign. Practice with sentence clues and a built-in Tamil keyboard.">
+  <link rel="stylesheet" href="../../assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="../../assets/css/common.css">
+  <link rel="stylesheet" href="../../assets/css/tamil-typing.css">
+</head>
+<body class="tamil-typing-page" data-typing-mode="letters">
+  <a class="skip-link" href="#start-btn">Skip to activity</a>
+  <nav class="navbar navbar-dark klg-navbar mb-4"><div class="container"><a class="navbar-brand" href="../../index.html">← Little Learners</a><span class="navbar-text text-white">Tamil Missing Letters</span></div></nav>
+  <main class="container typing-shell pb-5">
+    <section id="start-screen" class="card quiz-card p-4 text-center">
+      <div class="typing-emblem" aria-hidden="true" lang="ta">அ</div>
+      <p class="eyebrow">TAMIL · TYPE & LEARN</p>
+      <h1 class="tamil-text" lang="ta">எழுத்தை நிரப்புவோம்</h1>
+      <h2 class="h4">Tamil Missing Letters</h2>
+      <p>Read the sentence and type only the missing Tamil letter, including its vowel sign.</p>
+      <p class="text-muted">Use your device’s Tamil keyboard, or tap letters on the keyboard below each question. No timer. Try as often as you like.</p>
+      <label class="typing-category" for="sentence-category">Choose your sentences
+        <select id="sentence-category"><option value="all">All topics</option><option value="animals">Animals · விலங்குகள்</option><option value="nature">Nature · இயற்கை</option><option value="everyday">Everyday life · அன்றாட வாழ்க்கை</option></select>
+      </label>
+      <p id="round-note" class="small text-muted"></p>
+      <button id="start-btn" class="quiz-next" type="button">Let’s type →</button>
+      <a class="typing-other" href="../tamil-sentence-words/index.html">Try whole words instead →</a>
+    </section>
+    <section id="typing-screen" class="card quiz-card p-4" hidden aria-label="Tamil typing activity">
+      <div class="typing-toolbar"><button id="typing-exit" class="surprise-button" type="button">← Change topic</button><span id="typing-counter"></span><span class="untimed-label">No timer</span></div>
+      <progress id="typing-progress" value="0" max="10" aria-label="Completed sentences"></progress>
+      <div class="typing-clue"><span id="clue-emoji" aria-hidden="true"></span><span><span class="small text-muted">WORD CLUE</span><strong id="clue-word"></strong></span></div>
+      <p id="typing-instruction">Read the sentence and type only the missing Tamil letter, including its vowel sign.</p>
+      <p id="typing-sentence" class="tamil-text" lang="ta" tabindex="-1"></p>
+      <form id="typing-form" novalidate>
+        <label id="answer-label" for="tamil-answer">Type only the missing Tamil letter</label>
+        <div class="typing-answer-row"><input id="tamil-answer" class="tamil-text" lang="ta" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="80" aria-describedby="typing-sentence typing-instruction clue-word keyboard-note typing-feedback"><button id="check-answer" class="quiz-next" type="submit">Check answer ✓</button></div>
+      </form>
+      <div class="typing-help-row"><button id="show-answer" type="button">Show answer</button><span id="answer-length" class="small text-muted"></span></div>
+      <p id="typing-feedback" role="status" aria-live="polite"></p>
+      <button id="typing-next" class="quiz-next" type="button" hidden>Next sentence →</button>
+      <details id="tamil-keyboard" open><summary>Tamil keyboard <span lang="ta">தமிழ் விசைப்பலகை</span></summary>
+        <div class="keyboard-composer"><div><span class="small text-muted">Your answer</span><span id="keyboard-preview" class="tamil-text" lang="ta">…</span></div><button id="keyboard-check" type="button">Check ✓</button></div>
+        <p id="keyboard-note">Tap a vowel. For a consonant, choose it first, then tap its form. You can also type with your device’s Tamil keyboard.</p>
+        <div class="keyboard-top"><span class="keyboard-label">Vowels · <span lang="ta">உயிர்</span></span><div><button id="keyboard-backspace" type="button" aria-label="Delete previous Tamil letter">⌫ Delete letter</button><button id="keyboard-clear" type="button">Clear</button></div></div>
+        <div id="vowel-keys" class="tamil-key-grid" role="group" aria-label="Tamil vowels"></div>
+        <p class="keyboard-label">1. Choose a consonant · <span lang="ta">மெய்</span></p>
+        <div id="consonant-keys" class="tamil-key-grid" role="group" aria-label="Choose a Tamil consonant"></div>
+        <p class="keyboard-label">2. Tap its form · <span lang="ta">உயிர்மெய்</span></p>
+        <div id="form-keys" class="tamil-key-grid" role="group" aria-label="Consonant vowel forms"></div>
+      </details>
+    </section>
+    <section id="typing-results" class="card results-card p-4" hidden tabindex="-1">
+      <div class="typing-emblem" aria-hidden="true">🌟</div><h2 lang="ta" class="tamil-text">நன்றாகச் செய்தாய்!</h2><h3>You practiced Tamil!</h3><p id="typing-result-summary"></p><p id="typing-reward" class="fw-bold"></p>
+      <h4 class="h5 text-start">Your completed sentences</h4><ol id="typing-review" class="text-start"></ol>
+      <div class="typing-result-actions"><button id="play-again-btn" class="quiz-next" type="button">Play again →</button><button id="results-topic" class="surprise-button" type="button">Choose a topic</button><a href="../../index.html">More games</a></div>
+    </section>
+    <noscript><p>Enable JavaScript to play these typing games.</p></noscript>
+  </main>
+  <script src="../../assets/js/sounds.js"></script><script src="../../assets/js/progress.js"></script><script src="../../assets/js/tamil-sentences-data.js"></script><script src="../../assets/js/tamil-typing.js"></script>
+</body>
+</html>

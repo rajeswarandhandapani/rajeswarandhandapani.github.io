@@ -1,8 +1,47 @@
-# Kid Learning Games
+# Little Learners · Kid Learning Games
 
-Simple, timed multiple-choice quiz games for kids to learn and memorize things
-(multiplication tables, spelling, etc). Pure HTML/CSS/JS + Bootstrap, no build
-step, no server — deployable straight to GitHub Pages.
+30 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+
+## Run and verify
+
+```sh
+npm install
+npm start                 # http://localhost:4173
+npm test                  # progress and storage regression tests
+npx playwright install chromium
+npm run test:e2e          # keep the local server running in another terminal
+npm run build            # validates game links and copies static assets to site-output/
+```
+
+`BASE_URL` can point the browser tests at another local server. Screenshots are saved under `artifacts/` and ignored by Git.
+
+## Learning experience
+
+- Search 30 games, filter by subject and learning stage, and save favorites.
+- Untimed practice is the default. Children read feedback and choose when to continue. Optional timed challenge rounds retain speed records.
+- Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden uses a six-pair matching board.
+- Shared keyboard focus, audio replay with Enter/Space, visible answer symbols, feedback announcements, and reduced-motion support.
+- A grown-up panel explains learning stages and browser-local progress, with a confirmed reset action.
+- Existing Bootstrap, confetti, emoji, and Tamil font assets are bundled locally. No CDN or external font requests are needed to load the app. Speech synthesis still depends on browser/OS voice availability; some voices may require network access.
+
+This is an educational practice app, not a standardized assessment. Age ranges are starting points. Progress belongs to the current browser and is not synchronized across devices. Practice awards stars and XP but does not set speed records. Memory Garden awards completion stars, not an accuracy assessment.
+
+## Tamil sentence typing
+
+Two separate activities use a 32-sentence bank covering animals, nature, and everyday life:
+
+- **Tamil Sentence Words** (`games/tamil-sentence-words/`): type the whole missing Tamil word in a sentence. An English word clue and picture identify the intended answer. Common alternatives such as பசு / மாடு are accepted.
+- **Tamil Missing Letters** (`games/tamil-missing-letters/`): type one missing Tamil orthographic letter within the sentence's target word. Vowel signs and pulli stay attached; one-letter words are excluded from this mode.
+
+Both accept device Tamil keyboards and an on-screen keyboard with vowels, consonants, compound forms, deletion, and a pinned answer preview. They support Unicode normalization and IME composition. There is no Latin-to-Tamil transliteration: switch your device input to Tamil or use the on-screen keys.
+
+Rounds contain up to 10 different sentences. Wrong answers allow retries. “Show answer” reveals the target for typing practice; stars reflect sentences completed without revealing, and the results review includes every completed sentence. Unfinished rounds do not record progress.
+
+```sh
+npm run test:tamil        # local server must be running; requires Playwright
+```
+
+The shared content is in `assets/js/tamil-sentences-data.js`; UI logic is in `assets/js/tamil-typing.js`. `tests/tamil-typing.test.cjs` verifies normalization, orthographic splitting, and keyboard coverage of all words and accepted alternatives.
 
 ## Structure
 
@@ -24,8 +63,8 @@ page you can link to directly.
 
 | Level | Name | Ages | Games |
 | ----- | ---- | ---- | ----- |
-| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals |
-| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden |
+| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters |
 | 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder |
 | 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals |
 
@@ -35,7 +74,7 @@ Every finished quiz is banked by `assets/js/progress.js` in one
 `localStorage` record (`klg-progress-v1`), and the results screen shows what
 it earned:
 
-- **XP** — 10 a correct answer, +50 for a perfect round, +20/+50 for streaks
+- **XP** — 10 for completing a round, plus 10 a correct answer, +50 for a perfect round, +20/+50 for streaks
   of 5/10. Effort always earns something; accuracy earns much more.
 - **Ranks** — 🐣 Curious Chick → ✨ Bright Spark → ⭐ Star Learner →
   🧠 Quiz Whiz → 🏆 Brain Champ → 🚀 Mega Mind → 👑 Grand Legend, with a
@@ -49,7 +88,7 @@ it earned:
 The landing page turns that into a player card, a **daily challenge** (the
 same game for the whole day, a different one tomorrow), a **🎲 Surprise me**
 button, and a per-card star rating with a `MASTERED` flag at 3 stars.
-"Start over" clears everything on that device.
+The grown-up panel resets XP, stars, badges, and streaks after confirmation. Favorites and legacy per-game speed records are kept.
 
 The engine wires this up itself — no per-game code. Games only need to load
 `progress.js` before `quiz-engine.js`, and the game id comes from the folder
