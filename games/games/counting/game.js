@@ -67,6 +67,7 @@ function generateCountingQuestion(max) {
     const emoji = THINGS[randomInt(0, THINGS.length - 1)];
     return {
       prompt: emojiCluster(emoji, n),
+      speechPrompt: 'How many do you see?',
       dedupeKey: n,
       correctAnswer: n,
       choices: shuffle([n, ...makeDistractors(n, max)]),

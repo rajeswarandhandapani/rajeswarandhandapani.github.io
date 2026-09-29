@@ -56,6 +56,7 @@ class QuizEngine {
     this._cacheDom();
     this.practice = true;
     this.transitionTimer = null;
+    this.speechAvailable = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
     this._installLearningControls();
   }
 
@@ -98,6 +99,18 @@ class QuizEngine {
     };
     settings.querySelector('select').addEventListener('change', refreshMode);
     refreshMode();
+    if (this.speechAvailable) {
+      const instructions = document.createElement('button');
+      instructions.type = 'button';
+      instructions.className = 'quiz-listen quiz-intro-listen';
+      instructions.textContent = '🔊 Hear how to play';
+      instructions.addEventListener('click', () => {
+        const title = document.querySelector('#start-screen h1')?.textContent || 'Game';
+        const detail = document.querySelector('#start-screen .text-muted small')?.textContent || '';
+        this._speak(`${title}. ${detail || info?.textContent || 'Choose an answer for each question.'}`);
+      });
+      startButton.before(instructions);
+    }
     const feedback = document.createElement('p');
     feedback.className = 'quiz-feedback';
     feedback.id = 'quiz-feedback';
@@ -119,6 +132,13 @@ class QuizEngine {
     tools.className = 'quiz-tools';
     tools.innerHTML = '<button type="button" id="quiz-exit">← Change activity</button><span class="small text-muted">Take your time. You’re learning!</span>';
     this.el.quizScreen.prepend(tools);
+    this.listenButton = document.createElement('button');
+    this.listenButton.type = 'button';
+    this.listenButton.className = 'quiz-listen';
+    this.listenButton.textContent = '🔊 Listen to question';
+    this.listenButton.setAttribute('aria-label', 'Listen to the question again');
+    this.el.questionText.after(this.listenButton);
+    this.listenButton.addEventListener('click', () => this._speakQuestion());
     tools.querySelector('button').addEventListener('click', () => {
       clearInterval(this.timerInterval);
       clearTimeout(this.transitionTimer);
@@ -173,6 +193,7 @@ class QuizEngine {
     if (tappable) { this.el.questionText.setAttribute('role', 'button'); this.el.questionText.setAttribute('aria-label', 'Listen again: ' + this.currentQuestion.prompt); }
     else { this.el.questionText.removeAttribute('role'); this.el.questionText.removeAttribute('aria-label'); }
     this._renderChoices(this.currentQuestion.choices);
+    this.listenButton.hidden = !this._questionSpeech();
     this._replayAnimation(this.el.questionText, "klg-anim-in");
     this._replayAnimation(this.el.choicesContainer, "klg-anim-in");
     if (this.el.progressFill) {
@@ -182,7 +203,25 @@ class QuizEngine {
     this._startTimer();
     this.questionStartMs = Date.now();
     this.el.questionText.focus({ preventScroll: true });
+    if (this.listenButton.hidden === false) this._speakQuestion();
   }
+
+  _questionSpeech() {
+    if (!this.speechAvailable || this.currentQuestion.speech) return '';
+    const text = this.currentQuestion.speechPrompt || this.currentQuestion.prompt;
+    return /[A-Za-z]{2,}/.test(text) ? text.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim() : '';
+  }
+
+  _speak(text) {
+    if (!this.speechAvailable || !text) return;
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.88;
+    speechSynthesis.speak(utterance);
+  }
+
+  _speakQuestion() { this._speak(this._questionSpeech()); }
 
   _makeUniqueQuestion() {
     let question;
@@ -200,12 +239,30 @@ class QuizEngine {
   _renderChoices(choices) {
     this.el.choicesContainer.innerHTML = "";
     choices.forEach((choice) => {
+      const tile = document.createElement('div');
+      tile.className = 'quiz-choice-tile col-5 m-2';
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "btn quiz-choice-btn col-5 m-2";
-      btn.textContent = this.formatAnswer(choice);
+      btn.className = "btn quiz-choice-btn";
+      const answer = this.formatAnswer(choice);
+      const label = this.currentQuestion.choiceLabels?.[choice] || answer;
+      const visual = this.currentQuestion.choiceDisplay && this.currentQuestion.choiceDisplay[choice];
+      btn.textContent = visual || answer;
+      btn.setAttribute('aria-label', label);
+      btn.dataset.answer = answer;
       btn.addEventListener("click", () => this._handleAnswer(choice, btn));
-      this.el.choicesContainer.appendChild(btn);
+      tile.appendChild(btn);
+      if (this.speechAvailable && /[A-Za-z]{2,}/.test(label)) {
+        tile.classList.add('has-listen');
+        const listen = document.createElement('button');
+        listen.type = 'button';
+        listen.className = 'quiz-choice-listen';
+        listen.textContent = '🔊';
+        listen.setAttribute('aria-label', `Hear answer: ${label}`);
+        listen.addEventListener('click', () => this._speak(label));
+        tile.appendChild(listen);
+      }
+      this.el.choicesContainer.appendChild(tile);
     });
   }
 
@@ -239,9 +296,11 @@ class QuizEngine {
     if (this.locked) return;
     this.locked = true;
     clearInterval(this.timerInterval);
+    if (this.speechAvailable && !this.currentQuestion.speech) speechSynthesis.cancel();
     this.elapsedMs += Date.now() - this.questionStartMs;
 
     const correct = this.currentQuestion.correctAnswer;
+    const answerLabel = this.currentQuestion.choiceLabels?.[correct] || this.formatAnswer(correct);
     const isCorrect = selected !== null && selected === correct;
     if (isCorrect) {
       this.score += 1;
@@ -257,15 +316,15 @@ class QuizEngine {
       }
       this.wrongAnswers.push({
         prompt: this.currentQuestion.reviewPrompt || this.currentQuestion.prompt,
-        correctAnswer: this.formatAnswer(correct),
-        givenAnswer: selected === null ? "No answer (time's up)" : this.formatAnswer(selected),
+        correctAnswer: answerLabel,
+        givenAnswer: selected === null ? "No answer (time's up)" : (this.currentQuestion.choiceLabels?.[selected] || this.formatAnswer(selected)),
       });
     }
     this._updateScorePill();
 
-    Array.from(this.el.choicesContainer.children).forEach((btn) => {
+    this.el.choicesContainer.querySelectorAll('.quiz-choice-btn').forEach((btn) => {
       btn.disabled = true;
-      const value = btn.textContent;
+      const value = btn.dataset.answer;
       if (value === this.formatAnswer(correct)) {
         btn.classList.add("correct");
       } else if (btn === btnEl) {
@@ -273,7 +332,7 @@ class QuizEngine {
       }
     });
 
-    this.feedback.textContent = (isCorrect ? 'Yes! Well done. ' : `Good try! The answer is ${this.formatAnswer(correct)}. `) + (this.currentQuestion.explanation || '');
+    this.feedback.textContent = (isCorrect ? 'Yes! Well done. ' : `Good try! The answer is ${answerLabel}. `) + (this.currentQuestion.explanation || '');
     if (this.practice) {
       this.nextButton.textContent = this.currentIndex === this.totalQuestions ? 'See my stars →' : 'Next question →';
       this.nextButton.hidden = false;

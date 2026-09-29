@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feelings Faces | Little Learners</title>
+  <meta name="description" content="Listen to a little story and choose how someone feels." />
+  <link href="../../assets/vendor/bootstrap.min.css" rel="stylesheet" />
+  <link href="../../assets/css/common.css" rel="stylesheet" />
+</head>
+<body>
+  <a class="skip-link" href="#start-btn">Skip to activity</a>
+  <nav class="navbar navbar-dark klg-navbar mb-4"><div class="container"><a class="navbar-brand" href="../../index.html">&larr; Kid Learning Games</a><span class="navbar-text text-white">😊 Feelings Faces</span></div></nav>
+  <div class="container quiz-shell pb-5">
+    <div id="start-screen" class="card quiz-card p-4 text-center"><div class="card-body">
+      <div class="game-card-icon mb-2">😊</div><h1 class="h3 fw-bold">Feelings Faces</h1>
+      <p id="quiz-info">10 picture questions · practice at your own pace</p>
+      <p class="text-muted"><small>Listen to what happened. Look at the faces and choose the feeling.</small></p>
+      <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background:var(--klg-purple)">Start Game</button>
+    </div></div>
+    <div id="quiz-screen" class="card quiz-card p-4 d-none"><div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2"><span class="quiz-progress-text">Question <span id="question-number">1</span> / <span id="total-questions">10</span></span><div class="d-flex align-items-center gap-2"><span id="quiz-mascot" class="klg-mascot" aria-hidden="true">🐵</span><span id="score-pill" class="quiz-score-pill">Score: 0</span></div></div>
+      <div class="klg-progress-track mb-2"><div id="progress-fill" class="klg-progress-fill"></div></div>
+      <div class="quiz-timer-bar mb-1"><div id="timer-fill" class="quiz-timer-bar-fill"></div></div>
+      <div class="text-end mb-4"><small id="timer-text" class="text-muted">25s</small></div>
+      <div id="streak-badge" class="klg-streak-badge"></div>
+      <p id="question-text" class="quiz-question quiz-question-sm mb-4"></p>
+      <div id="choices-container" class="row justify-content-center g-2 quiz-choices-big"></div>
+    </div></div>
+    <div id="results-screen" class="card results-card p-4 d-none"><div class="card-body">
+      <div id="results-emoji" class="results-emoji mb-2">🎉</div><h2 class="fw-bold">Great exploring!</h2>
+      <div id="results-score" class="results-score my-3">0 / 10</div><div id="results-stars" class="results-stars mb-3"></div>
+      <p id="results-message" class="lead"></p><div id="results-review" class="text-start mx-auto" style="max-width:480px"></div>
+      <div class="d-flex justify-content-center gap-2 mt-4"><button id="play-again-btn" class="btn btn-lg text-white fw-bold px-4" style="background:var(--klg-purple)">Play Again</button><a href="../../index.html" class="btn btn-lg btn-outline-secondary fw-bold px-4">More Games</a></div>
+    </div></div>
+  </div>
+  <script src="../../assets/vendor/confetti.browser.min.js"></script>
+  <script src="../../assets/js/sounds.js"></script>
+  <script src="../../assets/js/progress.js"></script>
+  <script src="../../assets/js/quiz-engine.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
