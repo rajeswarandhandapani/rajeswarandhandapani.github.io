@@ -28,14 +28,17 @@
         <div class="game-card-icon mb-2">🌻</div>
         <h1 class="h3 fw-bold">Memory Garden</h1>
         <p class="text-muted" id="mode-label"></p>
-<p id="quiz-info">Turn over two cards. Match the pictures and discover all six pairs.</p>
+<p id="quiz-info">Turn over two cards and match the pictures. Every garden has a new mix!</p>
+        <label class="memory-size-label" for="memory-size">Garden size
+          <select id="memory-size"><option value="6">6 pairs · little garden</option><option value="8">8 pairs · growing garden</option><option value="10">10 pairs · big garden</option></select>
+        </label>
         <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
           Start Game
         </button>
       </div>
     </div>
 
-    <section id="memory-screen" class="card quiz-card p-4 d-none"><div class="memory-toolbar"><h2>Memory Garden</h2><button id="restart-memory" class="surprise-button">Start again</button></div><p id="memory-status" role="status">0 of 6 pairs found · 0 turns</p><div id="memory-board" class="memory-board" aria-label="Matching cards"></div><p id="memory-feedback" role="status">Choose two cards to find a pair.</p><a class="primary-link" href="../../index.html">Explore more games →</a></section>
+    <section id="memory-screen" class="card quiz-card p-4 d-none"><div class="memory-toolbar"><h2>Memory Garden</h2><button id="restart-memory" class="surprise-button">New garden</button></div><p id="memory-status" role="status">0 of 6 pairs found · 0 turns</p><div id="memory-board" class="memory-board" aria-label="Matching cards"></div><p id="memory-feedback" role="status">Choose two cards to find a pair.</p><button id="memory-change-size" class="surprise-button">Change size</button><a class="primary-link" href="../../index.html">Explore more games →</a></section>
   </div>
 
   <script src="../../assets/vendor/confetti.browser.min.js"></script>

@@ -76,6 +76,18 @@ const COLOR_DOTS = {
   white: "⚪",
 };
 
+// Keep the answer value as a name for scoring and screen readers, while a
+// beginning reader can choose by looking at the tile itself.
+const SHAPE_PICTURES = {
+  Circle: "⚪", Square: "🟦", Triangle: "🔺", Star: "⭐",
+  Heart: "❤️", Diamond: "🔷", Crescent: "🌙", Rectangle: "▭",
+  Pentagon: "⬠", Hexagon: "⬡", Octagon: "🛑",
+};
+const ANSWER_PICTURES = {
+  ...SHAPE_PICTURES,
+  ...Object.fromEntries(COLORS.map(({ name, emoji }) => [capitalize(name), emoji])),
+};
+
 const OBJECT_SHAPES = [
   { thing: "a ball ⚽", shape: "circle" },
   { thing: "a door 🚪", shape: "rectangle" },
@@ -292,9 +304,12 @@ document.addEventListener("DOMContentLoaded", () => {
     timePerQuestion: 20,
     generateQuestion: () => {
       const kind = mode === "all" ? pick(["shape", "color", "shape", "color", "sides"]) : mode;
-      if (kind === "shape") return makeShapeQuestion();
-      if (kind === "color") return makeColorQuestion();
-      return makeSidesQuestion();
+      const question = kind === "shape" ? makeShapeQuestion()
+        : kind === "color" ? makeColorQuestion() : makeSidesQuestion();
+      // Name-the-shape rounds keep the written names as optional reading
+      // practice; each choice has the shared listen button beside it.
+      if (!question.dedupeKey.startsWith('name-')) question.choiceDisplay = ANSWER_PICTURES;
+      return question;
     },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");

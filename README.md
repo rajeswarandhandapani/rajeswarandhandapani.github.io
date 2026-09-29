@@ -1,6 +1,6 @@
 # Little Learners · Kid Learning Games
 
-30 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+33 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
 
 ## Run and verify
 
@@ -17,9 +17,11 @@ npm run build            # validates game links and copies static assets to site
 
 ## Learning experience
 
-- Search 30 games, filter by subject and learning stage, and save favorites.
+- Search 33 games, filter by subject and learning stage, and save favorites.
 - Untimed practice is the default. Children read feedback and choose when to continue. Optional timed challenge rounds retain speed records.
-- Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden uses a six-pair matching board.
+- Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden draws a new picture mix for 6, 8, or 10 pairs.
+- Sentence questions are spoken automatically when the browser has speech synthesis. A Listen button replays them; word answer tiles and game instructions have their own speaker buttons. Shapes & Colors uses picture and color tiles where reading the label is unnecessary. Existing letter, number, and Tamil audio modes keep their dedicated pronunciation.
+- Picture Words, Feelings Faces, and What Do We Use? let children answer entirely with pictures. Spoken words and stories build vocabulary, emotional recognition, and everyday reasoning.
 - Shared keyboard focus, audio replay with Enter/Space, visible answer symbols, feedback announcements, and reduced-motion support.
 - A grown-up panel explains learning stages and browser-local progress, with a confirmed reset action.
 - Existing Bootstrap, confetti, emoji, and Tamil font assets are bundled locally. No CDN or external font requests are needed to load the app. Speech synthesis still depends on browser/OS voice availability; some voices may require network access.
@@ -63,7 +65,7 @@ page you can link to directly.
 
 | Level | Name | Ages | Games |
 | ----- | ---- | ---- | ----- |
-| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use? |
 | 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters |
 | 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder |
 | 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals |
@@ -359,8 +361,8 @@ choice set never mixes two animals that share a name. 15 questions,
 
 ## Shapes & Colors Quiz (pre-K)
 
-Name the shape you see (🔺 → triangle), find a named shape among four
-pictures, name colors, and say how many sides or corners a shape has —
+Name the shape you see (with spoken answer choices), find a named shape among four
+pictures, name colors by tapping color swatches, and say how many sides or corners a shape has —
 mix by default, or `?mode=shape`, `?mode=color`, `?mode=sides`. Sides and
 corners are asked in words so pentagons, hexagons and octagons can join in
 without needing an emoji. Everyday objects appear too ("what shape is a
