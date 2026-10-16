@@ -41,6 +41,7 @@ function makePictureQuestion() {
     correctAnswer: word.tamil,
     choices: shuffle([word, ...distractors].map((w) => w.tamil)),
     kind: "picture",
+    word,
   };
 }
 
@@ -51,6 +52,7 @@ function makeMeaningQuestion() {
     correctAnswer: word.english,
     choices: shuffle([word, ...distractors].map((w) => w.english)),
     kind: "meaning",
+    word,
   };
 }
 
@@ -119,6 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   renderBestTimeNote();
 
+  let currentWord = null;
+  questionText.addEventListener("click", () => {
+    if (currentWord && questionText.classList.contains("klg-tappable") && window.KlgTamilAudio) KlgTamilAudio.say(currentWord.tamil);
+  });
+
   const quiz = new QuizEngine({
     totalQuestions,
     timePerQuestion: 120,
@@ -129,8 +136,13 @@ document.addEventListener("DOMContentLoaded", () => {
       questionText.classList.toggle("quiz-question-xl", q.kind === "picture");
       questionText.classList.toggle("tamil-word", q.kind === "meaning");
       choicesContainer.classList.toggle("tamil-glyph", q.kind === "picture");
+      // A Tamil-word prompt can be tapped to hear it (real voice recording).
+      questionText.classList.toggle("klg-tappable", q.kind === "meaning");
+      currentWord = q.word;
       return q;
     },
+    onQuestionShown: (q) => { if (q.kind === "meaning" && window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
+    onAnswered: (q) => { if (window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");
       const best = loadBestMs(storageKey);

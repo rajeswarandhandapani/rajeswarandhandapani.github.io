@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Letter Bubbles | Kid Learning Games</title>
+  <meta name="description" content="Hear a Tamil letter or word and pop the matching bubble." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫧</text></svg>" />
+  <link href="../../assets/vendor/bootstrap.min.css" rel="stylesheet" />
+  <link href="../../assets/css/common.css" rel="stylesheet" />
+  <link href="../../assets/css/tamil-games.css" rel="stylesheet" />
+</head>
+<body class="tamil-activity">
+  <a class="skip-link" href="#start-btn">Skip to activity</a>
+  <nav class="navbar navbar-dark klg-navbar mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="../../index.html">&larr; Kid Learning Games</a>
+      <span class="navbar-text text-white tamil-glyph">🫧 Letter Bubbles</span>
+    </div>
+  </nav>
+
+  <div class="container quiz-shell pb-5">
+    <div id="start-screen" class="card quiz-card p-4 text-center">
+      <div class="card-body">
+        <div class="game-card-icon mb-2 tamil-glyph">🫧</div>
+        <h1 class="h3 fw-bold">Letter Bubbles</h1>
+        <p class="tamil-glyph tg-subtitle">எழுத்துக் குமிழ்கள்</p>
+        <div id="mode-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+          <a class="btn btn-sm btn-outline-secondary" href="index.html">உயிர் vowels</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?set=consonants">மெய் consonants</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?set=mixed">Mixed</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?set=words">🐘 Words</a>
+        </div>
+        <p id="quiz-info">10 bubbles to pop · no timer</p>
+        <p class="text-muted mb-1"><small>Listen to the letter, then pop the bubble that shows it. Tap 🔊 to hear it again.</small></p>
+        <p id="voice-note" class="tg-voice-note"></p>
+        <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
+          Let’s play
+        </button>
+      </div>
+    </div>
+
+    <section id="pop-screen" class="card quiz-card p-3 p-md-4 d-none">
+      <div class="quiz-tools"><button type="button" id="pop-exit">← Change activity</button><span id="pop-score" class="quiz-score-pill">⭐ 0</span></div>
+      <div class="d-flex justify-content-between align-items-center mb-2"><span id="pop-count" class="quiz-progress-text">1 / 10</span><button id="pop-hear" type="button" class="tg-pill">🔊 Hear again</button></div>
+      <div id="pop-field" class="tg-pop-field" aria-label="Bubbles"></div>
+      <p id="pop-feedback" class="quiz-feedback" role="status"></p>
+    </section>
+
+    <section id="finish-screen" class="card results-card p-4 text-center d-none" tabindex="-1">
+      <h2 class="fw-bold">Round complete!</h2>
+      <div id="finish-summary" class="tg-finish" role="status"></div>
+      <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+        <button id="play-again" class="btn btn-lg text-white fw-bold px-4" style="background: var(--klg-purple);">Play again</button>
+        <a href="../../index.html" class="btn btn-lg btn-outline-secondary fw-bold px-4">More games</a>
+      </div>
+    </section>
+  </div>
+
+  <script src="../../assets/vendor/confetti.browser.min.js"></script>
+  <script src="../../assets/js/sounds.js"></script>
+  <script src="../../assets/js/progress.js"></script>
+  <script src="../../assets/js/game-kit.js"></script>
+  <script src="../../assets/js/tamil-games.js"></script>
+  <script src="../../assets/js/tamil-kit.js"></script>
+  <script src="../../assets/js/tamil-audio-manifest.js"></script>
+  <script src="../../assets/js/tamil-audio.js"></script>
+  <script src="../../assets/js/tamil-words-data.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

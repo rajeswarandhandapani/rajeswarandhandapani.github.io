@@ -9,7 +9,13 @@
  *       // optional: dedupeKey — used instead of prompt to avoid repeats,
  *       // for games where the visible prompt isn't unique (e.g. audio
  *       // questions that all display 🔊)
+ *       optional: visual — a DOM node (or () => node) shown above the
+ *       prompt, e.g. a picture of groups; give it role="img" + aria-label
+ *       optional: choiceVisuals — { [choice]: node } drawn inside answer
+ *       buttons instead of text (pair with choiceLabels for screen readers)
  *     formatAnswer: (value) => String(value),   // optional
+ *     onQuestionShown: (question) => { ... },   // optional, after render
+ *     onAnswered: (question, isCorrect, selected) => { ... }, // optional
  *     onFinish: (result) => { ... },            // optional, receives
  *       { score, total, elapsedMs } — elapsedMs is time spent answering
  *       (question shown -> answered), excluding feedback pauses
@@ -38,6 +44,8 @@ class QuizEngine {
     this.generateQuestion = options.generateQuestion;
     this.formatAnswer = options.formatAnswer || ((v) => String(v));
     this.onFinish = options.onFinish || (() => {});
+    this.onQuestionShown = options.onQuestionShown || (() => {});
+    this.onAnswered = options.onAnswered || (() => {});
     this.correctDelay = options.correctDelay || 900;
     this.incorrectDelay = options.incorrectDelay || 2500;
 
@@ -144,6 +152,7 @@ class QuizEngine {
       clearTimeout(this.transitionTimer);
       this.locked = true;
       if (window.speechSynthesis) speechSynthesis.cancel();
+      if (window.KlgTamilAudio) KlgTamilAudio.stop();
       this.el.quizScreen.classList.add('d-none');
       document.getElementById('start-screen').classList.remove('d-none');
       startButton.focus();
@@ -188,6 +197,7 @@ class QuizEngine {
     this.currentQuestion = this._makeUniqueQuestion();
     this.el.questionNumber.textContent = this.currentIndex;
     this.el.questionText.textContent = this.currentQuestion.prompt;
+    this._renderVisual(this.currentQuestion.visual);
     const tappable = this.el.questionText.classList.contains('klg-tappable');
     this.el.questionText.tabIndex = tappable ? 0 : -1;
     if (tappable) { this.el.questionText.setAttribute('role', 'button'); this.el.questionText.setAttribute('aria-label', 'Listen again: ' + this.currentQuestion.prompt); }
@@ -204,6 +214,19 @@ class QuizEngine {
     this.questionStartMs = Date.now();
     this.el.questionText.focus({ preventScroll: true });
     if (this.listenButton.hidden === false) this._speakQuestion();
+    this.onQuestionShown(this.currentQuestion);
+  }
+
+  _renderVisual(visual) {
+    if (!this.visualBox) {
+      if (!visual) return;
+      this.visualBox = document.createElement('div');
+      this.visualBox.className = 'quiz-visual';
+      this.el.questionText.before(this.visualBox);
+    }
+    const node = typeof visual === 'function' ? visual() : visual;
+    this.visualBox.replaceChildren(...(node ? [node] : []));
+    this.visualBox.hidden = !node;
   }
 
   _questionSpeech() {
@@ -247,12 +270,14 @@ class QuizEngine {
       const answer = this.formatAnswer(choice);
       const label = this.currentQuestion.choiceLabels?.[choice] || answer;
       const visual = this.currentQuestion.choiceDisplay && this.currentQuestion.choiceDisplay[choice];
-      btn.textContent = visual || answer;
+      const picture = this.currentQuestion.choiceVisuals && this.currentQuestion.choiceVisuals[choice];
+      if (picture) { btn.replaceChildren(picture); btn.classList.add('has-visual'); }
+      else btn.textContent = visual || answer;
       btn.setAttribute('aria-label', label);
       btn.dataset.answer = answer;
       btn.addEventListener("click", () => this._handleAnswer(choice, btn));
       tile.appendChild(btn);
-      if (this.speechAvailable && /[A-Za-z]{2,}/.test(label)) {
+      if (this.speechAvailable && !this.currentQuestion.noChoiceListen && /[A-Za-z]{2,}/.test(label)) {
         tile.classList.add('has-listen');
         const listen = document.createElement('button');
         listen.type = 'button';
@@ -321,6 +346,7 @@ class QuizEngine {
       });
     }
     this._updateScorePill();
+    this.onAnswered(this.currentQuestion, isCorrect, selected);
 
     this.el.choicesContainer.querySelectorAll('.quiz-choice-btn').forEach((btn) => {
       btn.disabled = true;

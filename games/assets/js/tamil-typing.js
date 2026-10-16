@@ -53,6 +53,22 @@ document.addEventListener('DOMContentLoaded', () => {
     $('typing-progress').value = position;
     $('clue-word').textContent = current.clue;
     $('clue-emoji').textContent = current.emoji;
+    // Hearing the word (a real recording) helps children spell what they say.
+    if (window.KlgTamilAudio && KlgTamilAudio.canSay(current.word)) {
+      let hear = $('hear-word');
+      if (!hear) {
+        hear = document.createElement('button');
+        hear.type = 'button';
+        hear.id = 'hear-word';
+        hear.className = 'klg-say-btn';
+        hear.textContent = '🔊 Hear the word';
+        hear.addEventListener('click', () => KlgTamilAudio.say(current.word));
+        document.querySelector('.typing-clue').appendChild(hear);
+      }
+      hear.hidden = false;
+    } else if ($('hear-word')) {
+      $('hear-word').hidden = true;
+    }
     $('typing-feedback').textContent = '';
     $('typing-feedback').className = '';
     $('typing-next').hidden = true;
@@ -130,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sentence = current.before + completedWord + current.after;
     $('typing-sentence').textContent = sentence;
     say(revealed ? 'நன்று! You practiced the answer. Keep going!' : 'சரியான விடை! You completed the sentence.', 'answer-correct');
+    if (window.KlgTamilAudio) KlgTamilAudio.say(current.word);
     results.push({ sentence, word: completedWord, revealed });
     $('typing-progress').value = position + 1;
     $('typing-next').hidden = false;

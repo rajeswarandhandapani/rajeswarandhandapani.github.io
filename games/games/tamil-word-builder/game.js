@@ -76,6 +76,8 @@ function makeBuilderQuestion() {
     prompt: `${blanked} ${word.emoji}`,
     correctAnswer: answer,
     choices: shuffle([answer, ...wrongs]),
+    explanation: `${word.tamil} — ${word.english}.`,
+    word,
   };
 }
 
@@ -120,6 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
     totalQuestions,
     timePerQuestion: 120,
     generateQuestion: makeBuilderQuestion,
+    // Hear the finished word after every answer (real voice recording).
+    onAnswered: (q) => { if (window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");
       const best = loadBestMs(storageKey);

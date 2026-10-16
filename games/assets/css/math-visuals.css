@@ -1,0 +1,122 @@
+/* Pictures for multiplication & division (assets/js/math-visuals.js) and
+ * the hand-built maths activities. Builds on common.css tokens. */
+
+.quiz-visual { margin: 0 auto 12px; }
+.quiz-visual > .mv, .quiz-visual > div > .mv { margin-left: auto; margin-right: auto; }
+.quiz-visual + .quiz-question { margin-bottom: 1rem !important; }
+.mv { margin: 0; --item: 1.7rem; max-width: 100%; }
+.mv[data-size="s"] { --item: 1.3rem; }
+.mv[data-size="xs"] { --item: 1.05rem; }
+.mv-item { font-size: var(--item); line-height: 1.15; display: inline-block; text-align: center; }
+.mv-items { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 1px; max-width: calc(var(--item) * 5.6); }
+
+/* Equal groups in holders */
+.mv-groups { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.mv-holder { display: flex; align-items: center; justify-content: center; min-width: calc(var(--item) * 2.4); min-height: calc(var(--item) * 2.2); padding: 8px; }
+.mv-plate { background: radial-gradient(circle, #fff 55%, #eef1f5 56%, #fff 70%); border: 2px solid #d9dfe7; border-radius: 50%; padding: 12px; }
+.mv-bag { background: #fff3e2; border: 2px solid #e2c49c; border-radius: 10px 10px 18px 18px; border-top: 6px solid #d2a76d; }
+.mv-box { background: #f4ead9; border: 2px solid #b98f5a; border-radius: 6px; }
+.mv-basket { background: repeating-linear-gradient(45deg, #f2dcb8 0 6px, #e8cb9b 6px 12px); border: 2px solid #b98f5a; border-radius: 6px 6px 22px 22px; }
+.mv-pot { background: #ffe1d4; border: 2px solid #d48a6a; border-radius: 6px 6px 20px 20px; }
+.mv-plain { background: #f4f6ff; border: 2px dashed #aab7d6; border-radius: 14px; }
+
+/* Arrays */
+.mv-array { display: grid; grid-template-columns: repeat(var(--cols), auto); gap: 2px 4px; justify-content: center; padding: 10px; background: #f7faf4; border: 1px solid #dfe9d6; border-radius: 12px; }
+
+/* Loose pile, rows of five so it can be counted */
+.mv-pile { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.mv-five { max-width: none; flex-wrap: nowrap; }
+
+/* Number line */
+.mv-line { width: 100%; max-width: 560px; }
+.mv-line svg { width: 100%; height: auto; overflow: visible; }
+.mv-axis { stroke: #203341; stroke-width: 3; }
+.mv-tick { stroke: #203341; stroke-width: 2; }
+.mv-num { font: 700 19px "Segoe UI", Arial, sans-serif; fill: #203341; text-anchor: middle; }
+.mv-num.mv-hidden { fill: #b64261; font-size: 20px; }
+.mv-hop { fill: none; stroke: #2f9e6b; stroke-width: 3; stroke-dasharray: 2 5; stroke-linecap: round; }
+.mv-land { fill: #2f9e6b; }
+.mv-frog { font-size: 30px; text-anchor: middle; }
+
+/* Looped groups (division by grouping) */
+.mv-circled { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.mv-loop { border: 3px dashed #4055b5; border-radius: 999px; padding: 6px 12px; display: flex; align-items: center; }
+.mv-leftover { border: 3px dotted #b64261; border-radius: 12px; padding: 6px 10px; display: flex; align-items: center; background: #fdf0f3; }
+
+/* Sharing scene */
+.mv-share { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.mv-people { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.mv-person { font-size: 2rem; background: #eef6ff; border-radius: 50%; width: 3rem; height: 3rem; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Fact-family triangle */
+.mv-triangle { width: min(300px, 80vw); display: block; }
+.mv-triangle svg { width: 100%; height: auto; }
+.mv-tri { fill: #f4f6ff; stroke: #4055b5; stroke-width: 5; stroke-linejoin: round; }
+.mv-tri-line { stroke: #4055b5; stroke-width: 3; }
+.mv-tri-sign { font: 800 22px "Segoe UI", Arial, sans-serif; fill: #4055b5; text-anchor: middle; }
+.mv-tri-dot { fill: #fff; stroke: #4055b5; stroke-width: 3; }
+.mv-tri-hole { fill: #fff2c7; stroke: #b64261; stroke-width: 3; stroke-dasharray: 6 4; }
+.mv-tri-num { font: 800 30px "Segoe UI", Arial, sans-serif; fill: #203341; text-anchor: middle; }
+
+/* Picture answers */
+.quiz-choice-btn.has-visual { padding: 8px; display: flex; align-items: center; justify-content: center; }
+.quiz-choice-btn.has-visual .mv { --item: 1.05rem; pointer-events: none; }
+.quiz-choice-btn.has-visual .mv-holder { min-width: 0; min-height: 0; padding: 5px; }
+.quiz-choice-btn.has-visual .mv-groups { gap: 4px; }
+.quiz-choice-btn.has-visual .mv-array { padding: 4px; }
+
+/* Scenario cards (Market Day) */
+.mv-scene { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #fffaf0; border: 1px solid #f0e2c4; border-radius: 16px; padding: 12px 14px; width: 100%; }
+.mv-scene-title { font-weight: 800; color: #98522b; font-size: 0.95rem; letter-spacing: .5px; }
+.mv-tag { display: inline-block; background: #fff; border: 2px solid #e3c89b; border-radius: 10px; padding: 2px 10px; font-weight: 800; color: #6b3d1f; }
+.quiz-question.mv-story { font-size: 1.3rem; font-weight: 650; line-height: 1.5; max-width: 620px; margin-left: auto; margin-right: auto; }
+.mv-facts { list-style: none; padding: 0; margin: 6px 0 0; display: grid; grid-template-columns: repeat(2, auto); gap: 4px 18px; justify-content: center; font-weight: 700; }
+
+/* --- Hand-built maths games --------------------------------------------- */
+.mg-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.mg-task { font-size: 1.35rem; font-weight: 750; text-align: center; margin: 8px 0 12px; }
+.mg-feedback { min-height: 2.2rem; text-align: center; font-weight: 650; margin: 12px 0 6px; }
+.mg-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.mg-pill { border: 1px solid #c6d2e6; border-radius: 999px; background: #fff; color: #273b84; padding: 8px 16px; font-weight: 700; }
+.mg-pill:disabled { opacity: .45; }
+
+/* Share It Fairly */
+.sf-pile { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 3rem; padding: 10px; background: #fff8ec; border: 2px dashed #e3c89b; border-radius: 16px; margin-bottom: 14px; }
+.sf-pile .mv-item { font-size: 1.8rem; }
+.sf-plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+.sf-plate { position: relative; min-height: 120px; border: 2px solid #d9dfe7; border-radius: 50%; background: radial-gradient(circle, #fff 58%, #eef1f5 59%, #fff 72%); display: flex; flex-wrap: wrap; align-content: center; justify-content: center; padding: 20px 14px 14px; font-size: 1.4rem; }
+.sf-plate:hover:not(:disabled) { border-color: var(--klg-purple); }
+.sf-plate .sf-who { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-size: 1.6rem; }
+.sf-plate .sf-count { position: absolute; bottom: -10px; right: 6px; background: #4055b5; color: #fff; font-size: .8rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; }
+.sf-plate.uneven { border-color: var(--klg-red); }
+.sf-answer { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sf-answer button { min-width: 64px; min-height: 56px; font-size: 1.4rem; font-weight: 800; border-radius: 12px; border: 2px solid #c6d2e6; background: #fff; }
+.sf-answer button.correct { background: #e8f5ec; border-color: var(--klg-green); }
+.sf-answer button.incorrect { background: #fdecee; border-color: var(--klg-red); }
+
+/* Array Garden */
+.ag-wrap { display: flex; justify-content: center; }
+.ag-grid { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 3px; width: min(100%, 460px); aspect-ratio: 1; touch-action: none; user-select: none; padding: 6px; background: #8b6a43; border-radius: 12px; }
+.ag-cell { border: 0; border-radius: 6px; background: #a9845a; padding: 0; min-height: 0; font-size: clamp(.9rem, 4.2vw, 1.6rem); line-height: 1; }
+.ag-cell.on { background: #d9eebd; }
+.ag-cell.hint { outline: 2px dashed #fff3; outline-offset: -3px; }
+.ag-size { text-align: center; font-size: 1.6rem; font-weight: 800; color: var(--klg-purple); min-height: 2.2rem; }
+.ag-found { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ag-found span { background: #e8f5ec; border: 1px solid #b8dcc4; border-radius: 999px; padding: 4px 12px; font-weight: 700; }
+
+/* Multiples Hunt */
+.mh-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 520px; margin: 0 auto; }
+.mh-cell { aspect-ratio: 1; min-height: 0; border: 1px solid #d9dfe7; border-radius: 8px; background: #fff; font-weight: 700; font-size: clamp(.75rem, 3.4vw, 1.05rem); padding: 0; color: var(--ink); }
+.mh-cell.found { background: #ffe9a8; border-color: #e0b84a; }
+.mh-cell.miss { background: #fdecee; border-color: var(--klg-red); }
+.mh-cell.missed { background: #fff; border: 2px dashed #e0b84a; }
+.mh-legend { text-align: center; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 760px) {
+  .mv { --item: 1.45rem; }
+  .mv[data-size="s"] { --item: 1.15rem; }
+  .mv[data-size="xs"] { --item: .95rem; }
+  .quiz-question.mv-story { font-size: 1.1rem; }
+  .sf-plates { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); }
+  .sf-plate { min-height: 96px; font-size: 1.15rem; }
+}

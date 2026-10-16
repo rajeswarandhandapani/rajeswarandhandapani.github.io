@@ -11,7 +11,7 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  page.on('pageerror',e=>errors.push(e.message));
  page.on('request',r=>{if(!r.url().startsWith(base)&&!r.url().startsWith('data:'))external.push(r.url());});
  await page.goto(base);await page.evaluate(()=>document.fonts.ready);
- assert.equal(await page.locator('.game-card').count(),33);
+ assert.equal(await page.locator('.game-card').count(),51);
  await page.screenshot({path:'artifacts/home-desktop.png'});
  await page.locator('#game-search').fill('fractions');assert.equal(await page.locator('.game-tile:visible').count(),1);
  await page.locator('#game-search').fill('unfindable');assert.ok(await page.locator('#empty-games').isVisible());
@@ -28,6 +28,8 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  const games=fs.readdirSync('games').filter(id=>fs.existsSync(path.join('games',id,'index.html')));
  for(const id of games){
+  // Hand-built activities are played through in tests/tamil-games-browser.cjs and tests/math-games-browser.cjs.
+  if(['tamil-letter-chart','tamil-letter-pop','tamil-tracing','tamil-word-puzzle','tamil-memory','share-fairly','array-garden','multiples-hunt'].includes(id))continue;
   await page.goto(`${base}/games/${id}/index.html`);await page.locator('#start-btn').click();
   if(id==='memory-match')continue;
   if(id==='tamil-sentence-words'||id==='tamil-missing-letters'){
@@ -106,8 +108,8 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  assert.equal(await page.locator('.memory-card').count(),20);
  assert.match(await page.locator('#memory-status').textContent(),/0 of 10 pairs/);
  // Start with invalid storage and with localStorage unavailable.
- await page.evaluate(()=>localStorage.setItem('klg-progress-v1','null'));await page.goto(base);assert.equal(await page.locator('.game-card').count(),33);
- const blocked=await browser.newPage();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('Storage disabled');}});});await blocked.goto(base);assert.equal(await blocked.locator('.game-card').count(),33);await blocked.close();
+ await page.evaluate(()=>localStorage.setItem('klg-progress-v1','null'));await page.goto(base);assert.equal(await page.locator('.game-card').count(),51);
+ const blocked=await browser.newPage();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('Storage disabled');}});});await blocked.goto(base);assert.equal(await blocked.locator('.game-card').count(),51);await blocked.close();
  assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
- await browser.close();console.log('PASS all 33 activities, discovery, persistence, timers, replay, memory, mobile overflow; no runtime errors or external requests.');
+ await browser.close();console.log('PASS all 51 activities, discovery, persistence, timers, replay, memory, mobile overflow; no runtime errors or external requests.');
 })().catch(e=>{console.error(e);process.exit(1);});
