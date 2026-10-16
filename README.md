@@ -1,6 +1,6 @@
 # Little Learners · Kid Learning Games
 
-33 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+51 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
 
 ## Run and verify
 
@@ -11,13 +11,15 @@ npm test                  # progress and storage regression tests
 npx playwright install chromium
 npm run test:e2e          # keep the local server running in another terminal
 npm run build            # validates game links and copies static assets to site-output/
+npm run test:tamil-games  # plays every Tamil activity with recorded audio (server running)
+npm run test:math         # plays the visual × and ÷ games; checks every picture matches its answer
 ```
 
 `BASE_URL` can point the browser tests at another local server. Screenshots are saved under `artifacts/` and ignored by Git.
 
 ## Learning experience
 
-- Search 33 games, filter by subject and learning stage, and save favorites.
+- Search 51 games, filter by subject (including a dedicated **Tamil · தமிழ்** tab) and learning stage, and save favorites.
 - Untimed practice is the default. Children read feedback and choose when to continue. Optional timed challenge rounds retain speed records.
 - Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden draws a new picture mix for 6, 8, or 10 pairs.
 - Sentence questions are spoken automatically when the browser has speech synthesis. A Listen button replays them; word answer tiles and game instructions have their own speaker buttons. Shapes & Colors uses picture and color tiles where reading the label is unnecessary. Existing letter, number, and Tamil audio modes keep their dedicated pronunciation.
@@ -27,6 +29,87 @@ npm run build            # validates game links and copies static assets to site
 - Existing Bootstrap, confetti, emoji, and Tamil font assets are bundled locally. No CDN or external font requests are needed to load the app. Speech synthesis still depends on browser/OS voice availability; some voices may require network access.
 
 This is an educational practice app, not a standardized assessment. Age ranges are starting points. Progress belongs to the current browser and is not synchronized across devices. Practice awards stars and XP but does not set speed records. Memory Garden awards completion stars, not an accuracy assessment.
+
+## Seeing multiplication and division
+
+Seven activities teach × and ÷ with pictures, hands-on play and real-life
+stories, before children practise the bare facts in Multiplication and
+Division. Each one has three levels (`?level=1|2|3`).
+
+| Game | Level | What the child does | Modes |
+| ---- | ----- | ------------------- | ----- |
+| Picture Multiplication | 2 | Count equal groups on plates, arrays of flowers and frog hops on a number line. Also pick the picture that shows 3 × 4, or the number sentence for a picture. Each answer shows its repeated addition. | `?mode=groups\|arrays\|hops\|match\|sentence` |
+| Picture Division | 2 | Share among children, group into boxes, hop back to 0, split rows, and handle leftovers. After answering, the picture changes to the solved version. | `?mode=share\|group\|hops\|rows\|leftover` |
+| Share It Fairly | 2 | Deal treats onto friends' plates. The game spots an unfair share. Then say how many each friend gets and how many are left over (14 ÷ 4 = 3 r 2). | |
+| Market Day | 3 | Illustrated stories: prices in ₹, packs, seats in rows, animal legs, weeks, and "times as many". Level 3 adds change from a note, unit price, and remainder stories that round up (boats) or down (what can you afford). | |
+| Fact Family Triangles | 3 | Find the hidden corner of 3 · 4 · 12, or spot the fact that doesn't belong. All four facts are shown afterwards. | `?tables=3,4` |
+| Array Garden | 3 | Drag to plant exact arrays (rows go across). Find every way to plant 24, which covers factor pairs and turn-arounds. | |
+| Multiples Hunt | 3 | Tap every multiple on a hundred square and watch the pattern appear (columns, diagonals, digit sums). | `?n=7` |
+
+The pictures are drawn by `assets/js/math-visuals.js` (`KlgMathVis`). Every
+picture has a spoken-language `aria-label`. QuizEngine questions can now
+carry a `visual` (shown above the prompt) and `choiceVisuals` (picture
+answer buttons). Hand-built games share `assets/js/game-kit.js` for the
+finish panel, celebrations and mode links.
+
+## Learning Tamil with real voices
+
+Every Tamil activity speaks with **human recordings**, not the device's
+text-to-speech, so Tamil pronunciation no longer depends on whether a
+phone or computer happens to have a Tamil voice installed (desktop Chrome
+has none).
+
+- **Letters:** all 12 vowels (உயிர்), all 18 consonants (மெய்) and ஃ are
+  recorded by one speaker. 41 of the 216 compound letters (உயிர்மெய்)
+  have their own recording. The rest are taught the traditional way, by
+  blending the two recorded parts: க் … இ … கி. The device's Tamil voice,
+  if there is one, then says the whole letter.
+- **Words:** 102 of the 108 picture words, all 10 numbers (ஒன்று–பத்து) and
+  the sentence-game answers are recorded. The 6 unrecorded words (ஆப்பிள்,
+  திராட்சை, எலுமிச்சை, மின்னல், கத்தரிக்கோல், வெள்ளை) fall back to the
+  device voice. Listening games only ask recorded words.
+- **Source:** [Wikimedia Commons](https://commons.wikimedia.org/) and
+  [Lingua Libre](https://lingualibre.org/), CC BY-SA 3.0/4.0 and CC0. Every
+  file is credited in [`assets/audio/tamil/CREDITS.md`](assets/audio/tamil/CREDITS.md).
+  The audio is shared under those licences. It is not covered by the code's licence.
+- **Size:** 188 small MP3 files, 1.8 MB in total. A file loads only when it is played.
+
+`npm run audio:tamil` (`scripts/fetch-tamil-audio.cjs`) rebuilds everything
+reproducibly. It finds each text on Commons and records the chosen source
+in `scripts/tamil-audio-sources.json`. It then downloads the original
+(cached in the git-ignored `.cache/`), trims silence and stray clicks,
+normalizes loudness and writes `assets/audio/tamil/*.mp3`,
+`assets/js/tamil-audio-manifest.js` and the credits file. It needs
+`ffmpeg` on the `PATH` or in `FFMPEG`. Add a word to
+`tamil-words-data.js` and re-run it to pick up any new recording.
+
+Shared building blocks: `assets/js/tamil-kit.js` (letter tables,
+orthographic splitting, numbers), `assets/js/tamil-audio.js`
+(`KlgTamilAudio.say/blend/sequence`), `assets/js/tamil-games.js`
+(rewards for hand-built games) and `assets/css/tamil-games.css`.
+
+### The Tamil activities
+
+The home page has a 9-step **Tamil learning path** and a Tamil filter tab (16 games).
+
+| Game | What the child does | Modes |
+| ---- | ------------------- | ----- |
+| Tamil Letter Chart (எழுத்து அட்டவணை) | Tap any of 247 letters to hear it. See its sound, its parts (க் + இ) and an example word. Tap a row or column header to hear it all. | `?tab=uyir\|mei\|uyirmei` |
+| Letter Bubbles (எழுத்துக் குமிழ்கள்) | Hear a letter or word and pop the floating bubble that shows it. | `?set=vowels\|consonants\|mixed\|words` |
+| Trace Tamil Letters (எழுதிப் பழகுவோம்) | Trace big dotted letters with a finger. The tracing is checked against the letter's shape. | `?set=vowels\|consonants\|uyirmei` |
+| Listen & Find (கேட்டுக் கண்டுபிடி) | Hear a word and tap its picture. No reading needed. | `?cat=animals\|food\|body\|things\|nature\|people` |
+| Tamil Numbers (எண்கள்) | Count pictures and pick the number word, hear a number, or read Tamil numerals ௧–௰. | `?mode=count\|listen\|numerals` |
+| Short or Long? (குறில் · நெடில்) | Decide whether a sound is short or long, or tell இ from ஈ by ear. | `?mode=hear\|see\|pair` |
+| Sound Blender (க் + இ = கி) | Blend a consonant and a vowel into a compound letter, or split one apart. | `?mode=see\|listen\|split`, `?group=hard\|soft\|middle` |
+| First Letter (முதல் எழுத்து) | See a picture, hear its word and pick the letter it starts with. | `?start=all\|vowel` |
+| Tamil Memory (நினைவுப் பொருத்தம்) | Match picture cards to word cards, or vowels to their signs (ஆ ↔ கா). | `?mode=words\|signs` |
+| What Comes Next? (அடுத்த எழுத்து) | Fill the gap in the letter order. | `?set=vowels\|consonants\|rows` |
+| Tamil Word Puzzle (சொல் புதிர்) | Hear a word and build it from letter tiles, with look-alike tiles at higher levels. | `?level=1\|2\|3` |
+
+The existing Tamil games also use the recordings now. Tamil Alphabets'
+listen mode works on every device. Tamil Words, Word Builder and the two
+sentence-typing games say the word after each answer, and the typing
+games have a 🔊 Hear the word button.
 
 ## Tamil sentence typing
 
@@ -54,6 +137,12 @@ assets/js/quiz-engine.js   reusable QuizEngine (timer, scoring, results screen)
 assets/js/progress.js      KlgProgress — XP, ranks, stars, day streak, badges
 assets/js/home.js          landing page: player card, daily challenge, stars
 assets/js/sounds.js        KlgSounds — synthesized sound effects + mute button
+assets/js/math-visuals.js  KlgMathVis — groups, arrays, number lines, fact triangles
+assets/js/game-kit.js      KlgGameKit — finish panel, cheers, mode links for custom games
+assets/js/tamil-kit.js     KlgTamil — Tamil letter tables, letter splitting, numbers
+assets/js/tamil-audio.js   KlgTamilAudio — plays recorded Tamil (blend / TTS fallback)
+assets/audio/tamil/        recorded Tamil letters & words + CREDITS.md
+scripts/fetch-tamil-audio.cjs  rebuilds the Tamil audio from Wikimedia Commons
 games/<game-name>/         one folder per game (index.html + game.js)
 ```
 
@@ -65,9 +154,9 @@ page you can link to directly.
 
 | Level | Name | Ages | Games |
 | ----- | ---- | ---- | ----- |
-| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use? |
-| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters |
-| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers |
+| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly |
+| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder, Tamil Word Puzzle, Market Day, Fact Family Triangles, Array Garden, Multiples Hunt |
 | 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals |
 
 ## Progress, ranks and badges

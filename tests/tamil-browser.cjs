@@ -127,9 +127,11 @@ const base = process.env.BASE_URL || 'http://localhost:4173';
     }
     await page.goto(base);
     await page.locator('#game-search').fill('Tamil');
-    assert.equal(await page.locator('.game-tile:visible').count(), 5);
-    await page.locator('button[data-subject="language"]').click();
-    assert.equal(await page.locator('.game-tile:visible').count(), 5);
+    assert.ok(await page.locator('.game-tile:visible').count() >= 10);
+    await page.locator('#game-search').fill('');
+    await page.locator('button[data-subject="tamil"]').click();
+    assert.equal(await page.locator('.game-tile:visible').count(), 16);
+    assert.ok(await page.locator('[data-game="tamil-sentence-words"]').isVisible());
     assert.deepEqual(errors, []);
     console.log('PASS Tamil discovery and no browser errors');
   } finally { await browser.close(); }

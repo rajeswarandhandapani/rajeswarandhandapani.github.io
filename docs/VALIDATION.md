@@ -33,3 +33,18 @@ Reviewed Chromium screenshots of the desktop home, phone home/library, counting,
 - Both games were captured and visually inspected at phone and desktop widths; overflow checks and screenshots cover 320, 390, 768, and 1366 pixels. Wider compound-letter keys and a pinned answer preview address small-screen keyboard usability.
 - The full library regression passed with all 30 activities; no browser page errors were observed.
 - The site remains local. These additions were not exported or published.
+
+## Tamil voices and 11 new Tamil activities · October 16, 2026
+
+- 188 human recordings from Wikimedia Commons / Lingua Libre (CC BY-SA 3.0/4.0, CC0), 1.8 MB. Every vowel, consonant and ஃ, 41 compound letters, 102 of 108 picture words, all ten number words. Each file is credited in `assets/audio/tamil/CREDITS.md`.
+- `tests/tamil-audio.test.cjs` checks the letter tables (12 + 18 + 216) and letter splitting. It also checks that every vowel and consonant is recorded, so every compound letter can be blended, and that every MP3 exists, is small, has an open licence and is credited.
+- `tests/tamil-games-browser.cjs` runs on a simulated device with **no Tamil speech voice**. It logs which recordings play, finishes a full round of Letter Bubbles (10/10) and Word Puzzle, and matches every Tamil Memory pair. It checks that tracing rejects an empty canvas and a scribble but accepts a careful trace. It confirms that Tamil Alphabets' listen mode plays recordings and that unrecorded compound letters are blended from their parts. It checks that 11 quiz modes play Tamil audio when a question appears and again after an answer, with no overflow at 390px, no runtime errors and no external requests.
+- The existing suites were updated for 44 games and the new Tamil tab, and all pass: `npm test` (16), `npm run test:e2e`, `npm run test:tamil` and `npm run build`.
+- Practical limit: the processed recordings were checked by automated duration and loudness analysis and trimmed by speech detection. No one has listened to all 188 files yet. Please give a few letters a listen on a real phone.
+
+## Visual multiplication & division · October 16, 2026
+
+- Seven new activities: Picture Multiplication, Picture Division, Share It Fairly, Market Day, Fact Family Triangles, Array Garden and Multiples Hunt. The library now has 51 games.
+- `tests/math-games-browser.cjs` plays every activity at 390px. For each groups or arrays question at all three levels, the number of items drawn equals the correct answer. For sharing, grouping and leftover questions, the solved picture (items per plate, loops, leftover items) matches the answer. Every question has exactly one correct choice and no duplicate choices. Market Day answers are recomputed from the story's numbers: round up for boats, round down for what you can afford, change, sharing, and "times as many".
+- The test also checks the interactive games. Share It Fairly catches an unfair share and plays 6 stories to completion. Array Garden catches a turned-around array and has every factor pair found. Multiples Hunt explains a wrong tap and completes 3 tables. Progress is saved, with no errors and no external requests.
+- Five repeated runs pass, since questions are random. One run found duplicate options in "number sentence" mode when rows = columns, which is now fixed.

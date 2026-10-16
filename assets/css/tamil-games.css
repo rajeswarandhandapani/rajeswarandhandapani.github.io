@@ -1,0 +1,112 @@
+/* Shared styles for the Tamil activities (chart, bubbles, tracing, puzzle,
+ * memory and the Tamil quiz games). Builds on common.css tokens. */
+
+.tg-wide { max-width: 980px; }
+.tg-subtitle { font-size: 1.15rem; color: #52636b; margin-bottom: 12px; }
+.tg-voice-note { font-size: 13px; color: #3e6f5d; margin: 8px auto 0; max-width: 520px; }
+.tg-word-reveal { min-height: 2rem; text-align: center; font-size: 1.5rem; font-weight: 700; color: var(--klg-purple); margin: 0; }
+.tg-pill, .klg-say-btn {
+  border: 1px solid #c6d2e6; border-radius: 999px; background: #fff; color: #273b84;
+  padding: 8px 16px; font-weight: 700; font-size: 15px;
+}
+.tg-pill:hover, .klg-say-btn:hover { background: #eef1fb; }
+.tg-pill:disabled { opacity: .5; }
+
+/* --- Quiz prompt variants ------------------------------------------------ */
+.quiz-question.tg-sequence-prompt { font-size: clamp(2.2rem, 7vw, 3.6rem); word-spacing: .35em; }
+.quiz-question.tg-count-prompt { font-size: clamp(1.8rem, 6vw, 2.6rem); line-height: 1.5; max-width: 520px; margin-left: auto; margin-right: auto; }
+.tg-two-choices .quiz-choice-btn { font-size: 1.4rem !important; }
+.tg-picture-choices .quiz-choice-btn { font-size: 3rem !important; }
+/* Tamil words must never break mid-word (நான்|கு). */
+.tg-word-choices .quiz-choice-btn { font-size: 1.6rem !important; overflow-wrap: normal; word-break: keep-all; }
+
+/* --- Letter chart ----------------------------------------------------- */
+.tg-chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.tg-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.tg-tabs [role=tab] { border: 1px solid #dce4e9; background: #fff; border-radius: 999px; padding: 8px 16px; font-weight: 700; color: #52636b; }
+.tg-tabs [role=tab][aria-selected=true] { background: #254d48; border-color: #254d48; color: #fff; }
+.tg-detail { display: flex; align-items: center; gap: 18px; background: #f7f9fc; border: 1px solid #e3e9f2; border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; min-height: 120px; }
+.tg-detail-letter { flex: none; width: 104px; height: 104px; border-radius: 20px; border: 2px solid #c6d2e6; background: #fff; font-size: 3.6rem; line-height: 1; color: var(--ink); }
+.tg-detail-text { min-width: 0; }
+.tg-detail-sound { font-size: 1.6rem; font-weight: 800; color: var(--klg-purple); }
+.tg-detail-kind { color: #52636b; margin: 2px 0 10px; }
+.tg-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tg-chart { display: grid; gap: 10px; }
+.tg-chart-12 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.tg-chart-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.tg-letter {
+  min-height: 64px; border-radius: 14px; border: 2px solid #dce4e9; border-bottom-width: 4px;
+  background: #fff; font-size: 2rem; line-height: 1.1; color: var(--ink); padding: 4px;
+}
+.tg-letter:hover { border-color: var(--klg-purple); }
+.tg-letter.selected { border-color: var(--klg-purple); background: #eef1fb; }
+.tg-letter.short, .tg-key.short { background: #fff7e0; }
+.tg-letter.long, .tg-key.long { background: #ffe9d6; }
+.tg-letter.hard, .tg-key.hard { background: #ffe3e8; }
+.tg-letter.soft, .tg-key.soft { background: #e3f1ff; }
+.tg-letter.middle, .tg-key.middle { background: #e6f6e9; }
+.tg-letter.aytham { background: #f1e8ff; }
+.tg-legend .tg-key { display: inline-block; border-radius: 6px; padding: 1px 8px; margin: 2px 2px; color: var(--ink); }
+.tg-grid-wrap { overflow-x: auto; border: 1px solid #e3e9f2; border-radius: 14px; -webkit-overflow-scrolling: touch; }
+.tg-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto; }
+.tg-grid caption { caption-side: top; font-size: 13px; color: var(--muted); padding: 8px 10px 0; }
+.tg-grid th { position: sticky; background: #fff; z-index: 1; }
+.tg-grid thead th { top: 0; }
+.tg-grid tbody th { left: 0; }
+.tg-grid .tg-letter { min-width: 50px; min-height: 50px; font-size: 1.45rem; border-bottom-width: 3px; }
+.tg-grid .tg-letter.recorded { border-color: #b9d8c8; }
+.tg-head { min-width: 46px; min-height: 46px; border: 0; border-radius: 10px; background: #254d48; color: #fff; font-size: 1.25rem; font-weight: 700; }
+
+/* --- Letter bubbles ------------------------------------------------------- */
+.tg-pop-field {
+  position: relative; height: min(440px, 62vh); overflow: hidden; border-radius: 18px;
+  background: linear-gradient(#dff3ff, #f4fbff 70%, #e6f7ef); border: 1px solid #d3e6ef; touch-action: manipulation;
+}
+.tg-bubble {
+  position: absolute; left: 0; top: 0; border-radius: 50%; border: 2px solid #ffffffd0;
+  box-shadow: inset -6px -8px 14px #0000000f, 0 6px 14px #2033411a; font-size: 2.1rem; line-height: 1;
+  color: var(--ink); padding: 0; will-change: transform;
+}
+.tg-bubble.popped { animation: tg-pop .45s ease-out forwards; }
+.tg-bubble.wrong { opacity: .35; filter: grayscale(.7); }
+.tg-pop-field.still { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 14px; padding: 14px; }
+.tg-pop-field.still .tg-bubble { position: static; }
+@keyframes tg-pop { 60% { transform: scale(1.35); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
+
+/* --- Tracing ------------------------------------------------------------ */
+.tg-trace-wrap { width: 100%; }
+.tg-trace-canvas { display: block; width: 100%; height: 360px; background: #fff; border: 2px dashed #c6d2e6; border-radius: 18px; touch-action: none; cursor: crosshair; }
+
+/* --- Word puzzle -------------------------------------------------------- */
+.tg-picture { display: block; margin: 4px auto 12px; border: 0; background: #f7f9fc; border-radius: 24px; font-size: 5rem; width: 140px; height: 140px; line-height: 1; }
+.tg-slots, .tg-tiles { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.tg-slot, .tg-tile { min-width: 64px; min-height: 64px; border-radius: 14px; font-size: 1.9rem; line-height: 1; padding: 4px 8px; }
+.tg-slot { border: 3px dashed #aab7d6; background: #f7f9fc; color: var(--ink); }
+.tg-slot:not(:empty) { border-style: solid; background: #fff; }
+.tg-slot:disabled { opacity: 1; }
+.tg-slot.right { border-color: var(--klg-green); background: #e8f5ec; }
+.tg-slot.wrong { border-color: var(--klg-red); background: #fdecee; }
+.tg-tile { border: 2px solid #c6d2e6; border-bottom-width: 5px; background: #fff; color: var(--ink); }
+.tg-tile:disabled { opacity: .25; }
+.tg-tiles { margin-top: 18px; padding-top: 14px; border-top: 1px solid #e3e9f2; }
+
+/* --- Tamil memory --------------------------------------------------------- */
+.tg-memory-card.flipped.tamil-glyph { font-size: clamp(1rem, 3.6vw, 1.6rem); overflow-wrap: anywhere; padding: 4px; }
+
+@media (max-width: 760px) {
+  .tg-chart-12, .tg-chart-6 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tg-detail { padding: 12px; gap: 12px; }
+  .tg-detail-letter { width: 80px; height: 80px; font-size: 2.8rem; }
+  .tg-detail-sound { font-size: 1.3rem; }
+  .tg-trace-canvas { height: 300px; }
+  .tg-picture { width: 110px; height: 110px; font-size: 4rem; }
+  .tg-slot, .tg-tile { min-width: 54px; min-height: 54px; font-size: 1.6rem; }
+  .tg-two-choices .quiz-choice-btn { font-size: 1.1rem !important; }
+  .tg-picture-choices .quiz-choice-btn { font-size: 2.6rem !important; }
+  .tg-word-choices .quiz-choice-btn { font-size: 1.35rem !important; }
+}
+@media (max-width: 360px) {
+  .tg-chart-12, .tg-chart-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tg-detail { flex-direction: column; align-items: flex-start; }
+}
+.typing-clue .klg-say-btn { margin-left: auto; }

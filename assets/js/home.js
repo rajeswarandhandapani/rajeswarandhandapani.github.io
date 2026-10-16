@@ -162,7 +162,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const tiles = [...document.querySelectorAll('.game-card[data-game]')];
   const groups = {
-    language: ['english-alphabets','tamil-alphabets','rhyming-words','opposites','tamil-words','spelling-bee','tamil-word-builder','reading-stories','tamil-sentence-words','tamil-missing-letters','picture-words'],
+    tamil: tiles.map(card => card.dataset.game).filter(id => id.startsWith('tamil-')),
+    language: ['english-alphabets','rhyming-words','opposites','spelling-bee','reading-stories','picture-words'],
     world: ['baby-animals','calendar','solar-system','science-quiz','world-capitals','animal-habitats','feelings-faces','everyday-tools'],
     logic: ['patterns','memory-match']
   };
@@ -207,6 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.subject-tabs button').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
     filter();
   }));
+  const tamilJump = document.getElementById('tamil-jump');
+  if (tamilJump) tamilJump.addEventListener('click', () => {
+    search.value = '';
+    level.value = 'all';
+    document.querySelector('.subject-tabs [data-subject="tamil"]').click();
+    document.getElementById('library').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
   document.getElementById('clear-filters').addEventListener('click', () => { search.value = ''; level.value = 'all'; document.querySelector('[data-subject="all"]').click(); search.focus(); });
   const dialog = document.getElementById('parent-dialog');
   document.getElementById('parent-open').addEventListener('click', () => {

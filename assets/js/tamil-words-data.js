@@ -1,5 +1,5 @@
 /**
- * Shared Tamil vocabulary: ~95 everyday words, each with an English meaning,
+ * Shared Tamil vocabulary: 108 everyday words, each with an English meaning,
  * an emoji and a category. Used by the Tamil Words quiz (picture/meaning
  * matching) and the Tamil Word Builder quiz (fill in the missing letter).
  * Categories need at least 4 words each so same-category distractors work.
@@ -36,6 +36,10 @@ const TAMIL_WORDS = [
   { tamil: "தேனீ", english: "bee", emoji: "🐝", cat: "animals" },
   { tamil: "எறும்பு", english: "ant", emoji: "🐜", cat: "animals" },
   { tamil: "சிலந்தி", english: "spider", emoji: "🕷️", cat: "animals" },
+  { tamil: "அணில்", english: "squirrel", emoji: "🐿️", cat: "animals" },
+  { tamil: "ஈ", english: "fly", emoji: "🪰", cat: "animals" },
+  { tamil: "ஓநாய்", english: "wolf", emoji: "🐺", cat: "animals" },
+  { tamil: "ஒட்டகச்சிவிங்கி", english: "giraffe", emoji: "🦒", cat: "animals" },
   // Food
   { tamil: "மாம்பழம்", english: "mango", emoji: "🥭", cat: "food" },
   { tamil: "வாழைப்பழம்", english: "banana", emoji: "🍌", cat: "food" },
@@ -51,6 +55,8 @@ const TAMIL_WORDS = [
   { tamil: "சோளம்", english: "corn", emoji: "🌽", cat: "food" },
   { tamil: "மிளகாய்", english: "chilli", emoji: "🌶️", cat: "food" },
   { tamil: "வெங்காயம்", english: "onion", emoji: "🧅", cat: "food" },
+  { tamil: "ஆரஞ்சு", english: "orange", emoji: "🍊", cat: "food" },
+  { tamil: "கத்தரிக்காய்", english: "brinjal", emoji: "🍆", cat: "food" },
   { tamil: "பால்", english: "milk", emoji: "🥛", cat: "food" },
   { tamil: "முட்டை", english: "egg", emoji: "🥚", cat: "food" },
   { tamil: "சோறு", english: "rice", emoji: "🍚", cat: "food" },
@@ -93,6 +99,12 @@ const TAMIL_WORDS = [
   { tamil: "கடிகாரம்", english: "clock", emoji: "⏰", cat: "things" },
   { tamil: "நாற்காலி", english: "chair", emoji: "🪑", cat: "things" },
   { tamil: "கத்தரிக்கோல்", english: "scissors", emoji: "✂️", cat: "things" },
+  { tamil: "ஏணி", english: "ladder", emoji: "🪜", cat: "things" },
+  { tamil: "ஊசி", english: "needle", emoji: "🪡", cat: "things" },
+  { tamil: "படகு", english: "boat", emoji: "⛵", cat: "things" },
+  { tamil: "சட்டை", english: "shirt", emoji: "👕", cat: "things" },
+  { tamil: "தட்டு", english: "plate", emoji: "🍽️", cat: "things" },
+  { tamil: "கண்ணாடி", english: "mirror", emoji: "🪞", cat: "things" },
   // People
   { tamil: "அம்மா", english: "mother", emoji: "👩", cat: "people" },
   { tamil: "அப்பா", english: "father", emoji: "👨", cat: "people" },

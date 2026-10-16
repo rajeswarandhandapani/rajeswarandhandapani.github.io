@@ -115,33 +115,18 @@ const UYIRMEI_LETTERS = CONSONANT_BASES.flatMap((c) =>
 );
 
 /* --- Tamil speech ---------------------------------------------------------
- * The Web Speech API can speak Tamil, but only when the device actually has
- * a Tamil (ta-*) voice installed: Android and iOS ship one, Windows needs
- * the Tamil language pack (Microsoft Valluvar), and Edge always has online
- * Tamil voices. Desktop Chrome's built-in Google voices do NOT include
- * Tamil, so we must scan getVoices() for a ta-* voice instead of trusting
- * `"speechSynthesis" in window` — with no Tamil voice the default voice
- * can't read Tamil script at all. Voices load asynchronously, so the list
- * is re-checked on every question and on the voiceschanged event.
+ * Letters are spoken by KlgTamilAudio (assets/js/tamil-audio.js) from human
+ * recordings: every vowel and consonant is recorded, and a compound letter
+ * without its own recording is blended from its two parts (க் + இ → கி).
+ * The device's Tamil voice is only a last resort, so listen mode now works
+ * on desktop Chrome and other browsers that have no Tamil voice.
  */
-const hasSpeech = "speechSynthesis" in window;
-if (hasSpeech) speechSynthesis.getVoices(); // kick off the async voice load
-
-function findTamilVoice() {
-  if (!hasSpeech) return null;
-  const voices = speechSynthesis.getVoices();
-  return voices.find((v) => v.lang && v.lang.toLowerCase().startsWith("ta")) || null;
+function canSpeakTamil(text) {
+  return !!window.KlgTamilAudio && KlgTamilAudio.canSay(text);
 }
 
 function speakTamil(text) {
-  const voice = findTamilVoice();
-  if (!voice) return;
-  speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voice;
-  utterance.lang = voice.lang;
-  utterance.rate = 0.8;
-  speechSynthesis.speak(utterance);
+  if (window.KlgTamilAudio) KlgTamilAudio.say(text);
 }
 
 function getSelectedLetters() {
@@ -264,8 +249,7 @@ function generateTamilListenQuestion(letters) {
       }
     }
 
-    const canSpeak = !!findTamilVoice();
-    if (canSpeak) speakTamil(letter.tamil);
+    const canSpeak = canSpeakTamil(letter.tamil);
     return {
       prompt: canSpeak ? "🔊" : letter.sound,
       dedupeKey: letter.tamil,
@@ -321,14 +305,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function updateSpeechNote() {
-    if (!isListen) return;
-    speechNote.textContent = findTamilVoice()
-      ? ""
-      : '⚠️ No Tamil voice found on this device — questions will show the sound (like "aa") as text instead.';
-  }
-  updateSpeechNote();
-  if (hasSpeech) speechSynthesis.addEventListener("voiceschanged", updateSpeechNote);
+  speechNote.className = "tg-voice-note";
+  if (window.KlgTamilGames) KlgTamilGames.voiceNote(speechNote);
 
   // The two choices (letter group × read/listen) are independent: letter
   // group links carry the current mode, mode links carry the current group.
@@ -365,6 +343,10 @@ document.addEventListener("DOMContentLoaded", () => {
       currentSpeech = q.speech || null;
       return q;
     },
+    // Listen mode speaks once the question is on screen; both modes say the
+    // letter again after an answer so sound and shape stay linked.
+    onQuestionShown: (q) => { if (isListen && q.speech) speakTamil(q.speech); },
+    onAnswered: (q) => speakTamil(isListen ? q.correctAnswer : q.prompt),
   });
 
   document.getElementById("start-btn").addEventListener("click", () => {

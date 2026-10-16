@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Little Learners | 33 learning games for kids</title>
-  <meta name="description" content="Explore 33 playful learning activities for kids: math, English, Tamil, science, stories, pictures, and memory. Learn at your own pace with untimed practice." />
+  <title>Little Learners | 51 learning games for kids</title>
+  <meta name="description" content="Explore 51 playful learning activities for kids: math, English, Tamil (with real voice recordings), science, stories, pictures, and memory. Learn at your own pace with untimed practice." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>" />
   <link
     href="assets/vendor/bootstrap.min.css"
@@ -55,9 +55,26 @@
     </div>
 
     </div>
+    <section class="tamil-path" aria-labelledby="tamil-path-title">
+      <div class="tamil-path-head">
+        <div><div class="eyebrow">தமிழ் கற்போம் · LEARN TAMIL STEP BY STEP</div><h2 id="tamil-path-title">Tamil learning path</h2><p>Real voices say every letter and word. Follow the steps, or jump in anywhere.</p></div>
+        <button type="button" id="tamil-jump" class="surprise-button">See all 16 Tamil games →</button>
+      </div>
+      <ol class="tamil-steps">
+        <li><a href="games/tamil-letter-chart/index.html"><span class="step-n">1</span><span class="step-icon tamil-glyph">அ</span><b>Hear the letters</b><small>Letter Chart</small></a></li>
+        <li><a href="games/tamil-letter-pop/index.html"><span class="step-n">2</span><span class="step-icon">🫧</span><b>Find the letters</b><small>Letter Bubbles</small></a></li>
+        <li><a href="games/tamil-tracing/index.html"><span class="step-n">3</span><span class="step-icon">✏️</span><b>Write the letters</b><small>Trace Tamil Letters</small></a></li>
+        <li><a href="games/tamil-short-long/index.html"><span class="step-n">4</span><span class="step-icon">🐜</span><b>Short &amp; long</b><small>Short or Long?</small></a></li>
+        <li><a href="games/tamil-sound-blend/index.html"><span class="step-n">5</span><span class="step-icon tamil-glyph">கி</span><b>Blend sounds</b><small>Sound Blender</small></a></li>
+        <li><a href="games/tamil-first-letter/index.html"><span class="step-n">6</span><span class="step-icon">🔤</span><b>First sounds</b><small>First Letter</small></a></li>
+        <li><a href="games/tamil-listen-find/index.html"><span class="step-n">7</span><span class="step-icon">👂</span><b>Learn words</b><small>Listen &amp; Find</small></a></li>
+        <li><a href="games/tamil-word-puzzle/index.html"><span class="step-n">8</span><span class="step-icon">🧱</span><b>Build words</b><small>Word Puzzle</small></a></li>
+        <li><a href="games/tamil-sentence-words/index.html"><span class="step-n">9</span><span class="step-icon">📝</span><b>Write sentences</b><small>Sentence Words</small></a></li>
+      </ol>
+    </section>
     <section id="library" class="library-controls"><div class="library-heading"><div><div class="eyebrow">FOLLOW YOUR CURIOSITY</div><h2>What shall we play?</h2></div><button id="surprise-btn" type="button" class="surprise-button">🎲 Surprise me</button></div>
     <div class="search-row"><label class="search-box"><span aria-hidden="true">⌕</span><input id="game-search" type="search" placeholder="Find a game…" aria-label="Search games"></label><label class="level-select">Learning stage <select id="level-filter"><option value="all">All ages & stages</option><option value="1">First steps · ages 3–5</option><option value="2">Building blocks · ages 5–7</option><option value="3">Level up · ages 7–9</option><option value="4">Brain boost · ages 9+</option></select></label></div>
-    <div class="subject-tabs" role="group" aria-label="Filter by subject"><button data-subject="all" aria-pressed="true">All games</button><button data-subject="math" aria-pressed="false">🔢 Math</button><button data-subject="language" aria-pressed="false">📚 Words & letters</button><button data-subject="world" aria-pressed="false">🌍 Our world</button><button data-subject="logic" aria-pressed="false">🧩 Thinking skills</button><button data-subject="favorites" aria-pressed="false">♡ Favorites</button></div><p id="filter-status" class="filter-status" role="status"></p><div id="empty-games" hidden><h3>No games found yet</h3><p>Try another word or learning stage.</p><button id="clear-filters">Show all games</button></div>
+    <div class="subject-tabs" role="group" aria-label="Filter by subject"><button data-subject="all" aria-pressed="true">All games</button><button data-subject="math" aria-pressed="false">🔢 Math</button><button data-subject="language" aria-pressed="false">📚 Words & letters</button><button data-subject="tamil" aria-pressed="false" class="tamil-tab">அ Tamil · தமிழ்</button><button data-subject="world" aria-pressed="false">🌍 Our world</button><button data-subject="logic" aria-pressed="false">🧩 Thinking skills</button><button data-subject="favorites" aria-pressed="false">♡ Favorites</button></div><p id="filter-status" class="filter-status" role="status"></p><div id="empty-games" hidden><h3>No games found yet</h3><p>Try another word or learning stage.</p><button id="clear-filters">Show all games</button></div>
     </section>
     <!-- ---------------- Level 1 ---------------- -->
     <section id="level-1" class="mb-5">
@@ -154,6 +171,11 @@
             </div>
           </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-letter-chart/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-letter-chart"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">அ</div><h3 class="h4 fw-bold text-dark">Tamil Letter Chart</h3><p class="text-muted mb-0">Tap any of 247 letters to hear a real voice.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-listen-find/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-listen-find"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">👂</div><h3 class="h4 fw-bold text-dark">Listen &amp; Find</h3><p class="text-muted mb-0">Hear a Tamil word. Tap its picture.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-letter-pop/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-letter-pop"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🫧</div><h3 class="h4 fw-bold text-dark">Letter Bubbles</h3><p class="text-muted mb-0">Hear a Tamil letter. Pop its bubble!</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-tracing/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-tracing"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">✏️</div><h3 class="h4 fw-bold text-dark">Trace Tamil Letters</h3><p class="text-muted mb-0">Write big dotted letters with your finger.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-numbers/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-numbers"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🔢</div><h3 class="h4 fw-bold text-dark">Tamil Numbers</h3><p class="text-muted mb-0">Count and hear ஒன்று to பத்து.</p></div></div></a></div>
       </div>
     </section>
 
@@ -240,6 +262,14 @@
             </div>
           </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-short-long/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-short-long"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🐜</div><h3 class="h4 fw-bold text-dark">Short or Long?</h3><p class="text-muted mb-0">Hear குறில் and நெடில் sounds.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-sound-blend/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-sound-blend"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🧩</div><h3 class="h4 fw-bold text-dark">Sound Blender</h3><p class="text-muted mb-0">Join க் + இ to make கி.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-first-letter/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-first-letter"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🔤</div><h3 class="h4 fw-bold text-dark">First Letter</h3><p class="text-muted mb-0">Which letter does the word start with?</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-memory/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-memory"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🃏</div><h3 class="h4 fw-bold text-dark">Tamil Memory</h3><p class="text-muted mb-0">Match pictures to words, vowels to signs.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-letter-order/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-letter-order"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🚂</div><h3 class="h4 fw-bold text-dark">What Comes Next?</h3><p class="text-muted mb-0">Put Tamil letters in order.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/multiply-pictures/index.html" class="text-decoration-none"><div class="card game-card" data-game="multiply-pictures"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🍪</div><h3 class="h4 fw-bold text-dark">Picture Multiplication</h3><p class="text-muted mb-0">Groups, arrays and frog hops — see ×.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/divide-pictures/index.html" class="text-decoration-none"><div class="card game-card" data-game="divide-pictures"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🍰</div><h3 class="h4 fw-bold text-dark">Picture Division</h3><p class="text-muted mb-0">Share it out, group it up, find leftovers.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/share-fairly/index.html" class="text-decoration-none"><div class="card game-card" data-game="share-fairly"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🧺</div><h3 class="h4 fw-bold text-dark">Share It Fairly</h3><p class="text-muted mb-0">Deal treats onto plates. Is it fair?</p></div></div></a></div>
       </div>
     </section>
 
@@ -346,6 +376,11 @@
             </div>
           </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/tamil-word-puzzle/index.html" class="text-decoration-none"><div class="card game-card" data-game="tamil-word-puzzle"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🧱</div><h3 class="h4 fw-bold text-dark">Tamil Word Puzzle</h3><p class="text-muted mb-0">Hear a word. Build it from letter tiles.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/market-day/index.html" class="text-decoration-none"><div class="card game-card" data-game="market-day"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🛒</div><h3 class="h4 fw-bold text-dark">Market Day</h3><p class="text-muted mb-0">Shop, farm and trip stories: × or ÷?</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/fact-families/index.html" class="text-decoration-none"><div class="card game-card" data-game="fact-families"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🔺</div><h3 class="h4 fw-bold text-dark">Fact Family Triangles</h3><p class="text-muted mb-0">3 × 4 = 12, so 12 ÷ 4 = 3.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/array-garden/index.html" class="text-decoration-none"><div class="card game-card" data-game="array-garden"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🌻</div><h3 class="h4 fw-bold text-dark">Array Garden</h3><p class="text-muted mb-0">Plant rows × columns. Find every way.</p></div></div></a></div>
+        <div class="col-12 col-sm-6 col-lg-4"><a href="games/multiples-hunt/index.html" class="text-decoration-none"><div class="card game-card" data-game="multiples-hunt"><div class="card-body text-center p-4"><div class="game-card-icon mb-3">🔎</div><h3 class="h4 fw-bold text-dark">Multiples Hunt</h3><p class="text-muted mb-0">Find the times table in the hundred square.</p></div></div></a></div>
       </div>
     </section>
 
