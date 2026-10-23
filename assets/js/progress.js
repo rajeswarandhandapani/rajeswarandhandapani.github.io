@@ -370,6 +370,20 @@
     };
   }
 
+  // Offline support: every page loads this file, so it registers the service
+  // worker (sw.js at the site root, built by scripts/build-sw.cjs).
+  try {
+    if (typeof document !== "undefined" && document.currentScript && typeof navigator !== "undefined" &&
+        "serviceWorker" in navigator && location.protocol !== "file:") {
+      var swUrl = new URL("../../sw.js", document.currentScript.src).href;
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register(swUrl).catch(function () { /* offline support is optional */ });
+      });
+    }
+  } catch (e) {
+    /* no service workers here */
+  }
+
   window.KlgProgress = {
     RANKS: RANKS,
     BADGES: BADGES,

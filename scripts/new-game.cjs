@@ -137,4 +137,5 @@ if (!cat.includes(`id: "${id}"`) && !cat.includes(`"id":"${id}"`)) {
  cat = cat.replace(/\n  \];\n\n  var PATHS/, `\n    ${entry},\n  ];\n\n  var PATHS`);
  fs.writeFileSync(catPath, cat);
 }
-console.log(`Created games/${id}/ and listed it in the catalogue. Now run: npm run sync:index`);
+require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'build-sw.cjs')], { stdio: 'inherit' });
+console.log(`Created games/${id}/, listed it in the catalogue and added it to the offline list. Now run: npm run sync:index`);
