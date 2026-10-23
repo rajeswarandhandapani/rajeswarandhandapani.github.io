@@ -207,5 +207,6 @@
   window.KlgMathVis = {
     groups, array, numberLine, circled, share, triangle, pile, HOLDER_WORD,
     rand, pick, shuffle, numberChoices,
+    figure, el, sizeFor, SVG,
   };
 })();

@@ -217,6 +217,34 @@ function makeOppositeQuestion() {
   };
 }
 
+/** Picture mode: a picture of the word, answers are pictures of other words. */
+function pictureBox(word, big) {
+  const box = document.createElement("div");
+  box.className = "kv-choice";
+  box.innerHTML = `<span class="kv-emoji" aria-hidden="true" style="font-size:${big ? 3.4 : 2.6}rem">${KlgWordPics.pic(word)}</span><span class="kv-choice-text">${word}</span>`;
+  return box;
+}
+
+function makePictureOppositeQuestion() {
+  const pairs = KlgWordPics.OPPOSITES;
+  const [word, answer] = shuffle(pick(pairs));
+  const decoyWords = safeDecoys(word, answer, 12).filter((w) => KlgWordPics.has(w)).slice(0, 3);
+  if (decoyWords.length < 3) return makeOppositeQuestion();
+  const q = {
+    visual: pictureBox(word, true),
+    prompt: `Which picture shows the opposite of "${word}"?`,
+    dedupeKey: "picopp-" + word,
+    explanation: `${answer} is the opposite of ${word}.`,
+    correctAnswer: answer,
+    choices: shuffle([answer, ...decoyWords]),
+    choiceVisuals: {},
+    choiceLabels: {},
+    noChoiceListen: true,
+  };
+  q.choices.forEach((w) => { q.choiceVisuals[w] = pictureBox(w); q.choiceLabels[w] = w; });
+  return q;
+}
+
 function makeSimilarQuestion() {
   const [word, answer] = shuffle(pick(SIMILAR_PAIRS));
   const opposites = [...(OPPOSITES.get(word) || [])];
@@ -233,7 +261,7 @@ function makeSimilarQuestion() {
 
 function getMode() {
   const mode = new URLSearchParams(window.location.search).get("mode");
-  return ["opposite", "similar"].includes(mode) ? mode : "all";
+  return ["opposite", "similar", "picture"].includes(mode) ? mode : "all";
 }
 
 function loadBestMs(key) {
@@ -266,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
     all: "Opposites and words that mean the same",
     opposite: "Find the opposite word",
     similar: "Find the word that means the same",
+    picture: "Find the picture of the opposite",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
@@ -291,7 +320,8 @@ document.addEventListener("DOMContentLoaded", () => {
     totalQuestions,
     timePerQuestion: 15,
     generateQuestion: () => {
-      const kind = mode === "all" ? pick(["opposite", "opposite", "similar"]) : mode;
+      const kind = mode === "all" ? pick(["opposite", "opposite", "similar", "picture"]) : mode;
+      if (kind === "picture") return makePictureOppositeQuestion();
       return kind === "opposite" ? makeOppositeQuestion() : makeSimilarQuestion();
     },
     onFinish: ({ score, total, elapsedMs }) => {

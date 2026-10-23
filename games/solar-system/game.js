@@ -39,6 +39,73 @@ const PLANETS = [
   { name: "Neptune", emoji: "🔷" },
 ];
 
+/** Rough sizes (px) and colours so each planet is recognisable at a glance. */
+const LOOK = {
+  Mercury: { s: 14, c: "#9a8f87" }, Venus: { s: 24, c: "#e6b36a" }, Earth: { s: 25, c: "#4a90d9" }, Mars: { s: 18, c: "#c1553b" },
+  Jupiter: { s: 54, c: "#d2a679" }, Saturn: { s: 46, c: "#e3cf9c", ring: true }, Uranus: { s: 36, c: "#8fd6d8" }, Neptune: { s: 35, c: "#4a5fd1" },
+};
+
+function disc(name) {
+  const look = LOOK[name];
+  const d = document.createElement("span");
+  d.className = "kv-planet" + (look.ring ? " ring" : "");
+  d.style.setProperty("--s", look.s + "px");
+  d.style.setProperty("--c", look.c);
+  d.setAttribute("aria-hidden", "true");
+  return d;
+}
+
+/**
+ * The Sun and the eight planets in order. `named` is the list of names to
+ * show under their planets, `mark` the indexes to circle, `numbers` shows 1–8.
+ */
+function strip({ named = [], mark = [], numbers = false, label }) {
+  const f = document.createElement("figure");
+  f.className = "kv-solar";
+  f.setAttribute("role", "img");
+  f.setAttribute("aria-label", label || "The Sun and the eight planets in order from the Sun");
+  const sun = document.createElement("span");
+  sun.className = "kv-sun";
+  sun.setAttribute("aria-hidden", "true");
+  sun.textContent = "☀️";
+  f.appendChild(sun);
+  PLANETS.forEach((p, i) => {
+    const cell = document.createElement("span");
+    cell.className = "kv-pcell" + (mark.includes(i) ? " marked" : "");
+    cell.setAttribute("aria-hidden", "true");
+    cell.dataset.planet = p.name;
+    const slot = document.createElement("span");
+    slot.className = "kv-pslot";
+    slot.appendChild(disc(p.name));
+    const cap = document.createElement("span");
+    cap.className = "kv-pname";
+    cap.textContent = named.includes(p.name) ? p.name : numbers ? String(i + 1) : "";
+    cell.append(slot, cap);
+    f.appendChild(cell);
+  });
+  return f;
+}
+
+/** A planet picture with its name underneath, for answer buttons. */
+function planetChoice(name, showName = true) {
+  const box = document.createElement("div");
+  box.className = "kv-choice kv-pchoice";
+  box.appendChild(disc(name));
+  const text = document.createElement("div");
+  text.className = "kv-choice-text";
+  text.textContent = showName ? name : "";
+  box.appendChild(text);
+  return box;
+}
+
+function withPlanetPictures(q, names, showName = true) {
+  q.choiceVisuals = {};
+  q.choiceLabels = {};
+  names.forEach((n) => { q.choiceVisuals[n] = planetChoice(n, showName); q.choiceLabels[n] = n; });
+  q.noChoiceListen = true;
+  return q;
+}
+
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
 
 const FACTS = [
@@ -172,25 +239,31 @@ const FACTS = [
 ];
 
 function makeOrderQuestion() {
-  const kind = randomInt(1, 4);
+  const kind = randomInt(0, 4);
+  if (kind === 0) return makePictureQuestion();
 
   if (kind === 1) {
     const index = randomInt(0, 7);
     const answer = PLANETS[index];
     const wrongs = shuffle(PLANETS.filter((p) => p !== answer)).slice(0, 3);
-    return {
-      prompt: `Which planet is ${ORDINALS[index]} from the Sun? ☀️`,
+    const names = shuffle([answer.name, ...wrongs.map((p) => p.name)]);
+    return withPlanetPictures({
+      visual: strip({ mark: [index], numbers: true, label: `The Sun and the eight planets in order. The ${ORDINALS[index]} planet is circled.` }),
+      prompt: `Which planet is ${ORDINALS[index]} from the Sun?`,
       dedupeKey: "pos-" + index,
+      explanation: `Counting out from the Sun, ${answer.name} is ${ORDINALS[index]}.`,
       correctAnswer: answer.name,
-      choices: shuffle([answer.name, ...wrongs.map((p) => p.name)]),
-    };
+      choices: names,
+    }, names);
   }
 
   if (kind === 2) {
     const index = randomInt(0, 7);
     const planet = PLANETS[index];
     return {
-      prompt: `How far from the Sun is ${planet.name} ${planet.emoji}?`,
+      visual: strip({ mark: [index], named: [planet.name], label: `The Sun and the eight planets in order. ${planet.name} is circled.` }),
+      explanation: `${planet.name} is ${ORDINALS[index]} from the Sun.`,
+      prompt: `How far from the Sun is ${planet.name}?`,
       dedupeKey: "ord-" + index,
       correctAnswer: ORDINALS[index],
       choices: shuffle([ORDINALS[index], ...shuffle(ORDINALS.filter((o) => o !== ORDINALS[index])).slice(0, 3)]),
@@ -202,22 +275,41 @@ function makeOrderQuestion() {
     const planet = PLANETS[index];
     const answer = PLANETS[index + 1];
     const wrongs = shuffle(PLANETS.filter((p) => p !== answer && p !== planet)).slice(0, 3);
-    return {
-      prompt: `Which planet comes right after ${planet.name} ${planet.emoji}?`,
+    const names = shuffle([answer.name, ...wrongs.map((p) => p.name)]);
+    return withPlanetPictures({
+      visual: strip({ mark: [index], named: [planet.name], numbers: false, label: `The Sun and the eight planets in order. ${planet.name} is circled.` }),
+      prompt: `Which planet comes right after ${planet.name}, moving away from the Sun?`,
       dedupeKey: "after-" + index,
+      explanation: `${answer.name} comes right after ${planet.name}.`,
       correctAnswer: answer.name,
-      choices: shuffle([answer.name, ...wrongs.map((p) => p.name)]),
-    };
+      choices: names,
+    }, names);
   }
 
   const [a, b] = shuffle(PLANETS).slice(0, 2);
   const closer = PLANETS.indexOf(a) < PLANETS.indexOf(b) ? a : b;
   return {
+    visual: strip({ mark: [PLANETS.indexOf(a), PLANETS.indexOf(b)], named: [a.name, b.name], label: `The Sun and the eight planets in order. ${a.name} and ${b.name} are circled.` }),
+    explanation: `${closer.name} is closer to the Sun.`,
     prompt: `Which planet is closer to the Sun: ${a.name} or ${b.name}?`,
     dedupeKey: `closer-${[a.name, b.name].sort().join("-")}`,
     correctAnswer: closer.name,
     choices: shuffle([a.name, b.name]),
   };
+}
+
+/** "Which picture is Saturn?" — four planet pictures, no names. */
+function makePictureQuestion() {
+  const answer = pick(PLANETS);
+  const wrongs = shuffle(PLANETS.filter((p) => p !== answer)).slice(0, 3);
+  const names = shuffle([answer.name, ...wrongs.map((p) => p.name)]);
+  return withPlanetPictures({
+    prompt: `Which picture is ${answer.name}?`,
+    dedupeKey: "pic-" + answer.name,
+    explanation: `${answer.name} looks like this. Look at its size and colour.`,
+    correctAnswer: answer.name,
+    choices: names,
+  }, names, false);
 }
 
 function makeFactQuestion() {

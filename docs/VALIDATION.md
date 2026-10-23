@@ -48,3 +48,24 @@ Reviewed Chromium screenshots of the desktop home, phone home/library, counting,
 - `tests/math-games-browser.cjs` plays every activity at 390px. For each groups or arrays question at all three levels, the number of items drawn equals the correct answer. For sharing, grouping and leftover questions, the solved picture (items per plate, loops, leftover items) matches the answer. Every question has exactly one correct choice and no duplicate choices. Market Day answers are recomputed from the story's numbers: round up for boats, round down for what you can afford, change, sharing, and "times as many".
 - The test also checks the interactive games. Share It Fairly catches an unfair share and plays 6 stories to completion. Array Garden catches a turned-around array and has every factor pair found. Multiples Hunt explains a wrong tap and completes 3 tables. Progress is saved, with no errors and no external requests.
 - Five repeated runs pass, since questions are random. One run found duplicate options in "number sentence" mode when rows = columns, which is now fixed.
+
+## Version 3 — picture everything · October 23, 2026
+
+- The library has 72 games: 21 new hand-built games and 22 existing games made picture-first. The home page, the four learning paths and the grown-up report are rendered from `assets/js/catalogue.js`.
+- `tests/catalogue.test.cjs` checks that every game folder has exactly one catalogue entry, that skills and learning-path steps are real, and that the title count and `<noscript>` list in `index.html` match. `tests/visuals.test.cjs` checks the pure maths of the pictures: clock hand angles, coin totals and fewest-coin change, fraction wording and base-10 splits. `tests/progress.test.cjs` also covers the last-five scores, per-mode stars, old records without the new fields and the new badges.
+- `tests/picture-games-browser.cjs` (`npm run test:pictures`) has 23 sections and plays every new game at every level. Highlights:
+  - Set the Clock is driven with real pointer events as well as the buttons, and the clock hands are compared with the time asked.
+  - Pizza Fractions, Coin Shop, Block Builder, Measure Lab and Picture Graphs compare the picture with the number asked for (shaded slices, coin total, block counts, marker position, scale tilt, icons drawn).
+  - The sorting, ordering and map games are driven by tap and by keyboard; wrong placements keep the question open.
+  - Another section plays the upgraded quiz games and checks each picture against the correct answer (fractions, clocks and timelines, coin trays, rulers, jugs, thermometers, scales, place-value blocks, rounding lines, ten-frames, dice, calendar grids, planet order).
+  - The home section plays rounds, then checks that path steps tick, "Next up" moves, and the grown-up report lists "Needs practice" and "Ready for next".
+  - A layout section loads every new and upgraded game at 320px. `VIEW_WIDTH=320` plays all sections at that width.
+- Random suites were repeated: the picture-vs-answer section four times, the layout check six times, `npm run test:math` three times. Running them found real bugs, now fixed: an infinite loop in a question generator at level 1, a placed picture that swallowed taps meant for its house, long Tamil words and a four-column chart overflowing at 320px, and a primary button that turned white-on-white on hover.
+- Seventeen new Tamil recordings (all 7 days, 9 of 12 months, 8 of 10 colours; 205 files, 2.0 MB) were fetched, trimmed and credited by `scripts/fetch-tamil-audio.cjs`. `tests/tamil-audio.test.cjs` checks that every MP3 exists, is small, has an open licence and is credited.
+
+### Practical limits
+
+- The new Tamil sentences (the four-picture stories and the picture-sentence questions) were written for this milestone and have not been read by a native Tamil speaker. Please have one checked before children use them. The new recordings were checked by file analysis only; nobody has listened to all 17.
+- Pictures are emoji and inline SVG, so how they look depends on the bundled emoji font. A few newer emoji (for example the polar bear) may show as two symbols. The map and the child's body are simple sketches, not to scale.
+- No child has used these games yet. Level boundaries (for example "every minute" on the clock) are starting points, and the money games use US coins and notes.
+- Tests ran in Linux Chromium only, not on physical phones, Safari or Firefox. Touch dragging for the sorting games is covered by the tap alternative in the tests, not by a real finger.

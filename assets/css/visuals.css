@@ -1,0 +1,370 @@
+/* Shared pictures: clocks, fractions, money, measuring, blocks, graphs, scenes
+ * (assets/js/visuals/*.js). Builds on common.css tokens. */
+
+[class*="kv-"] { box-sizing: border-box; }
+figure[class*="kv-"] { margin: 0 auto; max-width: 100%; }
+.kv-tick { stroke: #203341; stroke-width: 1.5; }
+.kv-tick-big { stroke: #203341; stroke-width: 3; }
+.kv-tl-line { stroke: #203341; stroke-width: 3; }
+.kv-tl-label { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #203341; }
+
+/* Clock */
+.kv-clock svg { width: 100%; max-width: 220px; height: auto; display: block; margin: 0 auto; }
+.kv-clock-face { fill: #fff; stroke: #4055b5; stroke-width: 6; }
+.kv-clock-num { font: 700 17px "Segoe UI", Arial, sans-serif; fill: #203341; }
+.kv-hand-hour { stroke: #203341; stroke-width: 8; stroke-linecap: round; }
+.kv-hand-min { stroke: #b64261; stroke-width: 5; stroke-linecap: round; }
+.kv-clock-pin { fill: #203341; }
+.kv-clock-live svg { touch-action: none; cursor: grab; }
+.kv-timeline svg { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+.kv-tl-span { fill: #8fd3b0; stroke: #24754c; stroke-width: 2; }
+.kv-tl-end { font-size: 16px; }
+
+/* Fractions */
+.kv-frac svg { width: 100%; max-width: 190px; height: auto; display: block; margin: 0 auto; }
+.kv-slice { fill: #fff; stroke: #4055b5; stroke-width: 3; transition: fill 0.15s; }
+.kv-slice.on { fill: #7bc67e; }
+.kv-live .kv-slice { cursor: pointer; }
+.kv-live-status { text-align: center; font-weight: 700; color: #4055b5; margin-top: 6px; }
+.kv-bar-row { display: flex; width: min(320px, 100%); margin: 0 auto; border: 3px solid #4055b5; border-radius: 8px; overflow: hidden; background: #fff; }
+.kv-part { flex: 1; height: 40px; border-right: 2px solid #4055b5; }
+.kv-part:last-child { border-right: 0; }
+.kv-part.on { background: #7bc67e; }
+.kv-set-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 320px; margin: 0 auto; }
+.kv-set-item { font-size: 2rem; padding: 4px; border-radius: 10px; opacity: 0.35; filter: grayscale(0.8); }
+.kv-set-item.on { opacity: 1; filter: none; background: #e6f6e7; }
+.kv-fline svg { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+.kv-marker { fill: #b64261; stroke: #fff; stroke-width: 2; }
+.kv-stacked { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.kv-stacked figure { width: 100%; }
+
+/* Money */
+.kv-tray { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 8px; }
+.kv-coin { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font: 800 0.85rem "Segoe UI", Arial, sans-serif; color: #3a2a12; border: 3px solid rgba(0, 0, 0, 0.25); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35); width: 44px; height: 44px; user-select: none; }
+.kv-c1 { background: #d98b5f; width: 38px; height: 38px; }
+.kv-c5 { background: #cfd5da; width: 44px; height: 44px; }
+.kv-c10 { background: #dfe3e6; width: 36px; height: 36px; font-size: 0.78rem; }
+.kv-c25 { background: #d3d8dc; width: 52px; height: 52px; font-size: 0.95rem; }
+.kv-c50 { background: #c8cdd2; width: 60px; height: 60px; font-size: 1rem; }
+.kv-note { display: inline-flex; align-items: center; justify-content: center; width: 86px; height: 44px; border-radius: 6px; border: 3px solid #3d7a4b; background: repeating-linear-gradient(135deg, #cfe9d2 0 8px, #bfe0c4 8px 16px); font: 800 1.1rem "Segoe UI", Arial, sans-serif; color: #1f4d2b; }
+.kv-n500 { background: repeating-linear-gradient(135deg, #e0d4f0 0 8px, #d3c3ea 8px 16px); border-color: #6c4fa0; color: #3c2a63; }
+.kv-n1000 { background: repeating-linear-gradient(135deg, #fbe1c5 0 8px, #f5d1a8 8px 16px); border-color: #b0701f; color: #6a410f; }
+.kv-n2000 { background: repeating-linear-gradient(135deg, #cfe3f5 0 8px, #bcd6ee 8px 16px); border-color: #2f6aa0; color: #1b3f63; }
+
+/* Measuring */
+.kv-measure svg { width: 100%; max-width: 360px; height: auto; display: block; margin: 0 auto; }
+.kv-obj { fill: #fff6d6; stroke: #b08a1f; stroke-width: 2; }
+.kv-obj-emoji { font-size: 22px; }
+.kv-ruler-body { fill: #ffe69a; stroke: #b08a1f; stroke-width: 2; }
+.kv-stand, .kv-beam, .kv-pan { fill: #8a6a42; stroke: #5d4526; stroke-width: 2; }
+.kv-pan-emoji { font-size: 22px; }
+.kv-balance svg { max-width: 300px; }
+.kv-glass { fill: none; stroke: #4055b5; stroke-width: 3; }
+.kv-water { fill: #6ac1e8; }
+.kv-jug svg { max-width: 200px; }
+.kv-thermo svg { max-width: 160px; }
+.kv-glass-fill { fill: #fff; stroke: #4055b5; stroke-width: 3; }
+.kv-mercury { fill: #d64545; }
+
+/* Base-10 blocks */
+.kv-blocks { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 14px; padding: 8px; }
+.kv-bgroup { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; max-width: 100%; }
+.kv-bgroup.dim { opacity: 0.25; }
+.kv-b { display: inline-block; border: 2px solid #1f5f93; background: #9ccbee; border-radius: 2px; }
+.kv-flat { width: 54px; height: 54px; background: repeating-linear-gradient(0deg, #9ccbee 0 4px, #7fb7e0 4px 5px), #9ccbee; }
+.kv-rod { width: 12px; height: 54px; background: repeating-linear-gradient(180deg, #9ccbee 0 4px, #7fb7e0 4px 5px); border-color: #2f8f5b; background-color: #a8dcbc; }
+.kv-cube { width: 12px; height: 12px; background: #f5c16c; border-color: #b07a1f; }
+.kv-pvchart table { margin: 0 auto; border-collapse: collapse; }
+.kv-pvchart th, .kv-pvchart td { border: 2px solid #4055b5; padding: 4px 14px; text-align: center; font-weight: 800; }
+.kv-pvchart th { background: #e9edff; font-size: 0.8rem; }
+.kv-pvchart td { font-size: 1.6rem; }
+
+/* Graphs */
+.kv-graph { width: min(420px, 100%); }
+.kv-grow { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px dashed #d4dce3; }
+.kv-glabel { width: 90px; font-weight: 700; text-align: left; flex: none; }
+.kv-gicons { display: flex; flex-wrap: wrap; font-size: 1.6rem; gap: 2px; }
+.kv-gkey { text-align: right; font-size: 0.85rem; color: #60717a; padding-top: 4px; }
+.kv-gtrack { flex: 1; background: #eef1f5; border-radius: 6px; overflow: hidden; }
+.kv-gfill { display: block; background: #6c8ae4; color: #fff; font-weight: 800; padding: 2px 8px; min-width: 24px; text-align: right; border-radius: 6px; }
+.kv-tally { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+.kv-tgroup { position: relative; display: inline-flex; gap: 5px; height: 40px; }
+.kv-tgroup i { width: 4px; background: #203341; border-radius: 2px; }
+.kv-tgroup.five::after { content: ""; position: absolute; left: -4px; right: -4px; top: 18px; height: 4px; background: #b64261; transform: rotate(-24deg); border-radius: 2px; }
+.kv-tgroup.five { gap: 5px; }
+.kv-tgroup.five::before { content: ""; display: none; }
+
+/* Scenes */
+.kv-scene { position: relative; width: min(360px, 100%); border-radius: 14px; overflow: hidden; border: 2px solid #dce4e9; line-height: 1; }
+.kv-ground, .kv-waterband { position: absolute; left: 0; right: 0; bottom: 0; height: 38%; }
+.kv-waterband { height: 55%; opacity: 0.9; }
+.kv-sitem { position: absolute; }
+
+/* Play kit (assets/js/play-kit.js) */
+.pk-pool, .pk-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 12px 0; min-height: 70px; }
+.pk-item, .pk-card, .pk-tile { min-width: 64px; min-height: 64px; font-size: 1.9rem; border: 3px solid #4055b5; border-radius: 14px; background: #fff; padding: 6px 12px; touch-action: none; }
+.pk-item[aria-pressed="true"], .pk-card:focus-visible { background: #e9edff; box-shadow: 0 0 0 4px #9fb0ff; }
+.pk-item.placed { border-color: #7bc67e; background: #e6f6e7; pointer-events: none; }
+.pk-tile { font-size: 1.5rem; font-weight: 700; touch-action: manipulation; }
+.pk-bins { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.pk-bin { flex: 1 1 140px; min-height: 120px; border: 3px dashed #4055b5; border-radius: 16px; background: #f5f7ff; padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pk-bin-title { font-weight: 800; font-size: 1.05rem; }
+.pk-bin-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.pk-shake { animation: pk-shake 0.4s; }
+@keyframes pk-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .pk-shake { animation: none; outline: 3px solid #bd3e44; } }
+.pk-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 12px 0; }
+.pk-slot { position: relative; width: 92px; min-height: 92px; border: 3px dashed #9aa7d8; border-radius: 14px; background: #f5f7ff; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; padding: 4px; }
+.pk-slot.full { border-style: solid; border-color: #4055b5; background: #fff; }
+.pk-slot.right { border-color: #24754c; background: #e6f6e7; }
+.pk-slot.wrong { border-color: #bd3e44; background: #fdeaea; }
+.pk-slot-n { position: absolute; top: 2px; left: 8px; font-size: 0.8rem; font-weight: 800; color: #60717a; }
+.pk-slot.full .pk-slot-n { display: none; }
+.pk-answer { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px 0; }
+.pk-aslot { min-width: 56px; min-height: 60px; border: 3px dashed #9aa7d8; border-radius: 12px; background: #f5f7ff; font-size: 1.5rem; font-weight: 800; padding: 4px 10px; }
+.pk-aslot.full { border-style: solid; border-color: #4055b5; background: #fff; }
+.pk-hot { cursor: pointer; transition: fill 0.15s, opacity 0.15s; }
+.pk-hot:hover, .pk-hot:focus-visible { opacity: 0.8; }
+.pk-hot.right { fill: #7bc67e; }
+.pk-hot.wrong { fill: #f2a1a1; }
+
+/* Picture answer buttons (QuizEngine choiceVisuals) */
+.kv-choice { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+.kv-choice .kv-bar-row { width: 100%; max-width: 180px; }
+.kv-choice .kv-part { height: 26px; }
+.kv-choice-text { font-weight: 800; font-size: 1.15rem; }
+.quiz-choice-btn.has-visual figure[class*="kv-"] svg { max-width: 120px; }
+.kv-choice figure { width: 100%; }
+.quiz-choice-btn.has-visual .kv-clock svg { max-width: 130px; }
+.quiz-visual .kv-clock svg { max-width: 200px; }
+
+/* Price tags and picture rows */
+.kv-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; }
+.kv-tag { margin: 0; display: inline-flex; flex-direction: column; align-items: center; min-width: 74px; padding: 6px 12px; border: 3px solid #b0701f; border-radius: 6px 14px 14px 6px; background: #fff7e0; }
+.kv-tag-pic { font-size: 2rem; line-height: 1.1; }
+.kv-tag-price { font-weight: 800; font-size: 1.1rem; color: #6a410f; }
+.quiz-choice-btn.has-visual .kv-tray { padding: 2px; gap: 3px; }
+.quiz-choice-btn.has-visual .kv-coin { width: 30px; height: 30px; font-size: 0.62rem; border-width: 2px; }
+.quiz-choice-btn.has-visual .kv-note { width: 56px; height: 30px; font-size: 0.8rem; border-width: 2px; }
+.kv-thou { width: 54px; height: 54px; background: linear-gradient(135deg, #f7b7a3 0 50%, #f19a80 50%); border-color: #b4452a; border-radius: 6px; position: relative; }
+.kv-blocks.compact .kv-flat { width: 28px; height: 28px; }
+.kv-blocks.compact .kv-rod { width: 7px; height: 28px; }
+.kv-blocks.compact .kv-cube { width: 7px; height: 7px; }
+.kv-blocks.compact .kv-thou { width: 34px; height: 34px; }
+.kv-blocks.compact { gap: 10px; }
+.kv-roundline svg { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
+.kv-roundline .kv-dot { fill: #b64261; stroke: #fff; stroke-width: 2; }
+.kv-roundline .kv-mid { stroke: #24754c; stroke-dasharray: 3 3; stroke-width: 2; }
+.kv-roundline .kv-mid-label { font: 700 11px "Segoe UI", Arial, sans-serif; fill: #24754c; }
+.kv-tenframes { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.kv-frame { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 3px; border: 2px solid #4055b5; border-radius: 6px; background: #4055b5; width: 110px; }
+.kv-cell { height: 20px; background: #fff; border-radius: 2px; font-size: 0.8rem; line-height: 20px; text-align: center; }
+.quiz-choice-btn.has-visual .kv-frame { width: 84px; }
+.quiz-choice-btn.has-visual .kv-cell { height: 15px; line-height: 15px; font-size: 0.6rem; }
+.quiz-visual .kv-row .kv-choice { width: auto; flex: 1 1 140px; max-width: 220px; }
+.kv-pvchart.small th, .kv-pvchart.small td { padding: 2px 8px; }
+.kv-cell.c1 { background: #ffd9d9; }
+.kv-cell.c2 { background: #d9e8ff; }
+.kv-cell.c1::after, .kv-cell.c2::after { content: ""; display: block; width: 14px; height: 14px; margin: 3px auto; border-radius: 50%; }
+.kv-cell.c1::after { background: #d64545; }
+.kv-cell.c2::after { background: #2f6aa0; }
+.kv-cell.x { background: #fdeaea; color: #bd3e44; font-weight: 800; }
+.kv-op { font-size: 2rem; font-weight: 800; color: #4055b5; }
+.kv-addsub { margin-bottom: 4px; }
+.kv-dice { display: flex; justify-content: center; gap: 14px; margin: 0 auto; }
+.kv-die { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 86px; height: 86px; padding: 10px; background: #fff; border: 4px solid #203341; border-radius: 16px; box-shadow: 0 4px 0 #203341; }
+.kv-die > span { display: flex; align-items: center; justify-content: center; }
+.kv-pip { position: relative; }
+.kv-pip::after { content: ""; width: 14px; height: 14px; background: #203341; border-radius: 50%; display: block; }
+.kv-towers { gap: 6px; }
+.kv-tower { display: inline-flex; padding: 4px 6px; }
+.kv-next { font-size: 2rem; font-weight: 800; color: #b64261; border: 3px dashed #b64261; border-radius: 12px; min-width: 52px; min-height: 52px; align-items: center; justify-content: center; }
+
+/* Month calendar */
+.kv-month table { margin: 0 auto; border-collapse: separate; border-spacing: 3px; }
+.kv-month th { font-size: 0.7rem; color: #60717a; text-align: center; padding: 2px; }
+.kv-month td { width: 36px; height: 32px; text-align: center; background: #fff; border: 1px solid #dce4e9; border-radius: 6px; font-weight: 700; font-size: 0.9rem; }
+.kv-month td:empty { background: transparent; border-color: transparent; }
+.kv-month td.on { background: #ffe69a; border: 3px solid #b64261; color: #203341; }
+@media (max-width: 380px) { .kv-month td { width: 32px; } }
+
+/* "Show me" hint (QuizEngine hintVisual) */
+.quiz-hint { margin: 0 auto 12px; text-align: center; }
+.quiz-hint-btn { border: 2px solid #b34c13; background: #fff7f0; color: #7a3406; border-radius: 999px; padding: 8px 18px; font-weight: 700; }
+
+/* Emoji clues and picture answers */
+.kv-clue { margin: 0 auto; text-align: center; font-size: 3.4rem; line-height: 1.2; letter-spacing: 4px; }
+.kv-emoji { font-size: 2.2rem; line-height: 1.1; }
+
+/* Solar system strip */
+.kv-solar { --k: 1; display: flex; align-items: flex-end; justify-content: center; gap: calc(6px * var(--k)); margin: 0 auto; flex-wrap: nowrap; }
+.kv-sun { font-size: calc(2.4rem * var(--k)); line-height: 1; align-self: center; }
+.kv-pcell { display: flex; flex-direction: column; align-items: center; padding: 3px 2px; border-radius: 10px; border: 3px solid transparent; }
+.kv-pcell.marked { border-color: #b64261; background: #fff0f4; }
+.kv-pslot { display: flex; align-items: center; justify-content: center; height: calc(56px * var(--k)); }
+.kv-pname { font-size: 0.65rem; font-weight: 800; color: #203341; min-height: 1em; }
+.kv-planet { display: inline-block; border-radius: 50%; width: calc(var(--s) * var(--k, 1)); height: calc(var(--s) * var(--k, 1)); background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 40%), var(--c); box-shadow: inset -4px -4px 8px #00000030; position: relative; }
+.kv-planet.ring::after { content: ""; position: absolute; left: -35%; right: -35%; top: 38%; height: 24%; border: 3px solid #b99c6a; border-radius: 50%; transform: rotate(-18deg); }
+.kv-pchoice { min-height: 74px; justify-content: center; }
+.kv-pchoice .kv-planet { --k: 1; }
+@media (max-width: 420px) { .kv-solar { --k: 0.72; } .kv-pname { font-size: 0.55rem; } }
+
+/* Shapes */
+.kv-shape svg { width: 100%; max-width: 150px; height: auto; display: block; margin: 0 auto; }
+.kv-fill { fill: #8fd3b0; stroke: #24754c; stroke-width: 4; stroke-linejoin: round; }
+.kv-face-a { fill: #9fb4f0; stroke: #3f56b3; stroke-width: 3; stroke-linejoin: round; }
+.kv-face-b { fill: #c9d6ff; stroke: #3f56b3; stroke-width: 3; stroke-linejoin: round; }
+.kv-face-c { fill: #7c97e6; stroke: #3f56b3; stroke-width: 3; stroke-linejoin: round; }
+.kv-edge { stroke: #3f56b3; stroke-width: 3; }
+.quiz-choice-btn.has-visual .kv-shape svg { max-width: 90px; }
+.quiz-choice-btn.has-visual .kv-scene { width: 100%; }
+.quiz-choice-btn.has-visual .kv-sitem { font-size: 1.3em !important; }
+
+/* Hand-built game stage and shared controls */
+.kv-stage { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 120px; }
+.kv-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.kv-btn { min-width: 52px; min-height: 48px; border: 2px solid #4055b5; border-radius: 12px; background: #fff; color: #273b84; font-weight: 800; padding: 6px 14px; }
+.kv-btn:hover:not(:disabled) { background: #eef1ff; }
+.kv-btn.primary { background: #4055b5; color: #fff; }
+.kv-btn:disabled { opacity: 0.45; }
+.kv-readout { font-size: 2rem; font-weight: 800; color: #203341; font-variant-numeric: tabular-nums; }
+.mg-feedback.good { color: #24754c; }
+.mg-feedback.try { color: #8a4b0f; }
+
+/* Pizza fractions */
+.kv-pizza .kv-slice { fill: #ffe9b8; stroke: #b4651f; }
+.kv-pizza .kv-slice.on { fill: #e8833a; }
+.kv-pizza svg { max-width: 210px; }
+.pk-card .kv-pizza svg, .pk-slot .kv-pizza svg { max-width: 76px; }
+
+/* Coin shop */
+.kv-wallet { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 8px; border: 2px dashed #b0701f; border-radius: 14px; background: #fff7e0; }
+.kv-piece { border: 0; background: transparent; padding: 2px; border-radius: 10px; min-height: 48px; }
+.kv-piece:hover:not(:disabled), .kv-piece:focus-visible { background: #fff; box-shadow: 0 0 0 3px #4055b5; }
+.kv-paytray { min-height: 70px; width: 100%; max-width: 420px; border: 2px solid #4055b5; border-radius: 14px; background: #f5f7ff; color: #60717a; }
+
+/* Block builder */
+.kv-work { min-height: 90px; width: 100%; border: 2px dashed #4055b5; border-radius: 14px; background: #f5f7ff; color: #60717a; }
+.kv-removable { cursor: pointer; padding: 0; }
+.kv-removable:hover { outline: 3px solid #b64261; }
+
+/* Shape detectives */
+.kv-shapegrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(340px, 100%); }
+.kv-shapecell { border: 3px solid #dce4e9; border-radius: 14px; background: #fff; padding: 4px; min-height: 96px; }
+.kv-shapecell.on { border-color: #4055b5; background: #eef1ff; box-shadow: 0 0 0 3px #9fb0ff; }
+.kv-shapecell svg { max-width: 84px; }
+.kv-mirror { display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 3.4rem; }
+.kv-mirror-line { align-self: stretch; border-left: 4px dashed #b64261; min-height: 70px; }
+.kv-mirror-q { width: 64px; height: 64px; border: 3px dashed #4055b5; border-radius: 12px; font-size: 2rem; font-weight: 800; color: #4055b5; display: inline-flex; align-items: center; justify-content: center; }
+.kv-mirror-opt { min-width: 76px; min-height: 76px; }
+.kv-marker-line { stroke: #b64261; stroke-width: 3; }
+.kv-slider { width: min(340px, 100%); height: 36px; accent-color: #b64261; }
+
+/* Fixes found in review */
+.kv-btn.primary:hover:not(:disabled) { background: #2f4296; }
+.kv-readout { font-size: 1.6rem; text-align: center; }
+.kv-glabel { width: 118px; font-size: 0.92rem; overflow-wrap: break-word; }
+
+/* Phonics */
+.kv-letters { display: flex; gap: 10px; justify-content: center; }
+.kv-letter { min-width: 56px; padding: 6px 12px; text-align: center; font-size: 2.6rem; font-weight: 800; border: 3px solid #4055b5; border-radius: 14px; background: #fff; color: #203341; animation: kv-pop 0.4s both; }
+@keyframes kv-pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .kv-letter { animation: none; } }
+.kv-picbtn { min-width: 84px; min-height: 84px; }
+.kv-wordcard { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+.pk-item .kv-emoji { font-size: 2rem; }
+.pk-item .kv-choice-text { font-size: 0.95rem; }
+
+/* Sight word bubbles */
+.kv-sea { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width: min(360px, 100%); padding: 10px; border-radius: 18px; background: linear-gradient(#e8f6ff, #cfeaff); }
+.kv-bubble { min-height: 84px; border: 3px solid hsl(var(--h) 60% 45%); border-radius: 50%; background: radial-gradient(circle at 30% 25%, #ffffffcc, hsl(var(--h) 80% 85%) 60%); color: #203341; font-size: 1.7rem; font-weight: 800; animation: kv-float 3s ease-in-out infinite; }
+.kv-bubble:disabled:not(.popped) { opacity: 0.45; }
+.kv-bubble.popped { animation: kv-popout 0.4s forwards; }
+.kv-bubble.wobble { animation: pk-shake 0.4s; }
+@keyframes kv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes kv-popout { to { transform: scale(1.4); opacity: 0.15; } }
+@media (prefers-reduced-motion: reduce) { .kv-bubble { animation: none; } .kv-bubble.popped { opacity: 0.3; } }
+
+/* Story cards */
+.kv-storycard { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; max-width: 92px; }
+.kv-caption { font-size: 0.72rem; font-weight: 700; line-height: 1.15; color: #203341; }
+.pk-card .kv-storycard { max-width: 86px; }
+.pk-slot .kv-storycard { max-width: 82px; }
+.pk-slot { min-height: 112px; }
+
+/* Layout fixes: round bubbles, ordered slots stay on one row */
+.kv-bubble { aspect-ratio: 1 / 1; min-height: 0; width: 100%; max-width: 130px; justify-self: center; }
+.pk-slots { flex-wrap: nowrap; }
+.pk-slot { flex: 1 1 0; min-width: 0; width: auto; max-width: 92px; }
+.pk-slot .kv-caption { font-size: 0.62rem; }
+.pk-slot .kv-storycard .kv-emoji { font-size: 1.8rem !important; }
+
+/* Tamil days, months and colours */
+.kv-week, .kv-year { display: grid; gap: 6px; }
+.kv-week { grid-template-columns: repeat(7, 1fr); width: min(360px, 100%); }
+.kv-year { grid-template-columns: repeat(4, 1fr); width: min(300px, 100%); }
+.kv-cell2 { display: flex; align-items: center; justify-content: center; min-height: 48px; border: 3px solid #dce4e9; border-radius: 12px; background: #fff; font-weight: 800; font-size: 1.1rem; color: #203341; }
+button.kv-cell2:hover:not(:disabled) { border-color: #4055b5; }
+button.kv-cell2:disabled { opacity: 0.4; }
+.kv-cell2.lit { background: #ffe69a; border-color: #b64261; }
+.kv-swatches { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.kv-swatch { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #203341; display: inline-block; padding: 0; }
+button.kv-swatch:disabled { opacity: 0.3; }
+.kv-btn.tamil-glyph { font-size: 1.3rem; }
+
+/* Tamil sentences with tappable words */
+.kv-tamil-sentence { font-size: 1.45rem; line-height: 2.2; text-align: center; margin: 0; max-width: 100%; }
+.kv-tword { border: 0; background: transparent; padding: 2px 3px; border-radius: 8px; font: inherit; color: #203341; }
+.kv-tword:hover { background: #eef1ff; }
+.kv-tword.key { background: #ffe69a; font-weight: 800; box-shadow: 0 0 0 2px #b0701f; }
+
+/* Tamil–English match */
+.kv-matchboard { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: min(380px, 100%); }
+.kv-matchcol { display: flex; flex-direction: column; gap: 10px; }
+.kv-matchcell { min-height: 62px; font-size: 1.15rem; }
+.kv-matchcell.sel { background: #ffe69a; border-color: #b0701f; }
+.kv-matchcell.done { background: #e6f6e7; border-color: #24754c; color: #24754c; pointer-events: none; }
+
+/* Tamil story panels */
+.kv-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(400px, 100%); }
+.kv-panel { margin: 0; border: 3px solid #dce4e9; border-radius: 14px; background: #fff; padding: 8px; text-align: center; }
+.kv-panel-pic { font-size: 3rem; line-height: 1.2; }
+.kv-panel-cap { font-size: 0.98rem; line-height: 1.55; }
+.kv-tword.rec { text-decoration: underline dotted #b0701f; text-underline-offset: 4px; }
+.kv-english { font-size: 0.8rem; color: #60717a; }
+.kv-question { font-size: 1.25rem; font-weight: 800; text-align: center; margin: 4px 0; }
+
+/* Life cycles */
+.kv-cyclerow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+.kv-cyclecell { min-width: 70px; min-height: 84px; padding: 4px; border: 3px solid #dce4e9; border-radius: 12px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.kv-cyclecell.kv-next { border: 3px dashed #b64261; font-size: 2rem; font-weight: 800; color: #b64261; }
+.kv-picbtn .kv-storycard { max-width: 76px; }
+
+/* My body */
+.kv-child { width: min(220px, 70vw); height: auto; }
+.kv-child .pk-hot { cursor: pointer; }
+.kv-child .pk-hot:hover, .kv-child .pk-hot:focus-visible { fill: #ffe69a88; stroke: #b64261; stroke-width: 2; outline: none; }
+.kv-child .pk-hot.right { fill: #7bc67e99; stroke: #24754c; stroke-width: 2; }
+
+/* Weather & seasons */
+.kv-itemgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(360px, 100%); }
+.kv-itemcell { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 92px; padding: 6px; border: 3px solid #dce4e9; border-radius: 14px; background: #fff; }
+.kv-itemcell.on { border-color: #4055b5; background: #eef1ff; box-shadow: 0 0 0 3px #9fb0ff; }
+
+/* Map explorer */
+.kv-map { width: min(380px, 100%); height: auto; }
+.kv-map .pk-hot { cursor: pointer; }
+.kv-map .pk-hot:hover, .kv-map .pk-hot:focus-visible { filter: brightness(1.12); stroke: #b64261; stroke-width: 2.5; outline: none; }
+.kv-map .pk-hot.right { fill: #7bc67e; stroke: #24754c; stroke-width: 2.5; }
+.kv-map .pk-hot.wrong { fill: #f2a1a1; }
+.kv-matchboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.kv-matchcell { overflow-wrap: anywhere; padding: 4px 6px; font-size: clamp(0.95rem, 4.4vw, 1.15rem); }
+.kv-pvchart { width: 100%; }
+.kv-pvchart table { width: 100%; max-width: 360px; table-layout: fixed; }
+.kv-pvchart th { padding: 4px 2px; font-size: clamp(0.55rem, 2.6vw, 0.8rem); overflow-wrap: anywhere; }
+.kv-pvchart td { padding: 4px 6px; }
+.kv-itemgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kv-itemcell { min-width: 0; padding: 4px; }
+.kv-itemcell .kv-choice-text { font-size: 0.78rem; overflow-wrap: anywhere; text-align: center; line-height: 1.1; }
+.kv-pcell { padding: 3px 1px; border-width: 2px; }
+@media (max-width: 360px) { .kv-solar { --k: 0.6; gap: 3px; } .kv-pname { font-size: 0.5rem; } }

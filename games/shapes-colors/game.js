@@ -6,7 +6,11 @@
  *                             star?" plus everyday objects (a door is a…?)
  *  - color   (?mode=color):  "What color is this? 🟢" / "Which one is red?"
  *                             plus everyday objects (a banana is…?)
- *  - sides   (?mode=sides):  sides and corners of polygons — asked as words
+ *  - solid   (?mode=solid):  3D shapes drawn as pictures: name the solid,
+ *                             find an everyday object with that shape, count
+ *                             faces, edges and corners of a cube.
+ *  - sides   (?mode=sides):  sides and corners of polygons — drawn so they
+ *                             can be counted
  *                             so shapes with no emoji (hexagon, octagon)
  *                             can join in.
  *
@@ -235,6 +239,8 @@ function makeSidesQuestion() {
   const word = kind <= 3 ? "sides" : "corners";
   const wrongs = shuffle([2, 3, 4, 5, 6, 7, 8, 10].filter((n) => n !== shape.sides)).slice(0, 3);
   return {
+    visual: KlgShapes.polygon(shape.name),
+    explanation: `A ${shape.name} has ${shape.sides} sides and ${shape.sides} corners.`,
     prompt: `How many ${word} does ${an(shape.name)} have?`,
     dedupeKey: `${word}-${shape.name}`,
     correctAnswer: shape.sides,
@@ -242,9 +248,52 @@ function makeSidesQuestion() {
   };
 }
 
+/** Everyday things for each solid, so children link the picture to the real world. */
+const SOLID_OBJECTS = { cube: ["🎲", "🧊", "📦"], sphere: ["⚽", "🏀", "🌍"], cylinder: ["🥫", "🛢️"], cone: ["🍦"] };
+const SOLIDS = ["cube", "sphere", "cylinder", "cone", "pyramid"];
+
+function makeSolidQuestion() {
+  const kind = randomInt(1, 4);
+  if (kind <= 2) {
+    const name = pick(SOLIDS);
+    return {
+      visual: KlgShapes.solid(name, { label: "A 3D shape" }),
+      prompt: "What 3D shape is this?",
+      dedupeKey: "solid-" + name,
+      explanation: `It is a ${name}.`,
+      correctAnswer: capitalize(name),
+      choices: shuffle([capitalize(name), ...shuffle(SOLIDS.filter((s) => s !== name)).slice(0, 3).map(capitalize)]),
+    };
+  }
+  if (kind === 3) {
+    const name = pick(["cube", "sphere", "cylinder"]);
+    const object = pick(SOLID_OBJECTS[name]);
+    const wrongs = shuffle(["cube", "sphere", "cylinder", "cone"].filter((s) => s !== name)).slice(0, 3).map((s) => pick(SOLID_OBJECTS[s]));
+    const q = {
+      visual: KlgShapes.solid(name),
+      prompt: `Which one is shaped like this ${name}?`,
+      dedupeKey: "obj-" + name + object,
+      explanation: `${object} is shaped like a ${name}.`,
+      correctAnswer: object,
+      choices: shuffle([object, ...wrongs]),
+    };
+    return q;
+  }
+  const q = pick([["faces", 6], ["edges", 12], ["corners", 8]]);
+  const wrongs = shuffle([4, 5, 6, 8, 10, 12, 14].filter((n) => n !== q[1])).slice(0, 3);
+  return {
+    visual: KlgShapes.solid("cube"),
+    prompt: `How many ${q[0]} does a cube have?`,
+    dedupeKey: "cube-" + q[0],
+    explanation: `A cube has 6 faces, 12 edges and 8 corners.`,
+    correctAnswer: q[1],
+    choices: shuffle([q[1], ...wrongs]),
+  };
+}
+
 function getMode() {
   const mode = new URLSearchParams(window.location.search).get("mode");
-  return ["shape", "color", "sides"].includes(mode) ? mode : "all";
+  return ["shape", "color", "sides", "solid"].includes(mode) ? mode : "all";
 }
 
 function loadBestMs(key) {
@@ -278,6 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
     shape: "Name and find the shapes",
     color: "Name and find the colors",
     sides: "How many sides and corners?",
+    solid: "Cubes, spheres, cones and cylinders",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
@@ -303,9 +353,10 @@ document.addEventListener("DOMContentLoaded", () => {
     totalQuestions,
     timePerQuestion: 20,
     generateQuestion: () => {
-      const kind = mode === "all" ? pick(["shape", "color", "shape", "color", "sides"]) : mode;
+      const kind = mode === "all" ? pick(["shape", "color", "shape", "color", "sides", "solid"]) : mode;
       const question = kind === "shape" ? makeShapeQuestion()
-        : kind === "color" ? makeColorQuestion() : makeSidesQuestion();
+        : kind === "color" ? makeColorQuestion()
+        : kind === "solid" ? makeSolidQuestion() : makeSidesQuestion();
       // Name-the-shape rounds keep the written names as optional reading
       // practice; each choice has the shared listen button beside it.
       if (!question.dedupeKey.startsWith('name-')) question.choiceDisplay = ANSWER_PICTURES;

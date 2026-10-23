@@ -90,11 +90,42 @@ function makeDistractors({ a, b, symbol, correct }, max) {
   return [...wrongs];
 }
 
+const BK = window.KlgBlocks;
+
+function symbolNode(text) {
+  const span = document.createElement("span");
+  span.className = "kv-op";
+  span.setAttribute("aria-hidden", "true");
+  span.textContent = text;
+  return span;
+}
+
+/**
+ * Within 10 and 20: counters in ten-frames (two colours for a + b, a struck
+ * out part for a − b). Two-digit sums: base-10 blocks for each number.
+ */
+function pictureFor(q, max) {
+  const box = document.createElement("div");
+  box.className = "kv-row kv-addsub";
+  if (max === 100) {
+    const left = BK.blocks(q.a, { compact: true });
+    const right = BK.blocks(q.b, { compact: true });
+    box.append(left, symbolNode(q.symbol), right);
+    return box;
+  }
+  if (q.symbol === "+") box.appendChild(BK.tenFrame(q.a + q.b, { split: q.a }));
+  else box.appendChild(BK.tenFrame(q.a, { crossed: q.b }));
+  return box;
+}
+
 function generateQuestionForMode(op, max) {
   return () => {
     const useAdd = op === "add" || (op === "mix" && randomInt(0, 1) === 0);
     const q = useAdd ? makeAdditionQuestion(max) : makeSubtractionQuestion(max);
     return {
+      visual: pictureFor(q, max),
+      explanation: `${q.a} ${q.symbol} ${q.b} = ${q.correct}.`,
+      dedupeKey: `${q.a}${q.symbol}${q.b}`,
       prompt: `${q.a} ${q.symbol} ${q.b}`,
       correctAnswer: q.correct,
       choices: shuffle([q.correct, ...makeDistractors(q, max)]),

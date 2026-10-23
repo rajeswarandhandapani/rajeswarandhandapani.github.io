@@ -125,7 +125,54 @@
       hint: "Finish 100 quizzes",
       earned: function (s) { return s.plays >= 100; },
     },
+    {
+      id: "picture-pro",
+      emoji: "🖼️",
+      name: "Picture Pro",
+      hint: "Try 10 of the newest picture games",
+      earned: function (s) { return catalogue().filter(function (g) { return g.isNew && s.games[g.id]; }).length >= 10; },
+    },
+    {
+      id: "path-finder",
+      emoji: "🧭",
+      name: "Path Finder",
+      hint: "Earn a star in every step of a learning path",
+      earned: function (s) { return pathsDone(s).length > 0; },
+    },
+    {
+      id: "all-rounder",
+      emoji: "🌈",
+      name: "All-Rounder",
+      hint: "Earn a star in math, English, Tamil and science",
+      earned: function (s) {
+        var seen = {};
+        catalogue().forEach(function (g) { if (s.games[g.id] && s.games[g.id].bestStars > 0) seen[g.subject] = true; });
+        return !!(seen.math && seen.english && seen.tamil && seen.science);
+      },
+    },
+    {
+      id: "comeback",
+      emoji: "💪",
+      name: "Comeback",
+      hint: "Beat your own earlier score in a game",
+      earned: function (s, ctx) { return !!(ctx && ctx.improved); },
+    },
   ];
+
+  /** Game list from catalogue.js when the page loaded it (empty otherwise). */
+  function catalogue() {
+    return (window.KlgCatalogue && window.KlgCatalogue.GAMES) || [];
+  }
+
+  /** Learning paths where every step game has at least one star. */
+  function pathsDone(s) {
+    var paths = (window.KlgCatalogue && window.KlgCatalogue.PATHS) || {};
+    return Object.keys(paths).filter(function (key) {
+      return paths[key].steps.every(function (step) { return s.games[step.game] && s.games[step.game].bestStars > 0; });
+    });
+  }
+
+  var RECENT_KEEP = 5;
 
   function blank() {
     return { xp: 0, plays: 0, streak: 0, bestStreak: 0, lastDay: "", games: {}, badges: {} };
@@ -151,6 +198,10 @@
         var game = data.games[key];
         if (!game || typeof game !== "object") { delete data.games[key]; return; }
         game.bestStars = Math.max(0, Math.min(3, Math.floor(Number(game.bestStars) || 0)));
+        game.recent = Array.isArray(game.recent)
+          ? game.recent.map(Number).filter(Number.isFinite).slice(-RECENT_KEEP)
+          : [];
+        if (!game.byMode || typeof game.byMode !== "object" || Array.isArray(game.byMode)) game.byMode = {};
       });
       if (typeof data.lastDay !== "string") data.lastDay = "";
       return data;
@@ -210,6 +261,17 @@
     return match ? match[1] : null;
   }
 
+  /** ?mode=, ?type= or ?level= of the page being played ("default" when none). */
+  function currentMode() {
+    try {
+      var q = new URLSearchParams(window.location.search || "");
+      var parts = ["mode", "type", "level"].map(function (k) { return q.get(k) ? k + "=" + q.get(k) : ""; });
+      return parts.filter(Boolean).join("&").slice(0, 40) || "default";
+    } catch (e) {
+      return "default";
+    }
+  }
+
   function derived(data) {
     var ids = Object.keys(data.games);
     var stars = 0;
@@ -262,19 +324,27 @@
     }
 
     var g = data.games[gameId] || { plays: 0, bestScore: 0, total: total, bestStars: 0, bestMs: 0 };
+    var previousPlays = g.plays;
     g.plays += 1;
     g.total = total;
     g.lastPlayed = day;
     var isBest = score > g.bestScore;
     if (isBest) g.bestScore = score;
     g.bestStars = Math.max(g.bestStars || 0, stars);
+    g.recent = (g.recent || []).concat(total > 0 ? Math.round((score / total) * 100) : 0).slice(-RECENT_KEEP);
+    var mode = result.mode || currentMode();
+    g.byMode = g.byMode || {};
+    var m = g.byMode[mode] || { plays: 0, bestStars: 0 };
+    m.plays += 1;
+    m.bestStars = Math.max(m.bestStars, stars);
+    g.byMode[mode] = m;
     if (score === total && total > 0 && elapsedMs > 0 && (!g.bestMs || elapsedMs < g.bestMs)) {
       g.bestMs = elapsedMs;
     }
     data.games[gameId] = g;
 
     var stats = derived(data);
-    var context = { score: score, total: total, bestStreak: bestStreak, elapsedMs: elapsedMs };
+    var context = { score: score, total: total, bestStreak: bestStreak, elapsedMs: elapsedMs, improved: isBest && previousPlays > 0 };
     var newBadges = [];
     BADGES.forEach(function (badge) {
       if (!data.badges[badge.id] && badge.earned(stats, context)) {
@@ -307,6 +377,7 @@
     summary: function () { return derived(load()); },
     gameStats: function (id) { return load().games[id] || null; },
     currentGameId: currentGameId,
+    pathsDone: function () { return pathsDone(derived(load())); },
     rankFor: rankFor,
     starsFor: starsFor,
     reset: function () {

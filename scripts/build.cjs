@@ -1,4 +1,5 @@
 const fs=require('node:fs');
+const {synced}=require('./sync-index.cjs');fs.writeFileSync('index.html',synced(fs.readFileSync('index.html','utf8')));
 const path=require('node:path');
 const output='site-output';
 fs.mkdirSync(output,{recursive:true});

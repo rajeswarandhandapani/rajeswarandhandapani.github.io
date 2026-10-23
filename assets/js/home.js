@@ -2,9 +2,9 @@
  * Landing page behaviour: the player card (rank, XP, streak, badges), the
  * daily challenge, per-card stars and the "surprise me" button.
  *
- * The game list is read out of the page itself — every card carries
- * data-game and sits inside a #level-N section — so adding a game to
- * index.html is all it takes to include it here too.
+ * The game list comes from catalogue.js (window.KlgCatalogue): the level
+ * sections, subject tabs, learning paths and the grown-up report are all
+ * rendered from it, so adding a game is one line in the catalogue.
  */
 (function () {
   "use strict";
@@ -93,7 +93,7 @@
       if (!stats) {
         // On a first visit everything is new, and 25 NEW flags say nothing.
         // Once there's some history the flag marks what's left to try.
-        if (summary.plays > 0) {
+        if (summary.plays > 0 || card.getAttribute("data-new")) {
           flag.textContent = "NEW";
           card.appendChild(flag);
         }
@@ -130,6 +130,203 @@
     }
   }
 
+
+  function esc(text) {
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function readPref(key, fallback) {
+    try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
+  }
+
+  function writePref(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* not saved */ }
+  }
+
+  /** Subject tabs and the four level sections, from the catalogue. */
+  function renderLibrary() {
+    var cat = window.KlgCatalogue;
+    var tabs = document.getElementById("subject-tabs");
+    var levels = document.getElementById("levels");
+    if (!cat || !tabs || !levels) return;
+
+    var tabHtml = '<button data-subject="all" aria-pressed="true">All games</button>';
+    Object.keys(cat.SUBJECTS).forEach(function (key) {
+      var cls = key === "tamil" ? ' class="tamil-tab"' : "";
+      tabHtml += '<button data-subject="' + key + '" aria-pressed="false"' + cls + ">" + esc(cat.SUBJECTS[key].label) + "</button>";
+    });
+    tabHtml += '<button data-subject="favorites" aria-pressed="false">♡ Favorites</button>';
+    tabs.innerHTML = tabHtml;
+
+    var html = "";
+    Object.keys(cat.LEVELS).forEach(function (n) {
+      var level = cat.LEVELS[n];
+      var games = cat.GAMES.filter(function (g) { return String(g.level) === n; });
+      html += '<section id="level-' + n + '" class="mb-5"><div class="klg-level-heading klg-level-' + n + '">' +
+        '<span class="klg-level-pill">LEVEL ' + n + '</span><h2 class="h4 fw-bold mb-0">' + esc(level.name) + " " + level.emoji + "</h2>" +
+        '<span class="text-muted small">' + esc(level.ages) + " · " + esc(level.note) + "</span></div>" +
+        '<div class="row g-4 justify-content-center mt-1">';
+      games.forEach(function (g) {
+        html += '<div class="col-12 col-sm-6 col-lg-4"><a href="games/' + g.id + '/index.html" class="text-decoration-none">' +
+          '<div class="card game-card" data-game="' + g.id + '" data-subject="' + g.subject + '"' + (g.isNew ? ' data-new="1"' : "") + '>' +
+          '<div class="card-body text-center p-4"><div class="game-card-icon mb-3">' + esc(g.icon) + "</div>" +
+          '<h3 class="h4 fw-bold text-dark">' + esc(g.name) + '</h3><p class="text-muted mb-0">' + esc(g.blurb) + "</p></div></div></a></div>";
+      });
+      html += "</div></section>";
+    });
+    levels.innerHTML = html;
+  }
+
+  /** Learning paths: pick one, see its steps, ticks for starred steps and what is next. */
+  function renderPaths(summary) {
+    var cat = window.KlgCatalogue;
+    var root = document.getElementById("paths");
+    if (!cat || !root) return;
+    var keys = Object.keys(cat.PATHS);
+    var current = readPref("klg-path", "math");
+    if (keys.indexOf(current) < 0) current = keys[0];
+    var tabs = document.getElementById("path-tabs");
+
+    function paint() {
+      var path = cat.PATHS[current];
+      document.getElementById("path-eyebrow").textContent = path.eyebrow;
+      document.getElementById("paths-title").textContent = path.title;
+      document.getElementById("path-note").textContent = path.note;
+
+      var nextStep = null;
+      var items = path.steps.map(function (step, i) {
+        var game = cat.byId(step.game);
+        var stats = summary.games[step.game];
+        var done = !!(stats && stats.bestStars > 0);
+        if (!done && !nextStep) nextStep = { step: step, game: game };
+        var isNext = nextStep && nextStep.step === step;
+        var glyph = current === "tamil" && /[஀-௿]/.test(game.icon) ? " tamil-glyph" : "";
+        return '<li><a href="games/' + game.id + '/index.html"' + (done ? ' class="done"' : isNext ? ' class="next-up"' : "") + ">" +
+          '<span class="step-n">' + (i + 1) + '</span><span class="step-icon' + glyph + '">' + esc(game.icon) + "</span>" +
+          "<b>" + esc(step.label) + "</b><small>" + esc(game.name) + "</small>" +
+          (done ? '<span class="step-tick" aria-label="Done">✓</span>' : isNext ? '<span class="step-chip">Next up</span>' : "") + "</a></li>";
+      });
+      document.getElementById("path-steps").innerHTML = items.join("");
+      document.getElementById("path-next").textContent = nextStep
+        ? "Next up: " + nextStep.step.label + " · " + nextStep.game.name
+        : "🎉 You have a star in every step of this path!";
+
+      tabs.querySelectorAll("button[data-path]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.getAttribute("data-path") === current));
+      });
+      var count = cat.GAMES.filter(function (g) { return g.subject === current; }).length;
+      var jump = document.getElementById("path-jump");
+      jump.textContent = "See all " + count + " " + cat.SUBJECTS[current].label.replace(/^\S+\s/, "") + " games →";
+      jump.id = "path-jump";
+    }
+
+    tabs.innerHTML = keys.map(function (key) {
+      return '<button type="button" data-path="' + key + '" aria-pressed="false">' + esc(cat.SUBJECTS[key].label) + "</button>";
+    }).join("") + '<button type="button" id="path-jump" class="surprise-button"></button>';
+    tabs.querySelectorAll("button[data-path]").forEach(function (b) {
+      b.addEventListener("click", function () { current = b.getAttribute("data-path"); writePref("klg-path", current); paint(); });
+    });
+    document.getElementById("path-jump").addEventListener("click", function () {
+      var search = document.getElementById("game-search");
+      var level = document.getElementById("level-filter");
+      search.value = ""; search.dispatchEvent(new Event("input"));
+      level.value = "all"; level.dispatchEvent(new Event("change"));
+      var tab = document.querySelector('.subject-tabs [data-subject="' + current + '"]');
+      if (tab) tab.click();
+      document.getElementById("library").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    });
+    paint();
+  }
+
+  /** Grown-up report: stars, recent accuracy and what to practise, per subject. */
+  function sparkline(values) {
+    if (values.length < 2) return "";
+    var w = 90, h = 24;
+    var pts = values.map(function (v, i) {
+      return (i * (w / (values.length - 1))).toFixed(1) + "," + (h - 2 - (v / 100) * (h - 4)).toFixed(1);
+    }).join(" ");
+    return '<svg class="spark" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="Last ' + values.length + " scores: " + values.join("%, ") + '%"><polyline points="' + pts + '" fill="none" stroke="#4055b5" stroke-width="2"/></svg>';
+  }
+
+  function skillRows(summary) {
+    var cat = window.KlgCatalogue;
+    var rows = {};
+    cat.GAMES.forEach(function (g) {
+      var st = summary.games[g.id];
+      g.skills.forEach(function (tag) {
+        var r = rows[tag] || (rows[tag] = { tag: tag, subject: g.subject, games: [], played: [], stars: 0, recent: [], last: "" });
+        r.games.push(g);
+        if (st) {
+          r.played.push(g);
+          r.stars = Math.max(r.stars, st.bestStars || 0);
+          if ((st.lastPlayed || "") >= r.last) { r.last = st.lastPlayed || r.last; r.recent = st.recent || []; }
+        }
+      });
+    });
+    return Object.keys(rows).map(function (k) { return rows[k]; });
+  }
+
+  function nextGameAfter(game, summary) {
+    var cat = window.KlgCatalogue;
+    for (var key in cat.PATHS) {
+      var steps = cat.PATHS[key].steps;
+      var i = steps.findIndex(function (s) { return s.game === game.id; });
+      if (i >= 0) {
+        for (var j = i + 1; j < steps.length; j++) {
+          var st = summary.games[steps[j].game];
+          if (!st || !st.bestStars) return cat.byId(steps[j].game);
+        }
+      }
+    }
+    return null;
+  }
+
+  function renderReport() {
+    var box = document.getElementById("parent-report");
+    var cat = window.KlgCatalogue;
+    if (!box || !cat) return;
+    var summary = KlgProgress.summary();
+    var rows = skillRows(summary);
+    var avg = function (r) { return r.recent.length ? r.recent.reduce(function (a, b) { return a + b; }, 0) / r.recent.length : null; };
+
+    var practise = rows.filter(function (r) { var a = avg(r); return a !== null && a < 60; });
+    var ready = [];
+    rows.filter(function (r) { return r.stars === 3; }).forEach(function (r) {
+      var done = r.played.filter(function (g) { return summary.games[g.id].bestStars === 3; })[0];
+      var next = done && nextGameAfter(done, summary);
+      if (next && !ready.some(function (x) { return x.id === next.id; })) ready.push(next);
+    });
+
+    var html = "<h3>Progress report</h3>";
+    if (!summary.gamesPlayed) {
+      box.innerHTML = html + "<p>No rounds yet. Once your child plays, you will see stars and recent scores for each skill here.</p>";
+      return;
+    }
+    html += '<p class="report-summary"><b>Needs practice:</b> ' + (practise.length ? practise.map(function (r) { return esc(skillName(r.tag)); }).join(", ") : "nothing right now 🎉") +
+      '<br><b>Ready for next:</b> ' + (ready.length ? ready.slice(0, 4).map(function (g) { return '<a href="games/' + g.id + '/index.html">' + esc(g.icon + " " + g.name) + "</a>"; }).join(", ") : "keep earning stars on the current games") + "</p>";
+
+    Object.keys(cat.SUBJECTS).forEach(function (subject) {
+      var list = rows.filter(function (r) { return r.subject === subject && r.played.length; });
+      if (!list.length) return;
+      html += "<h4>" + esc(cat.SUBJECTS[subject].label) + '</h4><table class="report-table"><thead><tr><th>Skill</th><th>Stars</th><th>Recent scores</th><th>Last played</th></tr></thead><tbody>';
+      list.forEach(function (r) {
+        var a = avg(r);
+        html += "<tr" + (a !== null && a < 60 ? ' class="weak"' : "") + "><td>" + esc(skillName(r.tag)) + "</td><td>" + "⭐".repeat(r.stars) + "☆".repeat(3 - r.stars) + "</td><td>" +
+          (r.recent.length ? sparkline(r.recent) + " <small>" + Math.round(a) + "% avg</small>" : "–") + "</td><td>" + esc(r.last || "–") + "</td></tr>";
+      });
+      html += "</tbody></table>";
+    });
+    html += '<button type="button" class="print-report" id="print-report">Print this report</button>';
+    box.innerHTML = html;
+    document.getElementById("print-report").addEventListener("click", function () { window.print(); });
+  }
+
+  function skillName(tag) {
+    var names = (window.KlgCatalogue && window.KlgCatalogue.SKILL_NAMES) || {};
+    return names[tag] || tag.split(".")[1].replace(/-/g, " ");
+  }
+
+
   function wireButtons() {
     document.getElementById("surprise-btn").addEventListener("click", function () {
       var all = cards().filter(function (card) { return !card.closest(".game-tile").hidden; }).map(cardInfo);
@@ -151,22 +348,19 @@
   document.addEventListener("DOMContentLoaded", function () {
     if (!window.KlgProgress) return;
     var summary = KlgProgress.summary();
+    renderLibrary();
     renderPlayer(summary);
     decorateCards(summary);
     renderDaily(summary);
+    renderPaths(summary);
     wireButtons();
+    document.getElementById("parent-open").addEventListener("click", renderReport);
   });
 })();
 
 // Library discovery stays independent of progress storage.
 document.addEventListener('DOMContentLoaded', () => {
   const tiles = [...document.querySelectorAll('.game-card[data-game]')];
-  const groups = {
-    tamil: tiles.map(card => card.dataset.game).filter(id => id.startsWith('tamil-')),
-    language: ['english-alphabets','rhyming-words','opposites','spelling-bee','reading-stories','picture-words'],
-    world: ['baby-animals','calendar','solar-system','science-quiz','world-capitals','animal-habitats','feelings-faces','everyday-tools'],
-    logic: ['patterns','memory-match']
-  };
   let favorites = [];
   try { const saved = JSON.parse(localStorage.getItem('klg-favorites') || '[]'); if (Array.isArray(saved)) favorites = saved.filter(id => typeof id === 'string'); } catch (_) {}
   let subject = 'all';
@@ -190,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   tiles.forEach(card => {
     const id = card.dataset.game;
-    card.dataset.subject = Object.keys(groups).find(key => groups[key].includes(id)) || 'math';
     const tile = card.closest('a').parentElement;
     tile.classList.add('game-tile');
     const favorite = document.createElement('button');
@@ -208,13 +401,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.subject-tabs button').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
     filter();
   }));
-  const tamilJump = document.getElementById('tamil-jump');
-  if (tamilJump) tamilJump.addEventListener('click', () => {
-    search.value = '';
-    level.value = 'all';
-    document.querySelector('.subject-tabs [data-subject="tamil"]').click();
-    document.getElementById('library').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-  });
   document.getElementById('clear-filters').addEventListener('click', () => { search.value = ''; level.value = 'all'; document.querySelector('[data-subject="all"]').click(); search.focus(); });
   const dialog = document.getElementById('parent-dialog');
   document.getElementById('parent-open').addEventListener('click', () => {

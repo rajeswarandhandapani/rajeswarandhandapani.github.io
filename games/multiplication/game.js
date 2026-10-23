@@ -50,6 +50,7 @@ function generateMultiplicationQuestion(tables) {
 
     return {
       prompt: `${a} × ${b}`,
+      hintVisual: () => KlgMathVis.array(a, b, "🟣"),
       correctAnswer,
       choices: shuffle([...choices]),
     };

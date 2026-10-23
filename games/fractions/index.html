@@ -11,6 +11,8 @@
     rel="stylesheet"
   />
   <link href="../../assets/css/common.css" rel="stylesheet" />
+  <link href="../../assets/css/math-visuals.css" rel="stylesheet" />
+  <link href="../../assets/css/visuals.css" rel="stylesheet" />
 </head>
 <body>
   <a class="skip-link" href="#start-btn">Skip to activity</a>
@@ -30,15 +32,21 @@
         <p class="text-muted" id="mode-label"></p>
         <div id="mode-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
           <a class="btn btn-sm btn-outline-secondary" href="index.html">Mix</a>
-          <a class="btn btn-sm btn-outline-secondary" href="?type=identify">Pictures</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?type=identify">Read a picture</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?type=picture">Find the picture</a>
           <a class="btn btn-sm btn-outline-secondary" href="?type=equivalent">Equivalent</a>
           <a class="btn btn-sm btn-outline-secondary" href="?type=compare">Compare</a>
           <a class="btn btn-sm btn-outline-secondary" href="?type=add">Add &amp; Subtract</a>
         </div>
+        <div id="level-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+          <a class="btn btn-sm btn-outline-secondary" href="?level=1">Level 1 · halves &amp; quarters</a>
+          <a class="btn btn-sm btn-outline-secondary" href="index.html">Level 2 · up to tenths</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?level=3">Level 3 · bigger fractions</a>
+        </div>
         <p id="quiz-info">15 questions &bull; 2 minutes each &bull; multiple choice</p>
         <p class="text-muted mb-1"><small>
-          🟩 squares are the counted part, ⬜ squares are the rest —
-          count the green ones on top, all of them on the bottom!
+          The shaded parts go on top, all the equal parts go on the bottom.
+          Look at the picture, count, then choose.
         </small></p>
         <p id="best-time-note" class="fw-bold" style="color: var(--klg-purple);"></p>
         <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
@@ -101,6 +109,9 @@
   <script src="../../assets/js/sounds.js"></script>
   <script src="../../assets/js/progress.js"></script>
   <script src="../../assets/js/quiz-engine.js"></script>
+  <script src="../../assets/js/math-visuals.js"></script>
+  <script src="../../assets/js/visuals/fractions.js"></script>
+  <script src="../../assets/js/game-kit.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

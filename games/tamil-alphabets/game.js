@@ -156,6 +156,14 @@ function shuffle(array) {
   return arr;
 }
 
+/** A picture word that starts with (or contains) this letter, if the vocabulary has one. */
+let exampleWords = null;
+function exampleWordFor(letter) {
+  if (!window.TAMIL_WORDS || !window.KlgTamil) return null;
+  if (!exampleWords) exampleWords = TAMIL_WORDS.map((w) => ({ ...w, parts: KlgTamil.letters(w.tamil) }));
+  return exampleWords.find((w) => w.parts[0] === letter) || exampleWords.find((w) => w.parts.includes(letter)) || null;
+}
+
 function generateTamilQuestion(letters) {
   return (askedSet) => {
     const remaining = letters.filter((l) => !askedSet.has(l.tamil));
@@ -341,6 +349,9 @@ document.addEventListener("DOMContentLoaded", () => {
     generateQuestion: (askedSet) => {
       const q = generate(askedSet);
       currentSpeech = q.speech || null;
+      // After the answer, show a real word that uses the letter, with its picture.
+      const example = exampleWordFor(isListen ? q.correctAnswer : q.prompt);
+      if (example) q.explanation = `Example: ${example.emoji} ${example.tamil} (${example.english}).`;
       return q;
     },
     // Listen mode speaks once the question is on screen; both modes say the

@@ -4,6 +4,10 @@
  *  - capital (default): a country is shown (with its flag) — tap its
  *    capital city.
  *  - country: a capital city is shown — tap its country.
+ *  - flag:    a country name is shown — tap its flag.
+ *
+ * Capital and country questions come with a picture: the flag and, for
+ * about 30 countries, a famous landmark.
  *
  * ?region=asia|europe|africa|americas|oceania narrows practice to one
  * continent; mode and region combine freely.
@@ -99,6 +103,23 @@ const REGIONS = {
   oceania: "Oceania",
 };
 
+const LANDMARKS = {
+  India: "🕌", China: "🏯", Japan: "🗻", "South Korea": "🏯", Thailand: "🛕", Egypt: "🐪", France: "🗼", "United Kingdom": "🎡",
+  Germany: "🏰", Italy: "🏛️", Spain: "💃", Greece: "🏛️", Netherlands: "🌷", Switzerland: "🏔️", Russia: "🪆", Norway: "⛰️",
+  "United States": "🗽", Canada: "🍁", Mexico: "🌮", Brazil: "🌴", Peru: "🦙", Argentina: "⚽", Australia: "🦘", "New Zealand": "🥝",
+  Kenya: "🦁", Morocco: "🕌", Jamaica: "🏝️", Ireland: "☘️", Turkey: "🎈", "Saudi Arabia": "🕋", Nepal: "🏔️", Jordan: "🏜️", Tanzania: "🦒",
+};
+
+/** Big flag with its landmark beside it; labelled for screen readers. */
+function flagPicture(entry) {
+  const f = document.createElement("figure");
+  f.className = "kv-clue kv-flagpic";
+  f.setAttribute("role", "img");
+  f.setAttribute("aria-label", `The flag of ${entry.country}` + (LANDMARKS[entry.country] ? " and a famous landmark" : ""));
+  f.innerHTML = `<span aria-hidden="true">${entry.flag}${LANDMARKS[entry.country] ? " " + LANDMARKS[entry.country] : ""}</span>`;
+  return f;
+}
+
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -139,7 +160,9 @@ function generateCapitalQuestion(entries) {
     const wrongs = pickDistractors(entry.trap ? [entry.trap] : [], sameRegion, rest, entry.capital);
 
     return {
-      prompt: `${entry.flag} ${entry.country}`,
+      visual: flagPicture(entry),
+      prompt: `What is the capital of ${entry.country}?`,
+      explanation: `${entry.capital} is the capital of ${entry.country}.`,
       dedupeKey: entry.country,
       correctAnswer: entry.capital,
       choices: shuffle([entry.capital, ...wrongs]),
@@ -159,11 +182,43 @@ function generateCountryQuestion(entries) {
     const rest = COUNTRIES.filter((e) => e !== entry).map((e) => e.country);
 
     return {
-      prompt: `🏙️ ${entry.capital}`,
+      prompt: `${entry.capital} is the capital of which country?`,
+      explanation: `${entry.capital} is in ${entry.country}.`,
       dedupeKey: entry.country,
       correctAnswer: entry.country,
       choices: shuffle([entry.country, ...pickDistractors([], sameRegion, rest, entry.country)]),
     };
+  };
+}
+
+/** Name the country, tap the flag. Flags in the same region are the likely mix-ups. */
+function generateFlagQuestion(entries) {
+  return (askedSet) => {
+    const remaining = entries.filter((e) => !askedSet.has(e.country));
+    const pool = remaining.length ? remaining : entries;
+    const entry = pool[randomInt(0, pool.length - 1)];
+    const sameRegion = COUNTRIES.filter((e) => e !== entry && e.region === entry.region);
+    const others = COUNTRIES.filter((e) => e !== entry && e.region !== entry.region);
+    const wrongs = [...shuffle(sameRegion), ...shuffle(others)].filter((e) => e.flag !== entry.flag).slice(0, 3);
+    const options = shuffle([entry, ...wrongs]);
+    const q = {
+      prompt: `Which flag belongs to ${entry.country}?`,
+      explanation: `This is the flag of ${entry.country}.`,
+      dedupeKey: entry.country,
+      correctAnswer: entry.country,
+      choices: options.map((e) => e.country),
+      choiceVisuals: {},
+      choiceLabels: {},
+      noChoiceListen: true,
+    };
+    options.forEach((e) => {
+      const box = document.createElement("div");
+      box.className = "kv-choice";
+      box.innerHTML = `<span class="kv-emoji" aria-hidden="true" style="font-size:3rem">${e.flag}</span>`;
+      q.choiceVisuals[e.country] = box;
+      q.choiceLabels[e.country] = `the flag of ${e.country}`;
+    });
+    return q;
   };
 }
 
@@ -190,7 +245,7 @@ function formatSeconds(ms) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
-  const mode = params.get("mode") === "country" ? "country" : "capital";
+  const mode = ["country", "flag"].includes(params.get("mode")) ? params.get("mode") : "capital";
   const region = REGIONS[params.get("region")] ? params.get("region") : null;
   const entries = region ? COUNTRIES.filter((e) => e.region === region) : COUNTRIES;
   const storageKey = `klg-world-capitals-best-ms:${mode}:${region || "all"}`;
@@ -198,34 +253,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mode-label").textContent =
     (mode === "capital"
       ? "Find the capital city of each country"
+      : mode === "flag"
+      ? "Find the flag of each country"
       : "Find the country each capital belongs to") +
     ` — ${region ? REGIONS[region] : "the whole world"}, ${entries.length} countries`;
 
-  // The two choices (direction × region) are independent: direction links
-  // carry the current region, region links carry the current direction.
-  document.querySelectorAll("#sound-mode-links a").forEach((link) => {
-    const linkMode =
-      new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, "")).get("mode") === "country"
-        ? "country"
-        : "capital";
-    const p = new URLSearchParams(window.location.search);
-    if (linkMode === "country") p.set("mode", "country");
-    else p.delete("mode");
-    link.setAttribute("href", p.toString() ? "index.html?" + p.toString() : "index.html");
-    if (linkMode === mode) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
-  document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkRegion =
-      new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, "")).get("region");
-    const p = new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, ""));
-    if (mode === "country") p.set("mode", "country");
-    link.setAttribute("href", p.toString() ? "index.html?" + p.toString() : "index.html");
-    if (linkRegion === (region || null)) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
+  // Direction and region are independent choices; modeLinks keeps the other one.
+  KlgGameKit.modeLinks(document.getElementById("sound-mode-links"), "mode", "capital");
+  KlgGameKit.modeLinks(document.getElementById("mode-links"), "region", "");
 
   const bestTimeNote = document.getElementById("best-time-note");
   function renderBestTimeNote() {
@@ -240,7 +275,9 @@ document.addEventListener("DOMContentLoaded", () => {
     totalQuestions: Math.min(15, entries.length),
     timePerQuestion: 120,
     generateQuestion:
-      mode === "capital" ? generateCapitalQuestion(entries) : generateCountryQuestion(entries),
+      mode === "capital" ? generateCapitalQuestion(entries)
+        : mode === "flag" ? generateFlagQuestion(entries)
+        : generateCountryQuestion(entries),
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");
       const best = loadBestMs(storageKey);

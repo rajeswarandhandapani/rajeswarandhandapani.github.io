@@ -1,14 +1,15 @@
 /**
- * Time & elapsed time question generator.
- * Reads ?type=clock|elapsed from the URL to practice one skill;
- * defaults to a mix of both.
+ * Time & elapsed time question generator, drawn with KlgClock.
+ * Reads ?type=clock|match|elapsed from the URL to practice one skill;
+ * defaults to a mix. ?level=1 (o'clock and half past), 2 (default, every
+ * quarter and 5 minutes) or 3 (any minute) sets how fine the clocks are.
  *
  * Question kinds:
- *  - clock reading: a clock-face emoji (🕒) as the prompt — the 24 emoji
- *    cover every hour and half-hour, so no images are needed
+ *  - clock reading: an analog clock face — what time is it?
+ *  - match clock:   a time in words — tap the clock that shows it
  *  - end time:      "Soccer practice starts at 4:30 PM and lasts 45 minutes.
- *                    When does it end?"
- *  - elapsed time:  "How much time passes from 2:20 PM to 4:05 PM?"
+ *                    When does it end?" with a timeline strip
+ *  - elapsed time:  "How much time passes from 2:20 PM to 4:05 PM?" on a timeline
  *  - conversion:    "How many minutes are in 2 hours 15 minutes?"
  *
  * Distractors are the mistakes kids actually make: reading the hour hand
@@ -75,33 +76,84 @@ function offsetWrongs(correct, offsets, isValid, fmt) {
   return [...wrongs];
 }
 
-// 🕐..🕛 are 1:00..12:00, 🕜..🕧 are 1:30..12:30.
-function makeClockQuestion() {
+const level = [1, 3].includes(Number(new URLSearchParams(window.location.search).get("level")))
+  ? Number(new URLSearchParams(window.location.search).get("level")) : 2;
+const CK = window.KlgClock;
+
+/** A time to show on a clock: hour 1–12 and a minute that suits the level. */
+function pickTime() {
   const hour = randomInt(1, 12);
-  const minute = Math.random() < 0.5 ? 0 : 30;
-  const base = minute === 0 ? 0x1f550 : 0x1f55c;
-  const correct = fmtClock(hour, minute);
-  const wrongs = [
-    fmtClock(hour, minute === 0 ? 30 : 0), // right hour, wrong half
-    fmtClock((hour % 12) + 1, minute), // hour hand read one off
-    fmtClock(((hour + 10) % 12) + 1, minute),
+  const minute = level === 1 ? [0, 30][randomInt(0, 1)]
+    : level === 2 ? 5 * randomInt(0, 11)
+    : randomInt(0, 59);
+  return [hour, minute];
+}
+
+/** Wrong times kids really give: hour read one off, the two hands swapped, wrong half. */
+function clockWrongs(hour, minute) {
+  const next = (hour % 12) + 1, prev = ((hour + 10) % 12) + 1;
+  const list = [
+    [hour, minute === 0 ? 30 : 0],
+    [next, minute],
+    [prev, minute],
+    [hour, (minute + 30) % 60],
+    [hour, (minute + 5) % 60],
+    [hour, (minute + 55) % 60],
   ];
+  if (minute % 5 === 0 && minute !== 0 && hour * 5 % 60 !== minute) list.push([minute / 5 || 12, (hour * 5) % 60]); // hands swapped
+  if (level === 3) list.push([hour, (minute + 1) % 60], [hour, (minute + 59) % 60]);
+  const seen = new Set([fmtClock(hour, minute)]);
+  const out = [];
+  for (const [h, m] of shuffle(list)) {
+    const text = fmtClock(h, m);
+    if (!seen.has(text)) { seen.add(text); out.push([h, m]); }
+  }
+  return out.slice(0, 3);
+}
+
+function makeClockQuestion() {
+  const [hour, minute] = pickTime();
+  const correct = fmtClock(hour, minute);
+  const wrongs = clockWrongs(hour, minute).map(([h, m]) => fmtClock(h, m));
   return {
-    prompt: String.fromCodePoint(base + hour - 1),
+    visual: CK.face(hour, minute),
+    prompt: "What time does the clock show?",
+    dedupeKey: "clock:" + correct,
     correctAnswer: correct,
     choices: shuffle([correct, ...wrongs]),
-    bigGlyph: true,
+    explanation: `The short hand is near ${hour} and the long hand shows ${minute} minutes: ${correct}.`,
   };
 }
 
+function makeMatchClockQuestion() {
+  const [hour, minute] = pickTime();
+  const correct = fmtClock(hour, minute);
+  const times = [[hour, minute], ...clockWrongs(hour, minute)];
+  const q = {
+    prompt: `Which clock shows ${CK.spoken(hour, minute)}?`,
+    dedupeKey: "match:" + correct,
+    correctAnswer: correct,
+    choices: shuffle(times.map(([h, m]) => fmtClock(h, m))),
+    choiceVisuals: {},
+    choiceLabels: {},
+    noChoiceListen: true,
+    explanation: `${CK.spoken(hour, minute)} is ${correct}. Look at where the short and long hands point.`,
+  };
+  times.forEach(([h, m]) => {
+    q.choiceVisuals[fmtClock(h, m)] = CK.face(h, m);
+    q.choiceLabels[fmtClock(h, m)] = `a clock showing ${CK.spoken(h, m)}`;
+  });
+  return q;
+}
+
 const ACTIVITIES = [
-  { name: "School", earliest: 7 * 60, latest: 10 * 60 },
-  { name: "Art class", earliest: 9 * 60, latest: 11 * 60 },
-  { name: "Music class", earliest: 9 * 60, latest: 12 * 60 },
-  { name: "The movie", earliest: 14 * 60, latest: 19 * 60 },
-  { name: "Soccer practice", earliest: 15 * 60, latest: 18 * 60 },
-  { name: "Swimming lesson", earliest: 16 * 60, latest: 18 * 60 },
-  { name: "The birthday party", earliest: 14 * 60, latest: 18 * 60 },
+  { name: "School", icon: "🏫", earliest: 7 * 60, latest: 10 * 60 },
+  { name: "Art class", icon: "🎨", earliest: 9 * 60, latest: 11 * 60 },
+  { name: "Music class", icon: "🎵", earliest: 9 * 60, latest: 12 * 60 },
+  { name: "The movie", icon: "🎬", earliest: 14 * 60, latest: 19 * 60 },
+  { name: "Soccer practice", icon: "⚽", earliest: 15 * 60, latest: 18 * 60 },
+  { name: "Swimming lesson", icon: "🏊", earliest: 16 * 60, latest: 18 * 60 },
+  { name: "The birthday party", icon: "🎂", earliest: 14 * 60, latest: 18 * 60 },
 ];
 
 const DURATIONS = [20, 30, 40, 45, 50, 60, 75, 90];
@@ -114,7 +166,9 @@ function makeEndTimeQuestion() {
   const correct = start + dur;
   const wrongs = offsetWrongs(correct, TIME_OFFSETS, (v) => v > start, fmt12);
   return {
-    prompt: `${act.name} starts at ${fmt12(start)} and lasts ${durationPhrase(dur)}. When does it end?`,
+    visual: CK.timeline(start, dur, { label: `A timeline that starts at ${fmt12(start)}; the bar shows how long ${act.name} lasts` }),
+    prompt: `${act.icon} ${act.name} starts at ${fmt12(start)} and lasts ${durationPhrase(dur)}. When does it end?`,
+    explanation: `${fmt12(start)} plus ${durationPhrase(dur)} is ${fmt12(correct)}.`,
     correctAnswer: fmt12(correct),
     choices: shuffle([fmt12(correct), ...wrongs]),
   };
@@ -125,6 +179,8 @@ function makeElapsedQuestion() {
   const dur = 5 * randomInt(4, 36); // 20 min – 3 hr
   const wrongs = offsetWrongs(dur, TIME_OFFSETS, (v) => v > 0, fmtDuration);
   return {
+    visual: CK.timeline(start, dur),
+    explanation: `From ${fmt12(start)} to ${fmt12(start + dur)} is ${durationPhrase(dur)}.`,
     prompt: `How much time passes from ${fmt12(start)} to ${fmt12(start + dur)}?`,
     correctAnswer: fmtDuration(dur),
     choices: shuffle([fmtDuration(dur), ...wrongs]),
@@ -147,7 +203,7 @@ function makeMinutesQuestion() {
 }
 
 const QUESTION_KINDS = {
-  clock: [makeClockQuestion],
+  clock: [makeClockQuestion, makeMatchClockQuestion],
   elapsed: [makeEndTimeQuestion, makeElapsedQuestion, makeMinutesQuestion],
 };
 QUESTION_KINDS.all = [...QUESTION_KINDS.clock, ...QUESTION_KINDS.elapsed];
@@ -181,25 +237,19 @@ function formatSeconds(ms) {
 document.addEventListener("DOMContentLoaded", () => {
   const mode = getMode();
   const totalQuestions = 15;
-  const storageKey = "klg-time-best-ms:" + mode;
+  const storageKey = "klg-time-best-ms:" + mode + (level === 2 ? "" : ":L" + level);
   const kinds = QUESTION_KINDS[mode];
   const questionText = document.getElementById("question-text");
 
   const labels = {
     all: "Reading clocks + elapsed time",
-    clock: "Reading clock faces",
+    clock: "Reading clock faces and finding the clock for a time",
     elapsed: "End times, elapsed time and minute conversions",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
-  document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkType = new URLSearchParams(
-      link.getAttribute("href").replace(/^[^?]*\??/, "")
-    ).get("type");
-    if ((linkType || "all") === mode) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
+  KlgGameKit.modeLinks(document.getElementById("mode-links"), "type", "all");
+  KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "2");
 
   const bestTimeNote = document.getElementById("best-time-note");
   function renderBestTimeNote() {
@@ -215,9 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
     timePerQuestion: 120,
     generateQuestion: () => {
       const q = kinds[randomInt(0, kinds.length - 1)]();
-      // Clock-emoji prompts render as one big glyph; sentences render small.
-      questionText.classList.toggle("quiz-question-xl", !!q.bigGlyph);
-      questionText.classList.toggle("quiz-question-sm", !q.bigGlyph);
+      questionText.classList.add("quiz-question-sm");
       return q;
     },
     onFinish: ({ score, total, elapsedMs }) => {
