@@ -10,6 +10,8 @@
     "build": "node scripts/build.cjs",
     "sync:index": "node scripts/sync-index.cjs",
     "new-game": "node scripts/new-game.cjs",
+    "sw": "node scripts/build-sw.cjs",
+    "test:offline": "node tests/offline-browser.cjs",
     "test:tamil": "node tests/tamil-browser.cjs",
     "test:tamil-games": "node tests/tamil-games-browser.cjs",
     "test:math": "node tests/math-games-browser.cjs",

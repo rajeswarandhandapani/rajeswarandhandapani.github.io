@@ -327,6 +327,20 @@
   }
 
 
+  /** Tells grown-ups whether the games are saved on this device yet. */
+  function renderOfflineStatus() {
+    var el = document.getElementById("offline-status");
+    if (!el) return;
+    if (!("serviceWorker" in navigator) || !window.caches) { el.textContent = "This browser cannot save the games for offline use."; return; }
+    caches.keys().then(function (keys) {
+      var key = keys.filter(function (k) { return k.indexOf("klg-") === 0; }).pop();
+      if (!key) { el.textContent = "Saving the games for offline use… keep this page open for a minute while online."; return; }
+      return caches.open(key).then(function (c) { return c.keys(); }).then(function (list) {
+        el.textContent = "✓ Saved on this device for offline use (" + list.length + " files).";
+      });
+    }).catch(function () { el.textContent = ""; });
+  }
+
   function wireButtons() {
     document.getElementById("surprise-btn").addEventListener("click", function () {
       var all = cards().filter(function (card) { return !card.closest(".game-tile").hidden; }).map(cardInfo);
@@ -355,6 +369,7 @@
     renderPaths(summary);
     wireButtons();
     document.getElementById("parent-open").addEventListener("click", renderReport);
+    document.getElementById("parent-open").addEventListener("click", renderOfflineStatus);
   });
 })();
 

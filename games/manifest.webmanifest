@@ -1,0 +1,16 @@
+{
+  "name": "Little Learners",
+  "short_name": "Little Learners",
+  "description": "72 picture-first learning games for kids: math, English, Tamil and science.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f8fa",
+  "theme_color": "#203e45",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

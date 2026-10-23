@@ -49,3 +49,16 @@ test('index.html game count and noscript list match the catalogue (run npm run s
  const html = fs.readFileSync('index.html', 'utf8');
  assert.equal(synced(html), html);
 });
+
+test('the offline service worker saves every page, script, picture, font and recording (run npm run sw)', () => {
+ const sw = fs.readFileSync('sw.js', 'utf8');
+ const listed = new Set(JSON.parse(sw.match(/const FILES = (\[[\s\S]*?\]);/)[1]).map((f) => f.replace(/^\.\//, '')));
+ const walk = (p) => fs.statSync(p).isDirectory() ? fs.readdirSync(p).flatMap((f) => walk(path.join(p, f))) : [p.split(path.sep).join('/')];
+ const needed = ['index.html', 'manifest.webmanifest', ...walk('assets'), ...walk('games')].filter((f) => !/(^|\/)\.|\.md$/.test(f));
+ const missing = needed.filter((f) => !listed.has(f));
+ assert.deepEqual(missing, [], 'sw.js is missing files — run npm run sw');
+ for (const f of listed) if (f) assert.ok(fs.existsSync(f), 'sw.js lists a file that no longer exists: ' + f);
+ const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
+ for (const icon of manifest.icons) assert.ok(fs.existsSync(icon.src), icon.src);
+ assert.match(fs.readFileSync('index.html', 'utf8'), /rel="manifest"/);
+});
