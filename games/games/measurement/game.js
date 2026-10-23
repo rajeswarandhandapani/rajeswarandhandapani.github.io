@@ -1,8 +1,10 @@
 /**
  * Measurement question generator.
  *
- * Metric by default, US customary units with ?units=us. Four question
+ * Metric by default, US customary units with ?units=us. Question
  * kinds, mixed by default:
+ *  - read    (?mode=read):    read a picture: a ruler under a pencil, a
+ *                             measuring jug, a thermometer, a balance scale
  *  - unit    (?mode=unit):    which unit fits this object, and a rough
  *                             size estimate ("about how tall is a door?")
  *  - convert (?mode=convert): 3 m = ? cm, 2 kg = ? g, 12 in = ? ft
@@ -250,9 +252,93 @@ function makeCompareQuestion(system) {
   };
 }
 
+const MV = window.KlgMeasureVis;
+
+const RULER_THINGS = ["✏️", "🖍️", "🥕", "🪥", "🔑", "🍴", "🪁", "🐛"];
+
+/** A pencil (or other object) lined up from 0 on a ruler — how long is it? */
+function makeRulerQuestion(system) {
+  const us = system.name === "us";
+  const unit = us ? "in" : "cm";
+  const len = us ? randomInt(2, 8) : randomInt(3, 15);
+  const emoji = pick(RULER_THINGS);
+  const wrongs = shuffle([len + 1, len - 1, len + 2, len - 2, len * 2]).filter((v) => v > 0 && v !== len).slice(0, 3);
+  return {
+    visual: MV.ruler(len, { unit, emoji, max: us ? 9 : 16 }),
+    prompt: `How long is the ${emoji}?`,
+    dedupeKey: `ruler-${len}-${emoji}`,
+    explanation: `It starts at 0 and ends at ${len}, so it is ${len} ${unit} long.`,
+    correctAnswer: `${len} ${unit}`,
+    choices: shuffle([len, ...wrongs].map((v) => `${v} ${unit}`)),
+  };
+}
+
+/** A jug filled to a quarter mark — how much liquid is in it? */
+function makeJugQuestion(system) {
+  const us = system.name === "us";
+  const max = us ? 4 : pick([200, 400, 1000]);
+  const unit = us ? "cups" : "ml";
+  const step = max / 4;
+  const q = randomInt(1, 3);
+  const fill = q * step;
+  const wrongs = shuffle([fill + step, fill - step, fill + 2 * step, max]).filter((v) => v > 0 && v !== fill);
+  const answer = us ? fmtQty(fill, "cups") : `${fill} ml`;
+  const choices = [fill, ...[...new Set(wrongs)].slice(0, 3)];
+  return {
+    visual: MV.jug(fill, max, { unit }),
+    prompt: "How much liquid is in the jug?",
+    dedupeKey: `jug-${max}-${fill}`,
+    explanation: `The water reaches the ${fill} mark (each mark is ${step} ${unit}).`,
+    correctAnswer: answer,
+    choices: shuffle(choices.map((v) => (us ? fmtQty(v, "cups") : `${v} ml`))),
+  };
+}
+
+/** A thermometer in 5-degree steps — what is the temperature? */
+function makeThermoQuestion(system) {
+  const us = system.name === "us";
+  const [min, max] = us ? [0, 100] : [0, 40];
+  const temp = 5 * randomInt(min / 5 + 1, max / 5 - 1);
+  const wrongs = shuffle([temp + 5, temp - 5, temp + 10, temp - 10]).filter((v) => v > min && v < max && v !== temp).slice(0, 3);
+  const fmt = (v) => `${v}°${us ? "F" : "C"}`;
+  return {
+    visual: MV.thermometer(temp, { min, max }),
+    prompt: "What temperature does the thermometer show?",
+    dedupeKey: `thermo-${temp}`,
+    explanation: `The red line stops at ${fmt(temp)}.`,
+    correctAnswer: fmt(temp),
+    choices: shuffle([temp, ...wrongs].map(fmt)),
+  };
+}
+
+const WEIGHTS = [
+  ["🐘", "the elephant", 5000000], ["🍉", "the watermelon", 4000], ["🍎", "the apple", 150], ["🪶", "the feather", 1],
+  ["🐈", "the cat", 4000], ["🎾", "the tennis ball", 60], ["🚗", "the car", 1200000], ["🐜", "the ant", 1], ["📖", "the book", 500], ["🥚", "the egg", 60],
+];
+
+/** A balance scale tips toward the heavier side — which one is heavier? */
+function makeBalanceQuestion() {
+  let a, b;
+  do { [a, b] = shuffle(WEIGHTS).slice(0, 2); } while (a[2] === b[2]);
+  const heavier = a[2] > b[2] ? a : b;
+  const lighter = a[2] > b[2] ? b : a;
+  const askHeavy = randomInt(0, 1) === 0;
+  const target = askHeavy ? heavier : lighter;
+  const name = (x) => `${x[0]} ${x[1]}`;
+  return {
+    visual: MV.balance(a[2], b[2], { leftEmoji: a[0], rightEmoji: b[0] }),
+    prompt: `The scale is tipped. Which is ${askHeavy ? "heavier" : "lighter"}?`,
+    dedupeKey: `balance-${a[0]}-${b[0]}-${askHeavy}`,
+    explanation: `The ${heavier[0]} pulls its side of the scale down, so it is heavier and the ${lighter[0]} is lighter.`,
+    correctAnswer: name(target),
+    choices: shuffle([name(a), name(b)]),
+    noChoiceListen: true,
+  };
+}
+
 function getMode() {
   const mode = new URLSearchParams(window.location.search).get("mode");
-  return ["unit", "convert", "compare"].includes(mode) ? mode : "all";
+  return ["unit", "convert", "compare", "read"].includes(mode) ? mode : "all";
 }
 
 function getSystem() {
@@ -287,7 +373,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const storageKey = `klg-measurement-best-ms:${system.name}:${mode}`;
 
   const labels = {
-    all: "Units, converting and comparing",
+    all: "Reading tools, units, converting and comparing",
+    read: "Read the ruler, jug, thermometer and scale",
     unit: "Which unit fits?",
     convert: "Convert between units",
     compare: "Which is bigger?",
@@ -322,13 +409,16 @@ document.addEventListener("DOMContentLoaded", () => {
       // repeating.
       const kind =
         mode === "all"
-          ? pick(["unit", "estimate", "convert", "convert", "compare"])
+          ? pick(["unit", "estimate", "convert", "compare", "read", "read"])
+          : mode === "read"
+          ? "read"
           : mode === "unit"
           ? pick(["unit", "estimate"])
           : mode;
       if (kind === "unit") return makeUnitQuestion(system);
       if (kind === "estimate") return makeEstimateQuestion(system);
       if (kind === "convert") return makeConvertQuestion(system);
+      if (kind === "read") return pick([makeRulerQuestion, makeRulerQuestion, makeJugQuestion, makeThermoQuestion, makeBalanceQuestion])(system);
       return makeCompareQuestion(system);
     },
     onFinish: ({ score, total, elapsedMs }) => {

@@ -25,3 +25,24 @@ test('stale streaks expire and restart after a completed game',()=>{
 test('practice cannot earn a speed badge or best time',()=>{
  const p=setup();p.record({score:10,total:10,elapsedMs:0});assert.equal(p.gameStats('counting').bestMs,0);assert.equal(p.summary().badges.speedy,undefined);
 });
+
+test('rounds keep the last five accuracy results and per-mode stars',()=>{
+ const p=setup();
+ for(const score of [1,2,3,4,5,6,7])p.record({score,total:10});
+ const g=p.gameStats('counting');
+ assert.deepEqual([...g.recent],[30,40,50,60,70]);
+ assert.equal(g.byMode.default.plays,7);assert.equal(g.byMode.default.bestStars,2);
+ assert.ok(g.lastPlayed);
+});
+test('old records without the newer fields still load and update',()=>{
+ const p=setup(JSON.stringify({xp:20,plays:1,games:{counting:{plays:1,bestScore:4,total:10,bestStars:0,bestMs:0}},badges:{}}));
+ assert.equal(p.summary().games.counting.recent.length,0);
+ p.record({score:8,total:10});
+ assert.deepEqual([...p.gameStats("counting").recent],[80]);
+});
+test('comeback badge needs a better score than an earlier round',()=>{
+ const p=setup();
+ assert.ok(!p.record({score:5,total:10}).newBadges.some(b=>b.id==='comeback'));
+ assert.ok(!p.record({score:4,total:10}).newBadges.some(b=>b.id==='comeback'));
+ assert.ok(p.record({score:7,total:10}).newBadges.some(b=>b.id==='comeback'));
+});

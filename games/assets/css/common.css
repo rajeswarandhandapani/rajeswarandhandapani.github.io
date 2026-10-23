@@ -791,3 +791,28 @@ body { font-family:'Segoe UI','Learning Emoji','Noto Sans Tamil',Arial,sans-seri
 .tg-finish-note { font-size: 1.15rem; font-weight: 600; margin: 8px 0; }
 .tg-finish-xp { color: #3e6f5d; font-weight: 700; }
 
+
+/* Learning paths (catalogue-driven) and the grown-up report */
+.path-tabs { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.path-tabs button[data-path] { border:1px solid #e0cdb9; background:#fff; border-radius:999px; padding:8px 14px; font-weight:700; color:var(--ink); }
+.path-tabs button[data-path][aria-pressed="true"] { background:#203e45; border-color:#203e45; color:#fff; }
+.tamil-steps a.done { border-color:#24754c; background:#f2faf4; }
+.tamil-steps a.next-up { border:2px solid #b34c13; box-shadow:0 4px 14px #b34c1326; }
+.step-tick { position:absolute; bottom:8px; right:10px; color:#24754c; font-weight:800; }
+.step-chip { position:absolute; bottom:8px; right:10px; background:#b34c13; color:#fff; border-radius:999px; padding:1px 8px; font-size:11px; font-weight:800; }
+.path-next { margin-top:12px !important; font-weight:700; color:var(--ink) !important; }
+.report-summary { background:#f5f8fa; border-radius:12px; padding:12px 14px; }
+dialog h4 { font-size:15px; margin:18px 0 6px; }
+.report-table { width:100%; border-collapse:collapse; font-size:14px; }
+.report-table th, .report-table td { text-align:left; padding:6px 6px; border-bottom:1px solid #e6edf0; vertical-align:middle; }
+.report-table tr.weak td:first-child { color:#bd3e44; font-weight:700; }
+.spark { width:90px; height:24px; vertical-align:middle; }
+.print-report { margin-top:14px; border:1px solid #cdd8dd; background:#fff; border-radius:10px; padding:8px 14px; font-weight:700; }
+@media print {
+  body.learning-home > *:not(#parent-dialog) { display:none !important; }
+  #parent-dialog { position:static; box-shadow:none; border:0; width:100%; }
+  #parent-dialog .dialog-heading button, #parent-dialog .reset-button, #parent-dialog .parent-badges, .print-report { display:none !important; }
+}
+
+/* Long answer words stay whole next to the listen button on narrow phones */
+.quiz-choice-tile.has-listen .quiz-choice-btn { padding-left: 0.4rem; padding-right: 2.9rem; font-size: clamp(1.05rem, 4.6vw, 1.5rem); overflow-wrap: break-word; word-break: normal; hyphens: none; }

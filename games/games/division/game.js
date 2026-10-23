@@ -66,6 +66,7 @@ function makeFactQuestion(divisors, maxQuotient) {
   const dividend = divisor * quotient;
   return {
     prompt: `${dividend} ÷ ${divisor} = ?`,
+    hintVisual: () => KlgMathVis.circled(dividend, divisor, "🟣"),
     correctAnswer: quotient,
     choices: numericChoices(quotient, [
       quotient + 1,

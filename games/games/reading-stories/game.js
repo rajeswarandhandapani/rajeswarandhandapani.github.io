@@ -13,10 +13,21 @@ const STORIES = [
  ['The lights went out. Dad found a flashlight. Its bright beam helped everyone see.','What helped everyone see?','The flashlight',['A pillow','A spoon','A blanket'],'A flashlight makes light, so it helps us see in the dark.'],
  ['A red kite got stuck in a tree. Wind blew through the leaves. The kite came loose and floated down.','What freed the kite?','The wind',['A fish','The raincoat','A bicycle'],'The wind moved the leaves and helped the kite come loose.']
 ];
+// One picture strip per story. It shows who is in the story, never the answer.
+const PICTURES = ['👧🪴🌱','👦🥾☔','🐦🌳🌿','🧒🍎👧','👧🧦🛏️','🐇🐢🏞️','👧💌👴','🧒🥪🏞️','🐶🛁✨','👦📚🧑‍🏫','🌙🏠👨‍👧','🪁🌳🍃'];
+function storyPicture(emoji) {
+ const f = document.createElement('figure');
+ f.className = 'kv-clue';
+ f.setAttribute('role', 'img');
+ f.setAttribute('aria-label', 'A picture for the story');
+ f.innerHTML = '<span aria-hidden="true">' + emoji + '</span>';
+ return f;
+}
 document.addEventListener('DOMContentLoaded', () => {
  const quiz = new QuizEngine({totalQuestions:8,timePerQuestion:45,generateQuestion:() => {
-  const [story,question,correct,others,explanation] = STORIES[Math.floor(Math.random()*STORIES.length)];
-  return {prompt:story+'\n\n'+question,correctAnswer:correct,choices:[correct,...others].sort(() => Math.random()-.5),explanation};
+  const index = Math.floor(Math.random()*STORIES.length);
+  const [story,question,correct,others,explanation] = STORIES[index];
+  return {visual:storyPicture(PICTURES[index]),prompt:story+'\n\n'+question,dedupeKey:'story-'+index,correctAnswer:correct,choices:[correct,...others].sort(() => Math.random()-.5),explanation};
  }});
  document.getElementById('start-btn').onclick=()=>{document.getElementById('start-screen').classList.add('d-none');quiz.start();};
  document.getElementById('play-again-btn').onclick=()=>quiz.start();

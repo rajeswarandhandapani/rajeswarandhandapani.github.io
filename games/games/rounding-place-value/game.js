@@ -3,9 +3,14 @@
  * Reads ?type=rounding|placevalue from the URL to practice one skill;
  * defaults to a mix of both.
  *
+ * Pictures (KlgBlocks and a rounding number line) come with ?level=1
+ * (3-digit numbers) and ?level=2 (default, 4-digit). ?level=3 is the plain
+ * text drill with no pictures.
+ *
  * Question kinds:
  *  - rounding:       "Round 3,472 to the nearest hundred" (nearest 10 / 100 /
- *                    1,000, using the school rule: 5 or more rounds up)
+ *                    1,000, using the school rule: 5 or more rounds up),
+ *                    shown on a number line between the two nearest multiples
  *  - digit-at-place: "Which digit is in the tens place of 4,728?"
  *  - value-of-digit: "What is the value of the 7 in 4,728?"
  *  - expanded form:  "3,000 + 400 + 20 + 5 = ?"
@@ -34,12 +39,39 @@ function formatNumber(n) {
   return n.toLocaleString("en-US");
 }
 
+const level = [1, 3].includes(Number(new URLSearchParams(window.location.search).get("level")))
+  ? Number(new URLSearchParams(window.location.search).get("level")) : 2;
+const PICTURES = level < 3;
+const LEN = level === 1 ? 3 : 4;
+const BK = window.KlgBlocks;
+const V = window.KlgMathVis;
+
 const PLACES = [
-  { name: "ones", value: 1 },
-  { name: "tens", value: 10 },
-  { name: "hundreds", value: 100 },
-  { name: "thousands", value: 1000 },
-];
+  { name: "ones", value: 1, key: "o" },
+  { name: "tens", value: 10, key: "t" },
+  { name: "hundreds", value: 100, key: "h" },
+  { name: "thousands", value: 1000, key: "th" },
+].slice(0, LEN);
+
+/** Number line between the two multiples n sits between; the dashed line is halfway. */
+function roundingLine(n, unit, name) {
+  const lo = Math.floor(n / unit) * unit, hi = lo + unit, mid = lo + unit / 2;
+  const f = V.figure(`A number line from ${formatNumber(lo)} to ${formatNumber(hi)} with ${formatNumber(n)} marked on it. Halfway is ${formatNumber(mid)}.`, "kv-roundline");
+  f.dataset.value = String(n); f.dataset.lo = String(lo); f.dataset.hi = String(hi);
+  const w = 320, pad = 34, x = (v) => pad + ((v - lo) / unit) * (w - 2 * pad);
+  const svg = V.el("svg", { viewBox: `0 0 ${w} 84`, focusable: "false", "aria-hidden": "true" });
+  svg.appendChild(V.el("line", { x1: pad, y1: 44, x2: w - pad, y2: 44, class: "kv-tl-line" }));
+  [lo, hi].forEach((v) => {
+    svg.appendChild(V.el("line", { x1: x(v), y1: 34, x2: x(v), y2: 54, class: "kv-tick-big" }));
+    svg.appendChild(V.el("text", { x: x(v), y: 74, class: "kv-tl-label", "text-anchor": "middle" }, formatNumber(v)));
+  });
+  svg.appendChild(V.el("line", { x1: x(mid), y1: 30, x2: x(mid), y2: 58, class: "kv-mid" }));
+  svg.appendChild(V.el("text", { x: x(mid), y: 22, class: "kv-mid-label", "text-anchor": "middle" }, "halfway"));
+  svg.appendChild(V.el("circle", { cx: x(n), cy: 44, r: 8, class: "kv-dot" }));
+  svg.appendChild(V.el("text", { x: x(n), y: 14, class: "kv-tl-label", "text-anchor": "middle" }, formatNumber(n)));
+  f.appendChild(svg);
+  return f;
+}
 
 function digitAt(number, placeValue) {
   return Math.floor(number / placeValue) % 10;
@@ -51,16 +83,16 @@ function digitAt(number, placeValue) {
  * choices for place-value questions.
  */
 function randomDistinctDigitNumber() {
-  const digits = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4);
+  const digits = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, LEN);
   if (digits[0] === 0) [digits[0], digits[1]] = [digits[1], digits[0]];
   return { digits, number: digits.reduce((n, d) => n * 10 + d, 0) };
 }
 
 const ROUNDING_UNITS = [
   { unit: 10, name: "ten", min: 13, max: 987 },
-  { unit: 100, name: "hundred", min: 104, max: 9876 },
+  { unit: 100, name: "hundred", min: 104, max: level === 1 ? 987 : 9876 },
   { unit: 1000, name: "thousand", min: 1042, max: 9876 },
-];
+].slice(0, level === 1 ? 2 : 3);
 
 function makeRoundingQuestion() {
   const { unit, name, min, max } = ROUNDING_UNITS[randomInt(0, ROUNDING_UNITS.length - 1)];
@@ -86,6 +118,9 @@ function makeRoundingQuestion() {
   }
 
   return {
+    visual: PICTURES ? roundingLine(n, unit, name) : null,
+    explanation: `${formatNumber(n)} is between ${formatNumber(Math.floor(n / unit) * unit)} and ${formatNumber(Math.floor(n / unit) * unit + unit)}. ${n % unit >= unit / 2 ? "It is halfway or past it, so it rounds up" : "It is before halfway, so it rounds down"} to ${formatNumber(correct)}.`,
+    dedupeKey: `round:${n}:${unit}`,
     prompt: `Round ${formatNumber(n)} to the nearest ${name}.`,
     correctAnswer: correct,
     choices: shuffle([...choices].slice(0, 4)),
@@ -96,6 +131,9 @@ function makeDigitAtPlaceQuestion() {
   const { digits, number } = randomDistinctDigitNumber();
   const place = PLACES[randomInt(0, PLACES.length - 1)];
   return {
+    visual: PICTURES ? BK.chart(number) : null,
+    explanation: `In ${formatNumber(number)} the ${place.name} place holds ${digitAt(number, place.value)}.`,
+    dedupeKey: `digit:${number}:${place.name}`,
     prompt: `Which digit is in the ${place.name} place of ${formatNumber(number)}?`,
     correctAnswer: digitAt(number, place.value),
     choices: shuffle([...digits]),
@@ -108,6 +146,9 @@ function makeValueOfDigitQuestion() {
   const place = nonZeroPlaces[randomInt(0, nonZeroPlaces.length - 1)];
   const digit = digitAt(number, place.value);
   return {
+    visual: PICTURES ? BK.blocks(number, { highlight: place.key }) : null,
+    explanation: `${digit} in the ${place.name} place is worth ${digit} × ${formatNumber(place.value)} = ${formatNumber(digit * place.value)}.`,
+    dedupeKey: `value:${number}:${place.name}`,
     prompt: `What is the value of the ${digit} in ${formatNumber(number)}?`,
     correctAnswer: digit * place.value,
     choices: shuffle(PLACES.map((p) => digit * p.value)),
@@ -120,17 +161,20 @@ function makeExpandedFormQuestion() {
     ({ digits, number } = randomDistinctDigitNumber());
   } while (digits.includes(0)); // zeros would add ugly "+ 0" terms
 
-  const parts = digits.map((d, i) => formatNumber(d * 10 ** (3 - i)));
+  const parts = digits.map((d, i) => formatNumber(d * 10 ** (LEN - 1 - i)));
   const wrong = new Set();
   while (wrong.size < 3) {
     const swapped = [...digits];
-    const i = randomInt(0, 2);
-    const j = randomInt(i + 1, 3);
+    const i = randomInt(0, LEN - 2);
+    const j = randomInt(i + 1, LEN - 1);
     [swapped[i], swapped[j]] = [swapped[j], swapped[i]];
     wrong.add(swapped.reduce((n, d) => n * 10 + d, 0));
   }
 
   return {
+    visual: PICTURES ? BK.blocks(number) : null,
+    explanation: `${parts.join(" + ")} = ${formatNumber(number)}.`,
+    dedupeKey: `expanded:${number}`,
     prompt: `${parts.join(" + ")} = ?`,
     correctAnswer: number,
     choices: shuffle([number, ...wrong]),
@@ -181,7 +225,7 @@ function formatSeconds(ms) {
 document.addEventListener("DOMContentLoaded", () => {
   const mode = getMode();
   const totalQuestions = 20;
-  const storageKey = bestTimeKey(mode);
+  const storageKey = bestTimeKey(mode) + (level === 2 ? "" : ":L" + level);
   const kinds = QUESTION_KINDS[mode];
 
   const labels = {
@@ -191,14 +235,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
-  document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkType = new URLSearchParams(
-      link.getAttribute("href").replace(/^[^?]*\??/, "")
-    ).get("type");
-    if ((linkType || "all") === mode) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
+  KlgGameKit.modeLinks(document.getElementById("mode-links"), "type", "all");
+  KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "2");
 
   const bestTimeNote = document.getElementById("best-time-note");
   function renderBestTimeNote() {

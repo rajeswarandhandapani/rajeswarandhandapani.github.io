@@ -1,6 +1,6 @@
 # Little Learners · Kid Learning Games
 
-51 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+72 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
 
 ## Run and verify
 
@@ -13,13 +13,18 @@ npm run test:e2e          # keep the local server running in another terminal
 npm run build            # validates game links and copies static assets to site-output/
 npm run test:tamil-games  # plays every Tamil activity with recorded audio (server running)
 npm run test:math         # plays the visual × and ÷ games; checks every picture matches its answer
+npm run test:pictures     # plays every new and picture-upgraded game; checks each picture against its answer
+npm run new-game -- <id> "<Name>" <icon> …   # scaffolds a hand-built game and lists it in the catalogue
+npm run sync:index        # keeps the home page title count and <noscript> list in step with the catalogue
 ```
 
 `BASE_URL` can point the browser tests at another local server. Screenshots are saved under `artifacts/` and ignored by Git.
 
 ## Learning experience
 
-- Search 51 games, filter by subject (including a dedicated **Tamil · தமிழ்** tab) and learning stage, and save favorites.
+- Search 72 games, filter by subject (Math, English, Tamil · தமிழ், Science & world, Thinking skills) and learning stage, and save favorites. The home page is built from one list, `assets/js/catalogue.js`.
+- Four **learning paths** (Math, English, Tamil, Science & world) put the games in a sensible order. Each step shows a ✓ once it has a star, and a *Next up* chip points at the first step without one.
+- The **For grown-ups** panel has a progress report: stars, the last five scores and the last-played date for every skill, plus *Needs practice* and *Ready for next* lists. It stays on this browser and has a print button.
 - Untimed practice is the default. Children read feedback and choose when to continue. Optional timed challenge rounds retain speed records.
 - Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden draws a new picture mix for 6, 8, or 10 pairs.
 - Sentence questions are spoken automatically when the browser has speech synthesis. A Listen button replays them; word answer tiles and game instructions have their own speaker buttons. Shapes & Colors uses picture and color tiles where reading the label is unnecessary. Existing letter, number, and Tamil audio modes keep their dedicated pronunciation.
@@ -29,6 +34,90 @@ npm run test:math         # plays the visual × and ÷ games; checks every pictu
 - Existing Bootstrap, confetti, emoji, and Tamil font assets are bundled locally. No CDN or external font requests are needed to load the app. Speech synthesis still depends on browser/OS voice availability; some voices may require network access.
 
 This is an educational practice app, not a standardized assessment. Age ranges are starting points. Progress belongs to the current browser and is not synchronized across devices. Practice awards stars and XP but does not set speed records. Memory Garden awards completion stars, not an accuracy assessment.
+
+## Picture everything (v3)
+
+Version 3 makes every game picture-first and adds 21 new games. Shared pictures
+live in `assets/js/visuals/` (each one is a plain function that returns a
+`<figure role="img">` with a spoken `aria-label` and `data-*` values the tests
+read):
+
+| Module | Draws |
+| ------ | ----- |
+| `clock.js` · `KlgClock` | analog clocks (draggable when `interactive`), digital time, a timeline for elapsed time |
+| `fractions.js` · `KlgFracVis` | pies, bars, sets of things, number lines, stacked bars, a pie you shade by tapping |
+| `money.js` · `KlgMoneyVis` | US coins and notes (generic drawings), trays, price tags, fewest-coin change |
+| `measure.js` · `KlgMeasureVis` | ruler with a movable marker, balance scale, measuring jug, thermometer |
+| `place-value.js` · `KlgBlocks` | base-10 blocks up to thousands, place-value chart, ten-frames |
+| `charts.js` · `KlgPictograph` | picture graphs, bar charts, tally marks |
+| `shapes.js` · `KlgShapes` | flat shapes and solids (cube, sphere, cylinder, cone, pyramid) |
+| `scene.js` · `KlgScene` | emoji scenes: weather, seasons, habitats |
+
+`assets/js/play-kit.js` (`KlgPlayKit`) holds the interaction mechanics:
+`dragToBins`, `orderCards`, `tapHotspots` and `buildFromTiles`. Every one works by
+tap or click and by keyboard. Dragging is an extra. `assets/js/round-kit.js`
+(`KlgRound`) runs the question loop of the hand-built games and records progress.
+`assets/js/word-pictures.js` is the shared word → picture list.
+
+### Existing games made pictorial
+
+| Game | New pictures |
+| ---- | ------------ |
+| Fractions | pies, bars and sets; picture answers; `?type=picture`; `?level=1\|2\|3` |
+| Time | analog clocks, *which clock?*, timelines; `?level=1\|2\|3` (o'clock → any minute) |
+| Money | drawn coins and notes, *which coins make 37¢?*, price tags; `?level=1\|2\|3` |
+| Measurement | `?mode=read`: ruler, jug, thermometer and balance scale |
+| Rounding & Place Value | base-10 blocks to thousands, a rounding number line; `?level=1\|2\|3` (3 = no pictures) |
+| Comparing Numbers | ten-frames (to 10), blocks (to 100), place-value charts (to 1,000) |
+| Addition & Subtraction | two-colour ten-frames, struck-out counters, blocks |
+| Counting | `?mode=tenframe\|dice` |
+| Patterns & Skip Counting | frog-hop number lines and growing dot towers |
+| Calendar | `?type=grid`: questions on a drawn month |
+| Multiplication / Division | a **💡 Show me** button draws the fact (never automatic) |
+| Science Quiz | a picture clue for every question; picture answers when every choice has one |
+| Solar System | drawn planets in a Sun-to-Neptune strip; *which picture is Saturn?* |
+| World Capitals | flags and landmarks; `?mode=flag` |
+| Rhyming Words, Opposites | `?mode=picture` |
+| Spelling Bee | the word's picture at every level |
+| English Alphabets | 60 phonics pictures |
+| Shapes & Colors | drawn polygons; `?mode=solid` for 3D shapes |
+| Tamil Words | `?type=wordpic` (word → picture) |
+| Tamil Alphabets | an example word and picture after each answer |
+| Animal Homes | habitat scenes as the answers |
+| Baby Animals, Story Detectives | a picture for each question or story |
+
+### New games
+
+All have `?level=` (or `?mode=`) settings and need no account, network or timer.
+
+| Subject | Game | What the child does |
+| ------- | ---- | ------------------- |
+| Math | Set the Clock | drag the clock hands (or use the buttons) to a time |
+| Math | Pizza Fractions | shade slices, shade an equal fraction, order three pizzas |
+| Math | Coin Shop | tap coins and notes to pay exactly, or with the fewest pieces |
+| Math | Block Builder | build, trade (10 ones → 1 ten) and read base-10 blocks |
+| Math | Shape Detectives | count sides, tap every shape of one kind, find a mirror image |
+| Math | Measure Lab | slide a ruler marker, balance a scale, pour a jug |
+| Math | Picture Graphs | read picture graphs and bar charts, make tally marks |
+| English | Sound It Out | blend letters into a picture word, spell a picture word from tiles |
+| English | Word Families | sort picture words into -at, -og, -ip… houses |
+| English | Sight Word Pop | hear a common word, pop its bubble |
+| English | Sentence Builder | put word tiles in order to describe a picture |
+| English | Story Order | put 3–5 picture cards in order, then hear the retelling |
+| Tamil | நாட்கள் · நிறங்கள் | days, months and colours, with recordings (`?mode=days\|months\|colours`) |
+| Tamil | படம் பார்த்து சொல் | read a Tamil sentence, pick its picture |
+| Tamil | Tamil–English Match | join Tamil words to pictures or English words |
+| Tamil | கதை நேரம் | four-picture Tamil stories with a picture question |
+| Science & world | Life Cycles | what comes next, or put a life cycle in order |
+| Science & world | My Body | tap body parts on a drawn child, match the senses |
+| Science & world | Sort It! | living / not living, float / sink, land / water / air… |
+| Science & world | Weather & Seasons | dress for the weather, name the season |
+| Science & world | Map Explorer | tap continents and oceans, find where animals and landmarks belong |
+
+Picture rules for every game: wrong choices never include something that is
+quietly also right; a picture never shows the answer to a question that is
+asking you to read it out; every drag has a tap alternative; no external image
+or font is loaded.
 
 ## Seeing multiplication and division
 
@@ -72,7 +161,8 @@ has none).
   [Lingua Libre](https://lingualibre.org/), CC BY-SA 3.0/4.0 and CC0. Every
   file is credited in [`assets/audio/tamil/CREDITS.md`](assets/audio/tamil/CREDITS.md).
   The audio is shared under those licences. It is not covered by the code's licence.
-- **Size:** 188 small MP3 files, 1.8 MB in total. A file loads only when it is played.
+- **Size:** 205 small MP3 files, 2.0 MB in total. A file loads only when it is played.
+- **Days, months and colours:** all 7 days, 9 of 12 months and 8 of 10 colours are recorded (`assets/js/tamil-days-data.js`). The rest use the device voice when there is one.
 
 `npm run audio:tamil` (`scripts/fetch-tamil-audio.cjs`) rebuilds everything
 reproducibly. It finds each text on Commons and records the chosen source
@@ -90,7 +180,7 @@ orthographic splitting, numbers), `assets/js/tamil-audio.js`
 
 ### The Tamil activities
 
-The home page has a 9-step **Tamil learning path** and a Tamil filter tab (16 games).
+The home page has a 13-step **Tamil learning path** and a Tamil filter tab (20 games).
 
 | Game | What the child does | Modes |
 | ---- | ------------------- | ----- |
@@ -131,8 +221,15 @@ The shared content is in `assets/js/tamil-sentences-data.js`; UI logic is in `as
 ## Structure
 
 ```
-index.html                 landing page — games grouped into four levels
+index.html                 landing page, rendered from the catalogue (count and <noscript> list synced by scripts/sync-index.cjs)
 assets/css/common.css      shared styling used by every game
+assets/css/visuals.css     styling for the shared pictures and play mechanics
+assets/js/catalogue.js     KlgCatalogue — every game, its level, subject, skills and the learning paths
+assets/js/visuals/         clock, fractions, money, measuring, blocks, graphs, shapes, scenes
+assets/js/play-kit.js      KlgPlayKit — sort, order, tap-a-part and tile-building mechanics
+assets/js/round-kit.js     KlgRound — the question loop of the hand-built picture games
+assets/js/word-pictures.js KlgWordPics — word → emoji list
+assets/js/tamil-days-data.js  Tamil days, months and colours
 assets/js/quiz-engine.js   reusable QuizEngine (timer, scoring, results screen)
 assets/js/progress.js      KlgProgress — XP, ranks, stars, day streak, badges
 assets/js/home.js          landing page: player card, daily challenge, stars
@@ -143,21 +240,23 @@ assets/js/tamil-kit.js     KlgTamil — Tamil letter tables, letter splitting, n
 assets/js/tamil-audio.js   KlgTamilAudio — plays recorded Tamil (blend / TTS fallback)
 assets/audio/tamil/        recorded Tamil letters & words + CREDITS.md
 scripts/fetch-tamil-audio.cjs  rebuilds the Tamil audio from Wikimedia Commons
+scripts/new-game.cjs       scaffolds a new hand-built game
+scripts/sync-index.cjs     keeps index.html's count and <noscript> list in step with the catalogue
 games/<game-name>/         one folder per game (index.html + game.js)
 ```
 
 ## Levels
 
-The landing page sorts every game into four levels, roughly by age. Levels
+The landing page (built from `assets/js/catalogue.js`) sorts every game into four levels, roughly by age. Levels
 are a property of the landing page only — each game is still a standalone
 page you can link to directly.
 
 | Level | Name | Ages | Games |
 | ----- | ---- | ---- | ----- |
-| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers |
-| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly |
-| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder, Tamil Word Puzzle, Market Day, Fact Family Triangles, Array Garden, Multiples Hunt |
-| 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers, Sound It Out, Word Families, Sight Word Pop, Story Order, Tamil Days & Colours, My Body, Sort It!, Weather & Seasons |
+| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly, Set the Clock, Block Builder, Shape Detectives, Picture Graphs, Sentence Builder, Tamil Picture Sentences, Tamil–English Match, Life Cycles |
+| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder, Tamil Word Puzzle, Market Day, Fact Family Triangles, Array Garden, Multiples Hunt, Pizza Fractions, Coin Shop, Measure Lab, Tamil Story Time |
+| 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals, Map Explorer |
 
 ## Progress, ranks and badges
 
@@ -172,9 +271,11 @@ it earned:
   confetti burst and fanfare on each promotion.
 - **Stars** — up to 3 a game (90% / 70% / 50%), shown on the game's card.
 - **Day streak** — consecutive days played, so coming back tomorrow counts.
-- **Badges** — 12 one-off unlocks (first quiz, perfect score, 10 in a row,
+- **Badges** — 16 one-off unlocks (first quiz, perfect score, 10 in a row,
   full marks under 4s a question, 5 and 12 games tried, 25 and 100 quizzes,
-  3- and 7-day streaks).
+  3- and 7-day streaks, and in v3: Picture Pro, Path Finder, All-Rounder and Comeback).
+- **Per-game history** — each game also keeps its last five scores, the date last
+  played and stars per mode or level, which feed the grown-up report.
 
 The landing page turns that into a player card, a **daily challenge** (the
 same game for the whole day, a different one tomorrow), a **🎲 Surprise me**
@@ -187,15 +288,15 @@ name in the URL.
 
 ## Adding a new game
 
-1. Create `games/<name>/index.html`, copying `games/multiplication/index.html`
-   as a template (reuses the same start/quiz/results screen markup and IDs).
-2. Create `games/<name>/game.js` with a question generator function:
-   `(askedSet) => ({ prompt, correctAnswer, choices })`.
-3. Instantiate `QuizEngine({ totalQuestions, timePerQuestion, generateQuestion })`
-   and call `.start()`.
-4. Add a card for it on the root `index.html` inside the right `#level-N`
-   section, with `data-game="<name>"` on the `.game-card` — that attribute is
-   what wires up stars, the daily challenge and "Surprise me".
+1. **Hand-built picture game:** `npm run new-game -- <id> "<Name>" <icon> --blurb "…" --level 2 --subject math --skills math.time --levels "L1|L2|L3" --scripts visuals/clock.js`.
+   It writes `games/<id>/index.html`, a `game.js` stub that uses `KlgRound`, and the catalogue entry.
+2. **Quiz game:** create `games/<name>/index.html` (copy `games/multiplication/index.html`) and `game.js` with a
+   question generator `(askedSet) => ({ prompt, correctAnswer, choices, visual?, choiceVisuals?, explanation? })`, then
+   `new QuizEngine({ totalQuestions, timePerQuestion, generateQuestion }).start()`. Add one line to `GAMES` in `assets/js/catalogue.js`
+   (name, icon, blurb, level, subject, skills, `isNew`) and a `SKILL_NAMES` entry for any new skill tag.
+3. Optionally list it in a learning path in the same file (`PATHS`).
+4. Run `npm run sync:index`, `npm test` (the catalogue test fails if a folder and its entry disagree) and
+   `npm run test:pictures`. Add a section to `tests/picture-games-browser.cjs` that checks the picture against the answer.
 
 Two rules worth keeping when writing a generator: never ask for more unique
 questions than the data can supply (cap `totalQuestions` by pool size), and

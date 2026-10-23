@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const CAT=require('../assets/js/catalogue.js');const TAMIL_COUNT=CAT.GAMES.filter(g=>g.subject==='tamil').length;
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const data = require('../assets/js/tamil-sentences-data.js');
@@ -130,7 +131,7 @@ const base = process.env.BASE_URL || 'http://localhost:4173';
     assert.ok(await page.locator('.game-tile:visible').count() >= 10);
     await page.locator('#game-search').fill('');
     await page.locator('button[data-subject="tamil"]').click();
-    assert.equal(await page.locator('.game-tile:visible').count(), 16);
+    assert.equal(await page.locator('.game-tile:visible').count(), TAMIL_COUNT);
     assert.ok(await page.locator('[data-game="tamil-sentence-words"]').isVisible());
     assert.deepEqual(errors, []);
     console.log('PASS Tamil discovery and no browser errors');

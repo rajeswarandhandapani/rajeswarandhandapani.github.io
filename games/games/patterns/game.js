@@ -61,11 +61,15 @@ function makeSkipQuestion() {
     };
   }
 
-  const start = step * randomInt(1, 6);
+  const k = randomInt(1, 6);
+  const start = step * k;
   const shown = [];
   for (let i = 0; i < length; i += 1) shown.push(start + i * step);
   const answer = start + length * step;
   return {
+    // The frog hops from 0 in jumps of `step`; the last landing is the answer.
+    visual: window.KlgMathVis.numberLine({ step, hops: k + length, hideEnd: true }),
+    explanation: `Each hop adds ${step}: ${shown.join(", ")}, ${answer}.`,
     prompt: `Count in ${step}s. What comes next?\n${SEQ(shown)}`,
     dedupeKey: `skip-${step}-${start}`,
     correctAnswer: answer,
@@ -154,6 +158,36 @@ const PATTERN_SETS = [
   ["😀", "😎", "🤖"],
 ];
 
+/** Towers of dots that grow by the same amount each time. */
+function makeGrowingQuestion() {
+  const V = window.KlgMathVis;
+  const step = pick([1, 2, 2, 3]);
+  const first = randomInt(1, 3);
+  const emoji = pick(["🔵", "🟢", "🟡", "🔴", "⭐"]);
+  const counts = [first, first + step, first + 2 * step];
+  const answer = first + 3 * step;
+  const row = document.createElement("div");
+  row.className = "kv-row kv-towers";
+  counts.forEach((c, i) => {
+    const wrap = document.createElement("div");
+    wrap.className = "kv-tower";
+    wrap.appendChild(V.pile(c, emoji, { label: `Tower ${i + 1} has ${c}` }));
+    row.appendChild(wrap);
+    row.appendChild(Object.assign(document.createElement("span"), { className: "kv-op", textContent: "➜", ariaHidden: "true" }));
+  });
+  const q = Object.assign(document.createElement("div"), { className: "kv-tower kv-next", textContent: "?" });
+  q.setAttribute("aria-hidden", "true");
+  row.appendChild(q);
+  return {
+    visual: row,
+    explanation: `Each tower has ${step} more: ${counts.join(", ")}, ${answer}.`,
+    prompt: "How many will the next tower have?",
+    dedupeKey: `grow-${first}-${step}-${emoji}`,
+    correctAnswer: answer,
+    choices: buildChoices(answer, [answer + step, answer - step, answer + 1, answer - 1, counts[2]]),
+  };
+}
+
 function makeShapePattern() {
   // A letter run is the same idea with letters, worth mixing in.
   if (randomInt(1, 5) === 1) {
@@ -232,14 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
-  document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkMode = new URLSearchParams(
-      link.getAttribute("href").replace(/^[^?]*\??/, "")
-    ).get("mode");
-    if ((linkMode || "all") === mode) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
+  KlgGameKit.modeLinks(document.getElementById("mode-links"), "mode", "all");
 
   // Sequences read best on their own line, so keep the newlines in prompts.
   document.getElementById("question-text").style.whiteSpace = "pre-line";
@@ -259,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
     generateQuestion: () => {
       const kind = mode === "all" ? pick(["skip", "skip", "numbers", "numbers", "shapes"]) : mode;
       if (kind === "skip") return makeSkipQuestion();
-      if (kind === "numbers") return makeNumberQuestion();
+      if (kind === "numbers") return randomInt(1, 4) === 1 ? makeGrowingQuestion() : makeNumberQuestion();
       return makeShapePattern();
     },
     onFinish: ({ score, total, elapsedMs }) => {

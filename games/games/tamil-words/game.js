@@ -5,6 +5,7 @@
  * Question kinds:
  *  - picture: an emoji as the prompt, pick the matching Tamil word (🐘 → யானை)
  *  - meaning: a Tamil word as the prompt, pick its English meaning
+ *  - wordpic: a Tamil word as the prompt (and spoken), pick its picture
  *
  * Wrong choices are drawn from the same category (an animal's distractors
  * are other animals), so the quiz tests real word recognition instead of
@@ -56,15 +57,39 @@ function makeMeaningQuestion() {
   };
 }
 
+function makeWordPictureQuestion() {
+  const { word, distractors } = pickWordAndDistractors();
+  const options = shuffle([word, ...distractors]);
+  const q = {
+    prompt: word.tamil,
+    correctAnswer: word.tamil,
+    choices: options.map((w) => w.tamil),
+    kind: "wordpic",
+    word,
+    choiceVisuals: {},
+    choiceLabels: {},
+    noChoiceListen: true,
+  };
+  options.forEach((w) => {
+    const box = document.createElement("div");
+    box.className = "kv-choice";
+    box.innerHTML = `<span class="kv-emoji" aria-hidden="true" style="font-size:3rem">${w.emoji}</span>`;
+    q.choiceVisuals[w.tamil] = box;
+    q.choiceLabels[w.tamil] = w.english;
+  });
+  return q;
+}
+
 const QUESTION_KINDS = {
   picture: [makePictureQuestion],
+  wordpic: [makeWordPictureQuestion],
   meaning: [makeMeaningQuestion],
 };
-QUESTION_KINDS.all = [...QUESTION_KINDS.picture, ...QUESTION_KINDS.meaning];
+QUESTION_KINDS.all = [...QUESTION_KINDS.picture, ...QUESTION_KINDS.meaning, ...QUESTION_KINDS.wordpic];
 
 function getMode() {
   const type = new URLSearchParams(window.location.search).get("type");
-  return type === "picture" || type === "meaning" ? type : "all";
+  return type === "picture" || type === "meaning" || type === "wordpic" ? type : "all";
 }
 
 function loadBestMs(key) {
@@ -100,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     all: `Pictures + meanings, ${TAMIL_WORDS.length} everyday words`,
     picture: "Match the picture to the Tamil word",
     meaning: "Match the Tamil word to its meaning",
+    wordpic: "Match the Tamil word to its picture",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
@@ -134,14 +160,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // Emoji prompts render huge with Tamil choices; Tamil-word prompts
       // use the Tamil font with English choices.
       questionText.classList.toggle("quiz-question-xl", q.kind === "picture");
-      questionText.classList.toggle("tamil-word", q.kind === "meaning");
+      questionText.classList.toggle("tamil-word", q.kind === "meaning" || q.kind === "wordpic");
       choicesContainer.classList.toggle("tamil-glyph", q.kind === "picture");
       // A Tamil-word prompt can be tapped to hear it (real voice recording).
-      questionText.classList.toggle("klg-tappable", q.kind === "meaning");
+      questionText.classList.toggle("klg-tappable", q.kind === "meaning" || q.kind === "wordpic");
       currentWord = q.word;
       return q;
     },
-    onQuestionShown: (q) => { if (q.kind === "meaning" && window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
+    onQuestionShown: (q) => { if ((q.kind === "meaning" || q.kind === "wordpic") && window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
     onAnswered: (q) => { if (window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");

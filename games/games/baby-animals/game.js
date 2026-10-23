@@ -83,8 +83,16 @@ function makeBabyQuestion(askedSet) {
     wrongs.add(other.baby);
     if (wrongs.size === 3) break;
   }
+  const pic = document.createElement("figure");
+  pic.className = "kv-clue";
+  pic.setAttribute("role", "img");
+  pic.setAttribute("aria-label", `A ${answer.animal}`);
+  pic.innerHTML = `<span aria-hidden="true">${answer.emoji}</span>`;
   return {
-    prompt: `What is a baby ${answer.animal} called? ${answer.emoji}`,
+    visual: pic,
+    explanation: `A baby ${answer.animal} is called ${an(answer.baby)}.`,
+    reviewPrompt: `What is a baby ${answer.animal} called? ${answer.emoji}`,
+    prompt: `What is a baby ${answer.animal} called?`,
     dedupeKey: answer.animal,
     correctAnswer: answer.baby,
     choices: shuffle([answer.baby, ...wrongs]),
@@ -101,6 +109,7 @@ function makeAnimalQuestion(askedSet) {
     if (wrongs.size === 3) break;
   }
   return {
+    explanation: `A baby ${answer.animal} is called ${an(answer.baby)}.`,
     prompt: `Which animal has a baby called ${an(answer.baby)}?`,
     dedupeKey: answer.animal,
     correctAnswer: format(answer),

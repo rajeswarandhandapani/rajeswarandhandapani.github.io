@@ -96,15 +96,82 @@ const BANK = {
 
 const TOPICS = Object.keys(BANK);
 
+/**
+ * Every question gets a picture clue: the emoji already in the question, or
+ * one from this list (matched on the start of the question).
+ */
+const CLUES = [
+  ["What do we call animals that eat only plants", "🐄🌿"], ["What do we call animals that eat only meat", "🦁🥩"],
+  ["How do fish breathe", "🐟💧"], ["A caterpillar changes", "🐛➡️❓"], ["What is a group of animal babies", "🥚🐣"],
+  ["Which animal sleeps through the winter", "❄️💤"], ["Which animal changes color", "🌿🎨"],
+  ["How many senses", "👀👂👃👅✋"], ["Which body part digests", "🍽️"], ["What holds your body up", "🧍"],
+  ["How many teeth", "🦷"], ["Which food group helps", "💪🥚🫘"], ["Which part of your body protects your brain", "🧠"], ["How many bones", "🦴🦴🦴"],
+  ["Which part of a plant makes food", "☀️🌱"], ["What do plants need", "🌱☀️💧"], ["What gas do plants give out", "🌳💨"],
+  ["Which part of the plant holds it up", "🌻"], ["Where do most plants get their water", "🌧️🌱"], ["What do we call a tree that keeps", "🌲"], ["Why do leaves look green", "🍃"],
+  ["What are the three states of matter", "🧊💧♨️"], ["Water boiling", "🍲🔥"], ["Which of these is a liquid", "💧"], ["Which of these floats", "🌊"],
+  ["What pulls everything down", "🍎⬇️"], ["Sound travels", "🔔🔊"], ["What do we call the water cycle", "☀️💧⬆️"],
+];
+
+/** Answers that have a picture: when every choice does, the answer buttons become pictures. */
+const ANSWER_PICS = {
+  Chicken: "🐔", Cow: "🐄", Dog: "🐕", Cat: "🐈", "Blue whale": "🐋", Elephant: "🐘", Giraffe: "🦒", Shark: "🦈",
+  Bear: "🐻", Lion: "🦁", Horse: "🐴", Monkey: "🐒", Chameleon: "🦎", Zebra: "🦓", Kangaroo: "🦘",
+  Honey: "🍯", Milk: "🥛", Silk: "🧵", Butter: "🧈", Carrot: "🥕", Apple: "🍎", Lettuce: "🥬", Pea: "🫛",
+  Snow: "❄️", Fog: "🌫️", Dew: "💧", Steam: "♨️", "A rainbow": "🌈", "A cloud": "☁️", "The moon": "🌙", "A star": "⭐",
+  "The heart": "🫀", "The brain": "🧠", "The lungs": "🫁", "The stomach": "🫃", "The liver": "🍖", "The kidneys": "🫘", "The muscles": "💪",
+  "Our nose": "👃", "Our ears": "👂", "Our tongue": "👅", "Our eyes": "👀", "Our fingers": "✋",
+  "A thermometer": "🌡️", "A ruler": "📏", "A clock": "⏰", "A scale": "⚖️",
+  "The Sun": "☀️", "The Moon": "🌙", "A mirror": "🪞", "A window": "🪟",
+  "A wooden stick": "🪵", "A metal key": "🔑", "A stone": "🪨", "A coin": "🪙", "A brick": "🧱", "A pillow": "🛏️", "A spoon": "🥄",
+  "The bee": "🐝", "The ant": "🐜", "The fly": "🪰", "The beetle": "🪲", Butterfly: "🦋", Bee: "🐝", Bird: "🐦", Beetle: "🪲",
+};
+
+const PICTOGRAPH = /\p{Extended_Pictographic}[\u{FE0F}\u{200D}\p{Extended_Pictographic}]*/gu;
+
+function clueFor(entry) {
+  const inText = entry.q.match(PICTOGRAPH);
+  if (inText) return inText.join("");
+  const found = CLUES.find(([start]) => entry.q.startsWith(start));
+  return found ? found[1] : "";
+}
+
+function clueFigure(emoji) {
+  const f = document.createElement("figure");
+  f.className = "kv-clue";
+  f.setAttribute("role", "img");
+  f.setAttribute("aria-label", "Picture clue");
+  f.innerHTML = `<span aria-hidden="true">${emoji}</span>`;
+  return f;
+}
+
 function makeQuestion(mode) {
   const topic = mode === "all" ? pick(TOPICS) : mode;
   const entry = pick(BANK[topic]);
-  return {
-    prompt: entry.q,
+  const choices = shuffle([entry.a, ...entry.wrong]);
+  let emoji = clueFor(entry);
+  // A clue that is the answer itself would give it away.
+  if (ANSWER_PICS[entry.a] && emoji.includes(ANSWER_PICS[entry.a])) emoji = "❓";
+  const q = {
+    visual: emoji ? clueFigure(emoji) : null,
+    prompt: entry.q.replace(PICTOGRAPH, "").replace(/\s+([?.])/g, "$1").trim(),
+    reviewPrompt: entry.q,
     dedupeKey: entry.a + entry.q,
     correctAnswer: entry.a,
-    choices: shuffle([entry.a, ...entry.wrong]),
+    choices,
+    explanation: `The answer is ${entry.a}.`,
   };
+  if (choices.every((c) => ANSWER_PICS[c])) {
+    q.choiceVisuals = {};
+    q.choiceLabels = {};
+    choices.forEach((c) => {
+      const box = document.createElement("div");
+      box.className = "kv-choice";
+      box.innerHTML = `<span class="kv-emoji" aria-hidden="true">${ANSWER_PICS[c]}</span><span class="kv-choice-text">${c}</span>`;
+      q.choiceVisuals[c] = box;
+      q.choiceLabels[c] = c;
+    });
+  }
+  return q;
 }
 
 function getMode() {

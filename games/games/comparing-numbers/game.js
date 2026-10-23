@@ -10,6 +10,10 @@
  *  - symbol: "37 __ 73" — pick the right sign out of <, > and = (equal
  *    pairs come up roughly one time in five, so = stays a live option).
  *
+ * Pictures: numbers to 10 are ten-frames, numbers to 100 are tens rods and
+ * ones cubes, and the signs question for numbers to 1,000 shows both numbers
+ * in place-value charts so the hundreds can be compared first.
+ *
  * The four numbers aren't random-random: half the time they're built from
  * the same digits scrambled (37, 73, 33, 77 or 342, 432, 423, 324), the
  * classic place-value trap where kids compare the wrong digit first; the
@@ -35,6 +39,42 @@ function formatNumber(n) {
 function getMaxNumber() {
   const raw = parseInt(new URLSearchParams(window.location.search).get("max"), 10);
   return raw === 10 || raw === 1000 ? raw : 100;
+}
+
+const BK = window.KlgBlocks;
+
+/** A picture of n for this range, or null when pictures would not help. */
+function quantityPicture(n, max) {
+  if (max === 10) return BK.tenFrame(n, { emoji: "🔴" });
+  if (max === 100) return BK.blocks(n, { compact: true });
+  return null;
+}
+
+/** Answer button content: the picture with its numeral underneath. */
+function pictureChoice(n, max) {
+  const pic = quantityPicture(n, max);
+  if (!pic) return null;
+  pic.removeAttribute("role");
+  pic.removeAttribute("aria-label");
+  const box = document.createElement("div");
+  box.className = "kv-choice";
+  const text = document.createElement("div");
+  text.className = "kv-choice-text";
+  text.textContent = formatNumber(n);
+  box.append(pic, text);
+  return box;
+}
+
+function withPictures(q, numbers, max) {
+  if (max === 1000) return q;
+  q.choiceVisuals = {};
+  q.choiceLabels = {};
+  numbers.forEach((n) => {
+    q.choiceVisuals[n] = pictureChoice(n, max);
+    q.choiceLabels[n] = formatNumber(n);
+  });
+  q.noChoiceListen = true;
+  return q;
 }
 
 function getType() {
@@ -83,22 +123,24 @@ function makeFourNumbers(max) {
 
 function makeBiggestQuestion(max) {
   const numbers = makeFourNumbers(max);
-  return {
+  return withPictures({
     prompt: "Tap the BIGGEST number!",
     dedupeKey: "big:" + [...numbers].sort((a, b) => a - b).join(","),
+    explanation: `${formatNumber(Math.max(...numbers))} is the biggest. Compare the tens first, then the ones.`,
     correctAnswer: Math.max(...numbers),
     choices: shuffle(numbers),
-  };
+  }, numbers, max);
 }
 
 function makeSmallestQuestion(max) {
   const numbers = makeFourNumbers(max);
-  return {
+  return withPictures({
     prompt: "Tap the SMALLEST number!",
     dedupeKey: "small:" + [...numbers].sort((a, b) => a - b).join(","),
+    explanation: `${formatNumber(Math.min(...numbers))} is the smallest. Compare the tens first, then the ones.`,
     correctAnswer: Math.min(...numbers),
     choices: shuffle(numbers),
-  };
+  }, numbers, max);
 }
 
 function makeSymbolQuestion(max) {
@@ -122,7 +164,22 @@ function makeSymbolQuestion(max) {
     } while (b === a);
   }
   const correct = a < b ? "<" : a > b ? ">" : "=";
+  const row = document.createElement("div");
+  row.className = "kv-row";
+  [a, b].forEach((n) => {
+    const pic = max === 1000 ? BK.chart(n) : quantityPicture(n, max);
+    const cell = document.createElement("div");
+    cell.className = "kv-choice";
+    const text = document.createElement("div");
+    text.className = "kv-choice-text";
+    text.textContent = formatNumber(n);
+    cell.append(pic, text);
+    row.appendChild(cell);
+  });
   return {
+    visual: row,
+    explanation: `${formatNumber(a)} ${correct} ${formatNumber(b)}.`,
+    dedupeKey: `sym:${a}:${b}`,
     prompt: `${formatNumber(a)}  __  ${formatNumber(b)}`,
     correctAnswer: correct,
     choices: ["<", "=", ">"],

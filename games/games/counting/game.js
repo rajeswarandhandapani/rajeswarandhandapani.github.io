@@ -56,8 +56,40 @@ function makeDistractors(n, max) {
   return [...wrongs];
 }
 
+const STYLES = ["emoji", "tenframe", "dice"];
+const style = STYLES.includes(new URLSearchParams(window.location.search).get("mode"))
+  ? new URLSearchParams(window.location.search).get("mode") : "emoji";
+
+const PIPS = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+
+function dieFace(n) {
+  const die = document.createElement("span");
+  die.className = "kv-die";
+  die.setAttribute("aria-hidden", "true");
+  for (let cell = 1; cell <= 9; cell++) {
+    const spot = document.createElement("span");
+    if (PIPS[n].includes(cell)) spot.className = "kv-pip";
+    die.appendChild(spot);
+  }
+  return die;
+}
+
+/** One die for 1–6, two dice for 7–12 (the child adds the dots). */
+function dicePicture(n) {
+  const first = n <= 6 ? n : randomInt(n - 6, 6);
+  const faces = n <= 6 ? [first] : [first, n - first];
+  const f = document.createElement("figure");
+  f.className = "kv-dice";
+  f.setAttribute("role", "img");
+  f.setAttribute("aria-label", faces.length === 1 ? `A die showing ${n} dots` : `Two dice with ${faces[0]} and ${faces[1]} dots`);
+  f.dataset.total = String(n);
+  faces.forEach((x) => f.appendChild(dieFace(x)));
+  return f;
+}
+
 function generateCountingQuestion(max) {
   return (askedSet) => {
+    if (style === "dice") max = Math.min(max, 12);
     const available = [];
     for (let n = 1; n <= max; n++) {
       if (!askedSet.has(n)) available.push(n);
@@ -65,6 +97,17 @@ function generateCountingQuestion(max) {
     const pool = available.length ? available : [...Array(max)].map((_, i) => i + 1);
     const n = pool[randomInt(0, pool.length - 1)];
     const emoji = THINGS[randomInt(0, THINGS.length - 1)];
+    if (style !== "emoji") {
+      return {
+        visual: style === "dice" ? dicePicture(n) : KlgBlocks.tenFrame(n, { emoji }),
+        prompt: style === "dice" ? "How many dots?" : "How many do you see?",
+        speechPrompt: style === "dice" ? "How many dots are on the dice?" : "How many do you see?",
+        dedupeKey: n,
+        explanation: `There ${n === 1 ? "is" : "are"} ${n}.`,
+        correctAnswer: n,
+        choices: shuffle([n, ...makeDistractors(n, max)]),
+      };
+    }
     return {
       prompt: emojiCluster(emoji, n),
       speechPrompt: 'How many do you see?',
@@ -100,21 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const max = getMaxCount();
   const totalQuestions = Math.min(10, max);
   const timePerQuestion = max > 10 ? 30 : 20;
-  const storageKey = "klg-counting-best-ms:" + max;
+  const storageKey = "klg-counting-best-ms:" + max + (style === "emoji" ? "" : ":" + style);
 
   document.getElementById("mode-label").textContent = `Counting 1 to ${max}`;
   document.getElementById("quiz-info").textContent =
     `${totalQuestions} questions • ${timePerQuestion} seconds each • count and tap the number`;
 
-  document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkMax = parseInt(
-      new URLSearchParams(link.getAttribute("href").replace(/^[^?]*\??/, "")).get("max"),
-      10
-    );
-    if ((Number.isInteger(linkMax) ? linkMax : 10) === max) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
+  KlgGameKit.modeLinks(document.getElementById("mode-links"), "max", "10");
+  KlgGameKit.modeLinks(document.getElementById("style-links"), "mode", "emoji");
 
   const bestTimeNote = document.getElementById("best-time-note");
   function renderBestTimeNote() {

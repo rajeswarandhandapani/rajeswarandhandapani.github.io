@@ -13,6 +13,9 @@
  *       prompt, e.g. a picture of groups; give it role="img" + aria-label
  *       optional: choiceVisuals — { [choice]: node } drawn inside answer
  *       buttons instead of text (pair with choiceLabels for screen readers)
+ *       optional: hintVisual — a DOM node (or () => node) hidden behind a
+ *       "💡 Show me" button, for drills that should not show the picture
+ *       unless the child asks
  *     formatAnswer: (value) => String(value),   // optional
  *     onQuestionShown: (question) => { ... },   // optional, after render
  *     onAnswered: (question, isCorrect, selected) => { ... }, // optional
@@ -198,6 +201,7 @@ class QuizEngine {
     this.el.questionNumber.textContent = this.currentIndex;
     this.el.questionText.textContent = this.currentQuestion.prompt;
     this._renderVisual(this.currentQuestion.visual);
+    this._renderHint(this.currentQuestion.hintVisual);
     const tappable = this.el.questionText.classList.contains('klg-tappable');
     this.el.questionText.tabIndex = tappable ? 0 : -1;
     if (tappable) { this.el.questionText.setAttribute('role', 'button'); this.el.questionText.setAttribute('aria-label', 'Listen again: ' + this.currentQuestion.prompt); }
@@ -215,6 +219,28 @@ class QuizEngine {
     this.el.questionText.focus({ preventScroll: true });
     if (this.listenButton.hidden === false) this._speakQuestion();
     this.onQuestionShown(this.currentQuestion);
+  }
+
+  _renderHint(hint) {
+    if (!this.hintBox) {
+      if (!hint) return;
+      this.hintBox = document.createElement('div');
+      this.hintBox.className = 'quiz-hint';
+      this.el.choicesContainer.before(this.hintBox);
+    }
+    this.hintBox.replaceChildren();
+    this.hintBox.hidden = !hint;
+    if (!hint) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'quiz-hint-btn';
+    button.textContent = '💡 Show me';
+    button.addEventListener('click', () => {
+      const node = typeof hint === 'function' ? hint() : hint;
+      this.hintBox.replaceChildren(node);
+      this.hintShown = true;
+    });
+    this.hintBox.appendChild(button);
   }
 
   _renderVisual(visual) {

@@ -57,7 +57,7 @@ const UPPER_LOOKALIKES = {
   V: "UWY", W: "MVU", X: "KYZ", Y: "VTX", Z: "SNX",
 };
 
-// One picture word per letter for phonics mode.
+// Picture words for phonics mode: one or more per letter.
 const PHONICS_WORDS = [
   { letter: "A", word: "apple", emoji: "🍎" },
   { letter: "B", word: "banana", emoji: "🍌" },
@@ -85,6 +85,56 @@ const PHONICS_WORDS = [
   { letter: "X", word: "x-ray", emoji: "🩻" },
   { letter: "Y", word: "yo-yo", emoji: "🪀" },
   { letter: "Z", word: "zebra", emoji: "🦓" },
+  // More pictures per letter, so each round shows something new.
+  { letter: "A", word: "ant", emoji: "🐜" },
+  { letter: "A", word: "alligator", emoji: "🐊" },
+  { letter: "B", word: "ball", emoji: "⚽" },
+  { letter: "B", word: "bee", emoji: "🐝" },
+  { letter: "B", word: "bus", emoji: "🚌" },
+  { letter: "C", word: "cow", emoji: "🐄" },
+  { letter: "C", word: "cake", emoji: "🎂" },
+  { letter: "C", word: "car", emoji: "🚗" },
+  { letter: "D", word: "duck", emoji: "🦆" },
+  { letter: "D", word: "drum", emoji: "🥁" },
+  { letter: "E", word: "elephant", emoji: "🐘" },
+  { letter: "E", word: "eagle", emoji: "🦅" },
+  { letter: "F", word: "frog", emoji: "🐸" },
+  { letter: "F", word: "fire", emoji: "🔥" },
+  { letter: "F", word: "flower", emoji: "🌸" },
+  { letter: "G", word: "goat", emoji: "🐐" },
+  { letter: "G", word: "gift", emoji: "🎁" },
+  { letter: "G", word: "guitar", emoji: "🎸" },
+  { letter: "H", word: "hat", emoji: "🎩" },
+  { letter: "H", word: "horse", emoji: "🐴" },
+  { letter: "I", word: "iguana", emoji: "🦎" },
+  { letter: "J", word: "jet", emoji: "✈️" },
+  { letter: "J", word: "jellyfish", emoji: "🪼" },
+  { letter: "K", word: "key", emoji: "🔑" },
+  { letter: "K", word: "kangaroo", emoji: "🦘" },
+  { letter: "L", word: "leaf", emoji: "🍃" },
+  { letter: "L", word: "lemon", emoji: "🍋" },
+  { letter: "M", word: "mouse", emoji: "🐭" },
+  { letter: "M", word: "monkey", emoji: "🐵" },
+  { letter: "M", word: "mango", emoji: "🥭" },
+  { letter: "N", word: "nest", emoji: "🪺" },
+  { letter: "N", word: "nut", emoji: "🥜" },
+  { letter: "O", word: "owl", emoji: "🦉" },
+  { letter: "O", word: "orange", emoji: "🍊" },
+  { letter: "P", word: "pig", emoji: "🐖" },
+  { letter: "P", word: "panda", emoji: "🐼" },
+  { letter: "P", word: "pear", emoji: "🍐" },
+  { letter: "R", word: "robot", emoji: "🤖" },
+  { letter: "R", word: "rose", emoji: "🌹" },
+  { letter: "S", word: "snake", emoji: "🐍" },
+  { letter: "S", word: "star", emoji: "⭐" },
+  { letter: "S", word: "sock", emoji: "🧦" },
+  { letter: "T", word: "tree", emoji: "🌳" },
+  { letter: "T", word: "train", emoji: "🚆" },
+  { letter: "T", word: "turtle", emoji: "🐢" },
+  { letter: "V", word: "van", emoji: "🚐" },
+  { letter: "W", word: "watch", emoji: "⌚" },
+  { letter: "W", word: "watermelon", emoji: "🍉" },
+  { letter: "Y", word: "yarn", emoji: "🧶" },
 ];
 
 // Letters that make the same starting sound as the key — never valid
@@ -203,6 +253,7 @@ function generatePhonicsQuestion(askedSet) {
   speak(entry.word);
   return {
     prompt: hasSpeech ? entry.emoji : `${entry.emoji} ${entry.word}`,
+    explanation: `${entry.word} starts with ${answer}.`,
     dedupeKey: entry.word,
     correctAnswer: answer,
     choices: shuffle([answer, ...pickDistractors(preferred, pool, answer)]),

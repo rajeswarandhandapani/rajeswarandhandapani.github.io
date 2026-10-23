@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="klg-handbuilt" content="1" />
+  <title>Map Explorer | Kid Learning Games</title>
+  <meta name="description" content="Find continents and oceans, and where animals and landmarks belong." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>" />
+  <link href="../../assets/vendor/bootstrap.min.css" rel="stylesheet" />
+  <link href="../../assets/css/common.css" rel="stylesheet" />
+  <link href="../../assets/css/math-visuals.css" rel="stylesheet" />
+  <link href="../../assets/css/visuals.css" rel="stylesheet" />
+</head>
+<body>
+  <a class="skip-link" href="#start-btn">Skip to activity</a>
+  <nav class="navbar navbar-dark klg-navbar mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="../../index.html">&larr; Kid Learning Games</a>
+      <span class="navbar-text text-white">🗺️ Map Explorer</span>
+    </div>
+  </nav>
+
+  <div class="container quiz-shell pb-5">
+    <div id="start-screen" class="card quiz-card p-4 text-center">
+      <div class="card-body">
+        <div class="game-card-icon mb-2">🗺️</div>
+        <h1 class="h3 fw-bold">Map Explorer</h1>
+        <p class="text-muted">Tap the right place on the world map.</p>
+        <div id="level-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+          <a class="btn btn-sm btn-outline-secondary" href="?level=1">Level 1 · names on the map</a>
+          <a class="btn btn-sm btn-outline-secondary" href="index.html">Level 2 · no names</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?level=3">Level 3 · plus oceans</a>
+        </div>
+        <p id="quiz-info">8 questions · no timer</p>
+        <p class="text-muted mb-1"><small>Tap the continent or ocean you are asked for, or find where an animal or landmark belongs.</small></p>
+        <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
+          Let’s play
+        </button>
+      </div>
+    </div>
+
+    <section id="play-screen" class="card quiz-card p-3 p-md-4 d-none">
+      <div class="quiz-tools"><button type="button" id="exit-btn">← Change activity</button><span id="score-pill" class="quiz-score-pill">⭐ 0</span></div>
+      <div class="mg-toolbar"><span id="progress-text" class="quiz-progress-text">Question 1</span></div>
+      <p id="task" class="mg-task" tabindex="-1"></p>
+      <button id="listen-btn" type="button" class="quiz-listen" hidden>🔊 Listen again</button>
+      <div id="stage" class="kv-stage"></div>
+      <p id="feedback" class="mg-feedback" role="status"></p>
+      <button id="next-btn" type="button" class="quiz-next" hidden>Next →</button>
+    </section>
+
+    <section id="finish-screen" class="card results-card p-4 text-center d-none" tabindex="-1">
+      <h2 class="fw-bold">Round complete!</h2>
+      <div id="finish-summary" class="tg-finish" role="status"></div>
+      <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+        <button id="play-again" class="btn btn-lg text-white fw-bold px-4" style="background: var(--klg-purple);">Play again</button>
+        <a href="../../index.html" class="btn btn-lg btn-outline-secondary fw-bold px-4">More games</a>
+      </div>
+    </section>
+  </div>
+
+  <script src="../../assets/vendor/confetti.browser.min.js"></script>
+  <script src="../../assets/js/sounds.js"></script>
+  <script src="../../assets/js/progress.js"></script>
+  <script src="../../assets/js/game-kit.js"></script>
+  <script src="../../assets/js/math-visuals.js"></script>
+  <script src="../../assets/js/play-kit.js"></script>
+  <script src="../../assets/js/round-kit.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

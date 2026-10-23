@@ -1,16 +1,17 @@
 /**
- * Fractions question generator (grades 3-5).
- * ?type=identify|equivalent|compare|add practices one skill; the default
- * mixes all four. Fractions are shown as plain "3/5" strings and pictures
- * are rows of colored/blank squares (🟩🟩🟩⬜⬜), so no images are needed.
+ * Fractions question generator (grades 2-5), with pictures (KlgFracVis).
+ * ?type=identify|picture|equivalent|compare|add practices one skill; the
+ * default mixes all five. ?level=1 halves & quarters, 2 (default) up to
+ * tenths, 3 bigger denominators with the pictures taken away from compare.
  *
  * Question kinds:
- *  - identify:   🟩🟩🟩⬜⬜ — what fraction is green?
- *  - equivalent: "Which fraction is equal to 1/2?"
+ *  - identify:   a pie, bar or set of shapes — what fraction is shaded?
+ *  - picture:    "Which picture shows 3/4?" — the answers are pictures
+ *  - equivalent: a bar for 1/2 — which fraction is equal? Answers are bars
  *  - compare:    tap the biggest/smallest of four fractions (same
  *                denominator, or same numerator — where "bigger denominator
  *                means bigger fraction" is exactly the trap)
- *  - add:        "1/6 + 3/6 = ?" and "5/8 − 2/8 = ?" with like denominators
+ *  - add:        "1/6 + 3/6 = ?" and "5/8 − 2/8 = ?" shown as two bars
  *
  * Distractors are the real mistakes: counting the white squares instead
  * (2/5), part-over-part (3/2), flipping the fraction upside down (5/3),
@@ -34,6 +35,32 @@ function shuffle(array) {
 
 function frac(n, d) {
   return `${n}/${d}`;
+}
+
+const level = [1, 3].includes(Number(new URLSearchParams(window.location.search).get("level")))
+  ? Number(new URLSearchParams(window.location.search).get("level")) : 2;
+const FV = window.KlgFracVis;
+const SET_EMOJI = ["🍓", "🌻", "🐟", "⭐", "🍪", "🎈"];
+
+/** A picture of n/d: pie, bar or a set of things. */
+function fractionPicture(n, d, style) {
+  if (style === "bar") return FV.bar(n, d);
+  if (style === "set") return FV.set(n, d, SET_EMOJI[randomInt(0, SET_EMOJI.length - 1)]);
+  return FV.pie(n, d);
+}
+
+/** Answer button content: a bar with the fraction written under it. */
+function labelledBar(n, d) {
+  const box = document.createElement("div");
+  box.className = "kv-choice";
+  const bar = FV.bar(n, d);
+  bar.removeAttribute("role");
+  bar.removeAttribute("aria-label");
+  const text = document.createElement("div");
+  text.className = "kv-choice-text";
+  text.textContent = frac(n, d);
+  box.append(bar, text);
+  return box;
 }
 
 function valueEquals([n1, d1], [n2, d2]) {
@@ -64,14 +91,18 @@ function buildChoices(correct, candidates) {
   return shuffle(choices);
 }
 
-const IDENTIFY_DENOMINATORS = [2, 3, 4, 5, 6, 8, 10];
+const IDENTIFY_DENOMINATORS = level === 1 ? [2, 4] : level === 2 ? [2, 3, 4, 5, 6, 8, 10] : [3, 4, 5, 6, 8, 10, 12];
 
 function makeIdentifyQuestion() {
   const d = IDENTIFY_DENOMINATORS[randomInt(0, IDENTIFY_DENOMINATORS.length - 1)];
   const n = randomInt(1, d - 1);
-  const picture = "🟩".repeat(n) + "⬜".repeat(d - n);
+  const style = ["pie", "bar", "set"][randomInt(0, level === 1 ? 1 : 2)];
   return {
-    prompt: `${picture} — what fraction is green?`,
+    visual: fractionPicture(n, d, style),
+    prompt: "What fraction is shaded?",
+    dedupeKey: `id:${style}:${n}/${d}`,
+    reviewPrompt: `What fraction is shaded? (${n} of ${d} parts)`,
+    explanation: `${n} of the ${d} equal parts are shaded, so the fraction is ${frac(n, d)}.`,
     correctAnswer: frac(n, d),
     choices: buildChoices(
       [n, d],
@@ -86,24 +117,64 @@ function makeIdentifyQuestion() {
   };
 }
 
-const EQUIVALENT_BASES = [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5]];
+function makePictureQuestion() {
+  const d = IDENTIFY_DENOMINATORS[randomInt(0, IDENTIFY_DENOMINATORS.length - 1)];
+  const n = randomInt(1, d - 1);
+  const style = ["pie", "bar"][randomInt(0, 1)];
+  // Wrong pictures share the denominator, so the child must count the shaded parts.
+  const others = shuffle([...Array(d - 1)].map((_, i) => i + 1).filter((x) => x !== n)).slice(0, 3);
+  const all = [n, ...others];
+  const labels = {};
+  const visuals = {};
+  all.forEach((x) => {
+    labels[frac(x, d)] = `a ${style} with ${x} of ${d} parts shaded`;
+    visuals[frac(x, d)] = fractionPicture(x, d, style);
+  });
+  return {
+    prompt: `Which picture shows ${frac(n, d)}?`,
+    dedupeKey: `pic:${style}:${n}/${d}`,
+    correctAnswer: frac(n, d),
+    choices: shuffle(all.map((x) => frac(x, d))),
+    choiceVisuals: visuals,
+    choiceLabels: labels,
+    noChoiceListen: true,
+    explanation: `${frac(n, d)} means ${n} out of ${d} equal parts.`,
+  };
+}
+
+const EQUIVALENT_BASES = level === 1 ? [[1, 2]] : [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5]];
 
 function makeEquivalentQuestion() {
   const [n, d] = EQUIVALENT_BASES[randomInt(0, EQUIVALENT_BASES.length - 1)];
-  const k = randomInt(2, Math.min(4, Math.floor(20 / d)));
-  return {
+  const k = randomInt(2, Math.min(level === 1 ? 4 : 4, Math.floor(20 / d)));
+  const built = buildChoices(
+    [n * k, d * k],
+    shuffle([
+      [n + k, d + k],     // added instead of multiplied
+      [n * k, d * (k + 1)],
+      [n * k + 1, d * k],
+      [d, n * d],
+    ])
+  );
+  const q = {
+    visual: FV.bar(n, d, { label: `A bar for ${frac(n, d)}: ${n} of ${d} parts shaded` }),
     prompt: `Which fraction is equal to ${frac(n, d)}?`,
+    dedupeKey: `eq:${n}/${d}x${k}`,
+    explanation: `${frac(n, d)} and ${frac(n * k, d * k)} cover the same amount: cut each part into ${k} smaller parts.`,
     correctAnswer: frac(n * k, d * k),
-    choices: buildChoices(
-      [n * k, d * k],
-      shuffle([
-        [n + k, d + k],     // added instead of multiplied
-        [n * k, d * (k + 1)],
-        [n * k + 1, d * k],
-        [d, n * d],
-      ])
-    ),
+    choices: built,
   };
+  if (level < 3) {
+    q.choiceVisuals = {};
+    q.choiceLabels = {};
+    built.forEach((c) => {
+      const [cn, cd] = c.split("/").map(Number);
+      q.choiceVisuals[c] = labelledBar(cn, cd);
+      q.choiceLabels[c] = c;
+    });
+    q.noChoiceListen = true;
+  }
+  return q;
 }
 
 function makeCompareQuestion() {
@@ -122,13 +193,24 @@ function makeCompareQuestion() {
   const biggest = randomInt(0, 1) === 1;
   const sorted = [...fractions].sort((a, b) => a[0] * b[1] - b[0] * a[1]);
   const correct = biggest ? sorted[sorted.length - 1] : sorted[0];
-  return {
+  const q = {
     prompt: biggest ? "Which fraction is the BIGGEST?" : "Which fraction is the SMALLEST?",
     dedupeKey:
       (biggest ? "big:" : "small:") + sorted.map((f) => frac(...f)).join(","),
     correctAnswer: frac(...correct),
     choices: shuffle(fractions.map((f) => frac(...f))),
+    explanation: `${frac(...correct)} covers the ${biggest ? "most" : "least"} of the bar.`,
   };
+  if (level < 3) {
+    q.choiceVisuals = {};
+    q.choiceLabels = {};
+    fractions.forEach(([cn, cd]) => {
+      q.choiceVisuals[frac(cn, cd)] = labelledBar(cn, cd);
+      q.choiceLabels[frac(cn, cd)] = frac(cn, cd);
+    });
+    q.noChoiceListen = true;
+  }
+  return q;
 }
 
 function makeAddSubtractQuestion() {
@@ -146,6 +228,8 @@ function makeAddSubtractQuestion() {
   }
   const symbol = adding ? "+" : "−";
   return {
+    visual: FV.stacked([[n1, d], [n2, d]], { label: `Two bars cut into ${d} parts: one with ${n1} shaded and one with ${n2} shaded` }),
+    explanation: `${n1} ${symbol} ${n2} = ${result}, and the parts stay ${d}ths: ${frac(result, d)}.`,
     prompt: `${frac(n1, d)} ${symbol} ${frac(n2, d)} = ?`,
     correctAnswer: frac(result, d),
     choices: buildChoices(
@@ -162,12 +246,14 @@ function makeAddSubtractQuestion() {
 
 const QUESTION_KINDS = {
   identify: [makeIdentifyQuestion],
+  picture: [makePictureQuestion],
   equivalent: [makeEquivalentQuestion],
   compare: [makeCompareQuestion],
   add: [makeAddSubtractQuestion],
 };
 QUESTION_KINDS.all = [
   makeIdentifyQuestion,
+  makePictureQuestion,
   makeEquivalentQuestion,
   makeCompareQuestion,
   makeAddSubtractQuestion,
@@ -202,26 +288,21 @@ function formatSeconds(ms) {
 document.addEventListener("DOMContentLoaded", () => {
   const mode = getMode();
   const totalQuestions = 15;
-  const storageKey = "klg-fractions-best-ms:" + mode;
+  const storageKey = "klg-fractions-best-ms:" + mode + (level === 2 ? "" : ":L" + level);
   const kinds = QUESTION_KINDS[mode];
 
   const labels = {
     all: "Pictures, equivalents, comparing & adding",
     identify: "Read the fraction picture",
+    picture: "Find the picture for the fraction",
     equivalent: "Find the equivalent fraction",
     compare: "Tap the biggest or smallest fraction",
     add: "Add & subtract with like denominators",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
-  document.querySelectorAll("#mode-links a").forEach((link) => {
-    const linkType = new URLSearchParams(
-      link.getAttribute("href").replace(/^[^?]*\??/, "")
-    ).get("type");
-    if ((linkType || "all") === mode) {
-      link.classList.replace("btn-outline-secondary", "btn-secondary");
-    }
-  });
+  KlgGameKit.modeLinks(document.getElementById("mode-links"), "type", "all");
+  KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "2");
 
   const bestTimeNote = document.getElementById("best-time-note");
   function renderBestTimeNote() {

@@ -1,4 +1,5 @@
 // Plays every Tamil activity in Chromium on a device with NO Tamil speech
+const CAT=require('../assets/js/catalogue.js');const TAMIL_COUNT=CAT.GAMES.filter(g=>g.subject==='tamil').length;
 // voice, checking that real recordings are heard and that each game can be
 // completed. Run with the local server up: npm start, then npm run test:tamil-games
 const { chromium } = require('playwright');
@@ -47,14 +48,15 @@ const fakeAudio = () => {
 
   // --- Home: Tamil tab and learning path -----------------------------------
   await page.goto(base);
-  assert.equal(await page.locator('.game-card').count(), 51);
-  assert.equal(await page.locator('.tamil-steps li').count(), 9);
-  await page.locator('#tamil-jump').click();
-  assert.equal(await page.locator('.game-tile:visible').count(), 16);
+  assert.equal(await page.locator('.game-card').count(), CAT.GAMES.length);
+  await page.locator('#path-tabs [data-path="tamil"]').click();
+  assert.equal(await page.locator('.tamil-steps li').count(), CAT.PATHS.tamil.steps.length);
+  await page.locator('#path-jump').click();
+  assert.equal(await page.locator('.game-tile:visible').count(), TAMIL_COUNT);
   assert.equal(await page.locator('.subject-tabs [data-subject="tamil"]').getAttribute('aria-pressed'), 'true');
   await noOverflow('home');
   await page.screenshot({ path: 'artifacts/home-tamil-mobile.png', fullPage: false });
-  console.log('PASS home: 51 games, Tamil tab shows 16, learning path');
+  console.log('PASS home: all games, Tamil tab, learning path');
 
   // --- Tamil Alphabets listen mode now works with no Tamil voice ------------
   await page.goto(`${base}/games/tamil-alphabets/index.html?mode=listen&type=vowels`);

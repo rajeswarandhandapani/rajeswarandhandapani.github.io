@@ -9,6 +9,8 @@
  *  - rhyme  (?mode=rhyme):  "Which word rhymes with cat?"
  *  - odd    (?mode=odd):    three rhyming words plus an intruder.
  *  - finish (?mode=finish): a little rhyme with the last word missing.
+ *  - picture (?mode=picture): a picture of cat — tap the picture that rhymes
+ *                             (hat). Only words with a clear picture appear.
  */
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -109,6 +111,34 @@ function makeRhymeQuestion() {
   };
 }
 
+/** Picture and word together, for answer buttons. */
+function wordPicture(word) {
+  const box = document.createElement("div");
+  box.className = "kv-choice";
+  box.innerHTML = `<span class="kv-emoji" aria-hidden="true" style="font-size:2.6rem">${KlgWordPics.pic(word)}</span><span class="kv-choice-text">${word}</span>`;
+  return box;
+}
+
+function makePictureRhymeQuestion() {
+  const families = FAMILIES.map((f) => ({ id: f.id, words: f.words.filter((w) => KlgWordPics.has(w)) })).filter((f) => f.words.length >= 2);
+  const family = pick(families);
+  const [target, answer] = shuffle(family.words);
+  const wrongs = shuffle(families.filter((f) => f.id !== family.id)).slice(0, 3).map((f) => pick(f.words));
+  const q = {
+    visual: wordPicture(target),
+    prompt: `Which picture rhymes with "${target}"?`,
+    dedupeKey: "picrhyme-" + target,
+    explanation: `${target} and ${answer} end with the same sound.`,
+    correctAnswer: answer,
+    choices: shuffle([answer, ...wrongs]),
+    choiceVisuals: {},
+    choiceLabels: {},
+    noChoiceListen: true,
+  };
+  q.choices.forEach((w) => { q.choiceVisuals[w] = wordPicture(w); q.choiceLabels[w] = w; });
+  return q;
+}
+
 function makeOddQuestion() {
   const family = pick(FAMILIES);
   const three = shuffle(family.words).slice(0, 3);
@@ -133,7 +163,7 @@ function makeFinishQuestion() {
 
 function getMode() {
   const mode = new URLSearchParams(window.location.search).get("mode");
-  return ["rhyme", "odd", "finish"].includes(mode) ? mode : "all";
+  return ["rhyme", "odd", "finish", "picture"].includes(mode) ? mode : "all";
 }
 
 function loadBestMs(key) {
@@ -167,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     rhyme: "Find the word that rhymes",
     odd: "Spot the word that does not rhyme",
     finish: "Finish the rhyme",
+    picture: "Find the picture that rhymes",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 
@@ -192,7 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
     totalQuestions,
     timePerQuestion: 20,
     generateQuestion: () => {
-      const kind = mode === "all" ? pick(["rhyme", "rhyme", "odd", "finish"]) : mode;
+      const kind = mode === "all" ? pick(["rhyme", "rhyme", "odd", "finish", "picture"]) : mode;
+      if (kind === "picture") return makePictureRhymeQuestion();
       if (kind === "rhyme") return makeRhymeQuestion();
       if (kind === "odd") return makeOddQuestion();
       return makeFinishQuestion();

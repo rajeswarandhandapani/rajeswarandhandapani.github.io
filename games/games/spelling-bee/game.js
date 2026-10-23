@@ -220,6 +220,17 @@ function getLevel() {
   return WORD_LEVELS[raw] ? raw : "1";
 }
 
+/** The word's picture, big, above the spellings — at every level, with or without speech. */
+function spellingPicture(emoji) {
+  const f = document.createElement("figure");
+  f.className = "kv-clue";
+  f.setAttribute("role", "img");
+  f.setAttribute("aria-label", "A picture of the word to spell");
+  // Keycap digits (7️⃣) have no glyph in every font: show the plain digit instead.
+  f.innerHTML = `<span aria-hidden="true">${emoji.replace(/[\u20E3\uFE0F]/g, "")}</span>`;
+  return f;
+}
+
 function generateSpellingQuestion(words) {
   return (askedSet) => {
     const remaining = words.filter((w) => !askedSet.has(w.word));
@@ -228,7 +239,10 @@ function generateSpellingQuestion(words) {
 
     if (hasSpeech) speak(entry.word);
     return {
-      prompt: hasSpeech ? `🔊 ${entry.emoji}` : `${entry.emoji} ${entry.clue}`,
+      visual: spellingPicture(entry.emoji),
+      prompt: hasSpeech ? "🔊 Tap to hear the word" : entry.clue.charAt(0).toUpperCase() + entry.clue.slice(1),
+      reviewPrompt: `${entry.emoji} ${entry.clue}`,
+      explanation: `${entry.word} is spelled ${entry.word.split("").join("-")}.`,
       dedupeKey: entry.word,
       correctAnswer: entry.word,
       choices: shuffle([entry.word, ...pickWrongSpellings(entry.word)]),
@@ -276,8 +290,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!hasSpeech) {
     document.getElementById("speech-note").textContent =
       "⚠️ This browser can't speak — you'll get a picture and a clue instead of a spoken word.";
-    questionText.className = "quiz-question quiz-question-sm klg-tappable mb-4";
   }
+  questionText.className = "quiz-question quiz-question-sm klg-tappable mb-4";
 
   document.querySelectorAll("#mode-links a").forEach((link) => {
     const linkLevel =

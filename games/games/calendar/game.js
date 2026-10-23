@@ -173,7 +173,88 @@ function makeMonthCountQuestion() {
   };
 }
 
+/**
+ * A month drawn as a wall calendar. `start` is the weekday (0 = Sunday) of the
+ * 1st; `marked` dates are circled.
+ */
+function monthGrid(start, length, marked) {
+  const f = document.createElement("figure");
+  f.className = "kv-month";
+  f.setAttribute("role", "img");
+  f.setAttribute("aria-label", `A calendar month with ${length} days. The 1st is on a ${DAYS[start]}.` + (marked.length ? ` Circled: ${marked.join(" and ")}.` : ""));
+  f.dataset.start = String(start);
+  f.dataset.length = String(length);
+  const table = document.createElement("table");
+  table.setAttribute("aria-hidden", "true");
+  table.innerHTML = "<tr>" + DAYS.map((d) => `<th>${d.slice(0, 3)}</th>`).join("") + "</tr>";
+  let day = 1;
+  for (let week = 0; day <= length; week++) {
+    const tr = document.createElement("tr");
+    for (let col = 0; col < 7; col++) {
+      const td = document.createElement("td");
+      if ((week > 0 || col >= start) && day <= length) {
+        td.textContent = String(day);
+        if (marked.includes(day)) td.className = "on";
+        day++;
+      }
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+  f.appendChild(table);
+  return f;
+}
+
+function monthShape() {
+  return { start: randomInt(0, 6), length: [28, 30, 31][randomInt(0, 2)] };
+}
+
+function makeGridDayQuestion() {
+  const { start, length } = monthShape();
+  const date = randomInt(8, length);
+  const correct = DAYS[(start + date - 1) % 7];
+  const wrongs = shuffle(DAYS.filter((d) => d !== correct)).slice(0, 3);
+  return {
+    visual: monthGrid(start, length, [date]),
+    prompt: `What day of the week is the ${ordinal(date)}?`,
+    dedupeKey: `grid-day-${start}-${date}`,
+    explanation: `Follow the circled ${date} up to the top of its column: ${correct}.`,
+    correctAnswer: correct,
+    choices: shuffle([correct, ...wrongs]),
+  };
+}
+
+function makeGridBetweenQuestion() {
+  const { start, length } = monthShape();
+  const from = randomInt(1, length - 10);
+  const gap = randomInt(2, 10);
+  const wrongs = [gap + 1, gap - 1, gap + 7, gap * 2].filter((v, i, a) => v > 0 && v !== gap && a.indexOf(v) === i).slice(0, 3);
+  return {
+    visual: monthGrid(start, length, [from, from + gap]),
+    prompt: `How many days from the ${ordinal(from)} to the ${ordinal(from + gap)}?`,
+    dedupeKey: `grid-gap-${start}-${from}-${gap}`,
+    explanation: `${from + gap} − ${from} = ${gap} days.`,
+    correctAnswer: String(gap),
+    choices: shuffle([String(gap), ...wrongs.map(String)]),
+  };
+}
+
+function makeGridWeekQuestion() {
+  const { start, length } = monthShape();
+  const from = randomInt(1, length - 7);
+  const wrongs = [from + 6, from + 8, from + 1, from + 14].filter((v, i, a) => v <= length + 7 && a.indexOf(v) === i).slice(0, 3);
+  return {
+    visual: monthGrid(start, length, [from]),
+    prompt: `What date is exactly one week after the ${ordinal(from)}?`,
+    dedupeKey: `grid-week-${start}-${from}`,
+    explanation: `One week is 7 days, and the date goes straight down one row: ${from + 7}.`,
+    correctAnswer: String(from + 7),
+    choices: shuffle([String(from + 7), ...wrongs.map(String)]),
+  };
+}
+
 const QUESTION_KINDS = {
+  grid: [makeGridDayQuestion, makeGridBetweenQuestion, makeGridWeekQuestion],
   days: [
     makeDayOrderQuestion,
     makeDayOrderQuestion,
@@ -189,11 +270,11 @@ const QUESTION_KINDS = {
     makeMonthCountQuestion,
   ],
 };
-QUESTION_KINDS.all = [...QUESTION_KINDS.days, ...QUESTION_KINDS.months];
+QUESTION_KINDS.all = [...QUESTION_KINDS.days, ...QUESTION_KINDS.months, ...QUESTION_KINDS.grid];
 
 function getMode() {
   const type = new URLSearchParams(window.location.search).get("type");
-  return type === "days" || type === "months" ? type : "all";
+  return type === "days" || type === "months" || type === "grid" ? type : "all";
 }
 
 function loadBestMs(key) {
@@ -227,6 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
     all: "Days of the week + months of the year",
     days: "Days of the week",
     months: "Months of the year",
+    grid: "Reading a month calendar",
   };
   document.getElementById("mode-label").textContent = labels[mode];
 

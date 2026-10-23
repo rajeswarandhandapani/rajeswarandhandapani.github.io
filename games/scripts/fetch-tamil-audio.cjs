@@ -56,6 +56,11 @@ function wantedTexts() {
   const words = new Set(Tamil.NUMBERS.map((n) => n.tamil));
   const src = fs.readFileSync(path.join(ROOT, "assets/js/tamil-words-data.js"), "utf8");
   for (const m of src.matchAll(/tamil: "([^"]+)"/g)) words.add(m[1]);
+  // Days, months and colours for the Tamil Days & Colours game.
+  const daysFile = path.join(ROOT, "assets/js/tamil-days-data.js");
+  if (fs.existsSync(daysFile)) {
+    for (const m of fs.readFileSync(daysFile, "utf8").matchAll(/tamil: "([^"]+)"/g)) words.add(m[1]);
+  }
   for (const s of require(path.join(ROOT, "assets/js/tamil-sentences-data.js")).sentences) {
     words.add(s.word);
     (s.alternatives || []).forEach((a) => words.add(a));
