@@ -755,11 +755,11 @@ dialog h4 { font-size:15px; margin:18px 0 6px; }
 .report-table th, .report-table td { text-align:left; padding:6px 6px; border-bottom:1px solid #e6edf0; vertical-align:middle; }
 .report-table tr.weak td:first-child { color:#bd3e44; font-weight:700; }
 .spark { width:90px; height:24px; vertical-align:middle; }
-.print-report { margin-top:14px; border:1px solid #cdd8dd; background:#fff; border-radius:10px; padding:8px 14px; font-weight:700; }
+.print-report, .install-app { margin-top:14px; border:1px solid #cdd8dd; background:#fff; border-radius:10px; padding:8px 14px; font-weight:700; }
 @media print {
   body.learning-home > *:not(#parent-dialog) { display:none !important; }
   #parent-dialog { position:static; box-shadow:none; border:0; width:100%; }
-  #parent-dialog .dialog-heading button, #parent-dialog .reset-button, #parent-dialog .parent-badges, .print-report { display:none !important; }
+  #parent-dialog .dialog-heading button, #parent-dialog .reset-button, #parent-dialog .parent-badges, .print-report, .install-app, #install-help { display:none !important; }
 }
 
 /* Long answer words stay whole next to the listen button on narrow phones */
@@ -1061,7 +1061,7 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 .learning-home .subject-tabs button[aria-pressed=true] { background-color:var(--kid-gold); color:var(--kid-gold-ink); box-shadow:0 3px 0 var(--kid-gold-edge); }
 .learning-home .filter-status { margin:8px 2px 12px; color:#fff; font-size:1rem; font-weight:700; }
 #empty-games { color:var(--kid-ink); }
-#empty-games button, .reset-button, .print-report { min-height:48px; }
+#empty-games button, .reset-button, .print-report, .install-app { min-height:48px; }
 
 /* Footer: quietly at the bottom, for the grown-ups. */
 .learning-home .home-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 14px; width:100%; max-width:1240px; margin:0 auto; padding:6px 12px 12px; border:0; color:#fff; font-size:15px; text-align:center; }

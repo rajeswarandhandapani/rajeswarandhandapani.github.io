@@ -19,6 +19,8 @@
   const canSpeak = !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== "undefined";
   let favorites = [];
   let summary = null;
+  let installPrompt = null;
+  let justInstalled = false;
   let firstRoute = true;
 
   function esc(text) {
@@ -509,19 +511,34 @@
   function renderOfflineStatus() {
     const el = $("offline-status");
     if (!("serviceWorker" in navigator) || !window.caches) { el.textContent = "This browser cannot save the games for offline use."; return; }
-    caches.keys().then((keys) => {
-      const key = keys.filter((k) => k.indexOf("klg-") === 0).pop();
-      if (!key) { el.textContent = "Saving the games for offline use… keep this page open for a minute while online."; return; }
-      return caches.open(key).then((c) => c.keys()).then((list) => {
-        el.textContent = "✓ Saved on this device for offline use (" + list.length + " files).";
-      });
+    el.textContent = "Saving the games for offline use… keep this page open for a minute while online.";
+    // A cache exists before its files arrive, so wait for the worker: it only activates once all are saved.
+    navigator.serviceWorker.ready.then(() => caches.keys()).then((keys) => Promise.all(
+      keys.filter((k) => k.indexOf("klg-") === 0).map((k) => caches.open(k).then((c) => c.keys()).then((list) => list.length))
+    )).then((counts) => {
+      const saved = Math.max(0, ...counts);
+      if (saved) el.textContent = "✓ Saved on this device for offline use (" + saved + " files).";
     }).catch(() => { el.textContent = ""; });
+  }
+
+  /** Tells grown-ups how to install the site as an app on this device. */
+  function renderInstallHelp() {
+    const el = $("install-help");
+    if (!el) return;
+    const installed = justInstalled || window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    const apple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    $("install-app").hidden = installed || !installPrompt;
+    if (installed) el.textContent = "✓ Installed on this device.";
+    else if (installPrompt) el.textContent = "Install it to open the games from their own icon, without the browser's address bar.";
+    else if (apple) el.textContent = "In Safari, tap Share, then Add to Home Screen. Do this early, because stars earned in Safari may not move to the installed app.";
+    else el.textContent = "Open your browser's menu and choose Install app or Add to Home screen. If neither is listed, try Chrome.";
   }
 
   function openParentDialog() {
     const current = KlgProgress.summary();
     renderReport();
     renderOfflineStatus();
+    renderInstallHelp();
     $("parent-summary").textContent = current.gamesPlayed + " activities explored · " + current.plays + " rounds completed · " + current.stars + " stars earned.";
     const list = $("parent-badge-list");
     list.replaceChildren();
@@ -547,6 +564,12 @@
       KlgProgress.reset();
       window.location.reload();
     });
+    $("install-app").addEventListener("click", () => {
+      const prompt = installPrompt;
+      installPrompt = null;
+      renderInstallHelp();
+      if (prompt) prompt.prompt();
+    });
     $("parent-open").addEventListener("click", openParentDialog);
     $("parent-close").addEventListener("click", () => $("parent-dialog").close());
     $("see-all-grownup").addEventListener("click", () => $("parent-dialog").close());
@@ -555,6 +578,18 @@
     $("play-next-wrap").appendChild(nextSay);
     window.addEventListener("hashchange", route);
   }
+
+  // Chrome and Edge offer this once the site can be installed. Holding it keeps the
+  // offer away from children and lets the grown-up panel's button use it.
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    renderInstallHelp();
+  });
+  window.addEventListener("appinstalled", () => {
+    justInstalled = true;
+    renderInstallHelp();
+  });
 
   document.addEventListener("DOMContentLoaded", () => {
     if (!window.KlgProgress || !window.KlgCatalogue) return;

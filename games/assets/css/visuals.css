@@ -396,3 +396,52 @@ button.kv-swatch:disabled { opacity: 0.3; }
 .nb-whole { background: #fff2df; border: 3px solid #b34c13; }
 .nb-part { background: #e8f3ff; border: 3px solid #4055b5; flex: 0 1 44%; max-width: 44%; }
 .nb-counters { display: block; font-size: 0.85rem; line-height: 1.25; text-align: center; overflow-wrap: anywhere; word-break: break-all; max-width: 100%; }
+
+/* Puzzle games: Piece Together, Picture Squares, Pipe Garden, Who Lives Where? */
+.pt-area { display: flex; justify-content: center; align-items: flex-start; gap: 10px; width: 100%; }
+.pt-peek { flex: 0 0 76px; border: 2px solid #4055b5; border-radius: 10px; overflow: hidden; line-height: 0; }
+.pt-peek svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.pt-board { position: relative; flex: 1 1 auto; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), minmax(0, 1fr)); gap: 3px; aspect-ratio: 1; max-width: 250px; padding: 3px; background: #dfe7ef; border-radius: 12px; }
+.pt-board.pt-level-1 { max-width: 220px; }
+.pt-board.pt-level-3 { max-width: 270px; }
+.pt-board.pt-whole { gap: 0; }
+.pt-ghost { position: absolute; inset: 3px; opacity: 0.35; pointer-events: none; }
+.pt-ghost svg { display: block; width: 100%; height: 100%; }
+.pt-slot { position: relative; min-width: 0; min-height: 0; padding: 0; overflow: hidden; background: transparent; border: 2px dashed #6b7a8c; border-radius: 6px; }
+.pt-slot.full { border: 0; border-radius: 0; }
+.pt-slot svg { display: block; width: 100%; height: 100%; }
+.pt-tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.pt-piece { width: 84px; min-width: 44px; min-height: 44px; aspect-ratio: var(--w) / var(--h); padding: 0; overflow: hidden; background: #fff; border: 3px solid #4055b5; border-radius: 10px; touch-action: none; }
+.pt-tray.pt-level-2 .pt-piece { width: 48px; }
+.pt-tray.pt-level-3 .pt-piece { width: 58px; }
+.pt-piece[aria-pressed="true"] { box-shadow: 0 0 0 4px #f2a900; }
+.pt-piece svg { display: block; width: 100%; height: 100%; pointer-events: none; }
+.ps-grid { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 3px; width: min(100%, calc(var(--n) * 66px)); }
+.ps-cell { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; min-width: 0; padding: 0; font-size: clamp(1.4rem, 7vw, 2rem); line-height: 1; color: #203341; background: #fff; border: 2px solid #4055b5; border-radius: 10px; }
+.ps-given { background: #dfe7ef; border-color: #dfe7ef; }
+.ps-blank[aria-pressed="true"] { box-shadow: 0 0 0 3px #f2a900; }
+.ps-blank.wrong { background: #ffe9e9; border: 3px dashed #bd3e44; }
+.ps-picks { gap: 6px; }
+.ps-pick { min-width: 46px; padding: 4px; font-size: 1.5rem; line-height: 1; }
+.pg-board { width: min(100%, calc(var(--n) * 72px)); }
+.pg-grid, .pg-signs { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+.pg-signs span { text-align: center; font-size: 1.8rem; line-height: 1.25; min-height: 2.25rem; }
+.pg-tile { display: block; aspect-ratio: 1; min-width: 0; padding: 0; overflow: hidden; background: #eaf5dc; border: 1px solid #a9c08f; }
+.pg-tile:focus-visible { position: relative; z-index: 1; outline: 3px solid #f2a900; outline-offset: -3px; }
+.pg-tile:disabled { opacity: 1; }
+.pg-tile svg { display: block; width: 100%; height: 100%; transition: transform 0.15s; }
+.pg-tile path { fill: none; }
+.pg-outer { stroke: #5b6b7a; stroke-width: 32; }
+.pg-inner { stroke: #d5dde4; stroke-width: 18; }
+.pg-tile.wet .pg-inner { stroke: #1b87e0; }
+.wl-clues { width: 100%; margin: 0; font-size: 1.02rem; }
+.wl-clues li { padding: 1px 4px; border-radius: 6px; }
+.wl-clues li.wl-bad { background: #ffe9e9; outline: 2px dashed #bd3e44; }
+.wl-row { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 4px; width: min(100%, calc(var(--n) * 92px)); }
+.wl-house { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 0; background: none; border: 0; }
+.wl-roof { width: 100%; height: 22px; background: var(--c); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.wl-body { display: flex; align-items: center; justify-content: center; width: 86%; min-height: 56px; font-size: 1.9rem; line-height: 1; background: var(--soft); border: 3px solid var(--c); border-top: 0; }
+.wl-name { font-size: 0.8rem; font-weight: 800; color: #203341; }
+.wl-house:disabled { opacity: 1; }
+.wl-tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; min-height: 60px; }
+.wl-animal { min-width: 54px; min-height: 54px; padding: 2px 6px; font-size: 1.8rem; line-height: 1; }

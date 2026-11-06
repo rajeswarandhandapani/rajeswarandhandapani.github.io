@@ -1023,6 +1023,219 @@ const section = (name, fn) => sections.push([name, fn]);
   });
 
 
+  section('piece-together: pieces only fit their own place, by tap, keyboard and drag', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const [level, count, help] of [[1, 4, '.pt-ghost'], [2, 6, '.pt-peek'], [3, 9, null]]) {
+      await startRound(`piece-together/index.html?level=${level}`);
+      const seen = new Set();
+      for (let i = 0; i < 4; i++) {
+        const q = JSON.parse(await page.locator('.pt-board').getAttribute('data-puzzle'));
+        assert.ok(!seen.has(q.scene), 'a round does not repeat a picture');
+        seen.add(q.scene);
+        assert.equal(await page.locator('.pt-slot').count(), count);
+        assert.equal(await page.locator('.pt-piece').count(), count);
+        if (help) assert.equal(await page.locator(help).count(), 1, 'level ' + level + ' help');
+        else assert.equal(await page.locator('.pt-ghost, .pt-peek').count(), 0, 'level 3 has no picture to copy');
+        const ids = await page.locator('.pt-piece').evaluateAll((els) => els.map((e) => e.dataset.piece));
+        if (i < 2) {
+          // One slip is a nudge, and a second is a mistake. A wrong place never accepts the piece.
+          const piece = ids[0];
+          const other = ids[1];
+          await page.locator(`.pt-piece[data-piece="${piece}"]`).click();
+          for (let slip = 0; slip <= i; slip++) await page.locator(`.pt-slot[data-slot="${other}"]`).click();
+          assert.match(await page.locator('#feedback').textContent(), /somewhere else/);
+          assert.equal(await page.locator('.pt-slot.full').count(), 0);
+        }
+        const place = async (id, how) => {
+          const piece = page.locator(`.pt-piece[data-piece="${id}"]`), slot = page.locator(`.pt-slot[data-slot="${id}"]`);
+          if (how === 'drag') {
+            const a = await piece.boundingBox(), b = await slot.boundingBox();
+            await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+            await page.mouse.down();
+            await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 4 });
+            await page.mouse.up();
+          } else if (how === 'keys') {
+            await piece.focus();
+            await page.keyboard.press('Enter');
+            await slot.focus();
+            await page.keyboard.press('Enter');
+          } else {
+            await piece.click();
+            await slot.click();
+          }
+          assert.ok(await slot.locator('svg').count(), `piece ${id} is in place (${how})`);
+          assert.equal(await piece.isVisible(), false);
+        };
+        await place(ids[0], 'drag');
+        await place(ids[1], 'keys');
+        for (const id of ids.slice(2)) await place(id, 'tap');
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        assert.match(await page.locator('#feedback').textContent(), /You made/);
+        assert.equal(await page.locator('#score-pill').textContent(), i === 0 ? '⭐ 1' : '⭐ ' + i, 'one slip keeps the star, two lose it');
+        await noOverflow('piece-together');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+    // No two pieces of a picture may look alike, or a right-looking piece could be refused.
+    const close = await page.evaluate(async () => {
+      const paint = (svg) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 48;
+          const g = canvas.getContext('2d', { willReadFrequently: true });
+          g.drawImage(img, 0, 0, 48, 48);
+          resolve(g.getImageData(0, 0, 48, 48).data);
+        };
+        img.onerror = reject;
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      });
+      const differ = (a, b) => {
+        let n = 0;
+        for (let p = 0; p < a.length; p += 4) if (Math.abs(a[p] - b[p]) + Math.abs(a[p + 1] - b[p + 1]) + Math.abs(a[p + 2] - b[p + 2]) > 60) n += 1;
+        return n / (a.length / 4);
+      };
+      const out = [];
+      for (const scene of KlgPieceScenes.SCENES) {
+        for (const [rows, cols] of [[2, 2], [2, 3], [3, 3]]) {
+          const tiles = [];
+          for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) tiles.push({ id: row + ',' + col, data: await paint(KlgPieceScenes.svg(scene, { row, col, rows, cols })) });
+          for (let a = 0; a < tiles.length; a++) for (let b = a + 1; b < tiles.length; b++) {
+            const d = differ(tiles[a].data, tiles[b].data);
+            if (d < 0.08) out.push(`${scene.id} ${rows}x${cols}: ${tiles[a].id} and ${tiles[b].id} differ by ${(d * 100).toFixed(1)}%`);
+          }
+        }
+      }
+      return out;
+    });
+    assert.deepEqual(close, []);
+  });
+
+  section('picture-squares: clashes are marked, and only the one answer is right', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const [level, size] of [[1, 3], [2, 4], [3, 5]]) {
+      await startRound(`picture-squares/index.html?level=${level}`);
+      for (let i = 0; i < 5; i++) {
+        const q = JSON.parse(await page.locator('.ps-grid').getAttribute('data-puzzle'));
+        assert.equal(q.size, size);
+        assert.equal(await page.locator('.ps-cell').count(), size * size);
+        assert.equal(await page.locator('.ps-pick').count(), size);
+        const shown = await page.locator('.ps-given').evaluateAll((els) => els.map((e) => e.textContent));
+        assert.deepEqual(shown, q.grid.flat().filter((pic) => pic !== null).map((pic) => q.pictures[pic].emoji), 'the pictures shown are the puzzle');
+        const blanks = [];
+        q.grid.forEach((row, r) => row.forEach((pic, c) => { if (pic === null) blanks.push([r, c]); }));
+        assert.equal(await page.locator('.ps-blank').count(), blanks.length);
+        const fill = (r, c, pic) => page.locator(`.ps-blank[data-square="${r},${c}"]`).click().then(() => page.locator(`.ps-pick[data-pick="${pic}"]`).click());
+        await page.locator('#ps-check').click();
+        assert.match(await page.locator('#feedback').textContent(), /Fill every/);
+        assert.equal(await page.locator('#next-btn').isHidden(), true);
+        for (const [r, c] of blanks) await fill(r, c, q.solution[r][c]);
+        if (i === 0) {
+          const [r, c] = blanks[0];
+          const wrongPic = (q.solution[r][c] + 1) % size;
+          await fill(r, c, wrongPic);
+          assert.match(await page.locator(`.ps-blank[data-square="${r},${c}"]`).getAttribute('aria-label'), new RegExp(q.pictures[wrongPic].name));
+          await page.locator('#ps-check').click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true, 'a wrong grid is not accepted');
+          assert.ok(await page.locator(`.ps-blank[data-square="${r},${c}"].wrong`).count(), 'the wrong square is marked');
+          await page.locator(`.ps-blank[data-square="${r},${c}"]`).focus();
+          await page.keyboard.press('Enter');
+          await page.locator(`.ps-pick[data-pick="${q.solution[r][c]}"]`).focus();
+          await page.keyboard.press('Enter');
+          assert.equal(await page.locator('.ps-blank.wrong').count(), 0, 'changing a square clears the marks');
+        }
+        await page.locator('#ps-check').click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('picture-squares');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('pipe-garden: the picture matches the pipes, and water only flows when they join', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const [level, size] of [[1, 3], [2, 4], [3, 5]]) {
+      await startRound(`pipe-garden/index.html?level=${level}`);
+      for (let i = 0; i < 5; i++) {
+        const q = JSON.parse(await page.locator('.pg-board').getAttribute('data-puzzle'));
+        assert.equal(q.size, size);
+        assert.equal(await page.locator('.pg-tile').count(), size * size);
+        const column = (id) => page.locator(id).evaluate((el) => [...el.parentElement.children].indexOf(el));
+        assert.equal(await column('#pg-tap'), q.start, 'the tap is over the starting column');
+        assert.equal(await column('#pg-flower'), q.goal, 'the flower is under its column');
+        assert.equal(await page.locator('#pg-flower').textContent(), '🌱');
+        await page.locator('#pg-go').click();
+        assert.equal(await page.locator('#next-btn').isHidden(), true, 'scrambled pipes do not reach the flower');
+        assert.match(await page.locator('#feedback').textContent(), /water/);
+        for (let t = 0; t < q.tiles.length; t++) {
+          const tile = page.locator(`.pg-tile[data-tile="${t}"]`);
+          for (let n = 0; n < 4 && Number(await tile.getAttribute('data-rot')) !== q.answer[t]; n++) {
+            if (t % 2) await tile.click();
+            else { await tile.focus(); await page.keyboard.press('Enter'); }
+          }
+          const [rot, drawn] = await tile.evaluate((b) => [Number(b.dataset.rot), Number(b.firstElementChild.style.transform.match(/-?\d+/)[0])]);
+          assert.equal(rot, q.answer[t]);
+          assert.equal(((drawn % 360) + 360) % 360, rot * 90, 'the pipe is drawn the way it is turned');
+        }
+        assert.equal(await page.locator('.pg-tile.wet').count(), 0, 'turning a pipe drains the water');
+        await page.locator('#pg-go').click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        assert.equal(await page.locator('#pg-flower').textContent(), '🌻');
+        assert.ok(await page.locator('.pg-tile.wet').count() >= size, 'water fills the route');
+        await noOverflow('pipe-garden');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('who-lives-where: clues agree with the one answer, and a broken clue is pointed out', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const [level, n] of [[1, 3], [2, 4], [3, 5]]) {
+      await startRound(`who-lives-where/index.html?level=${level}`);
+      for (let i = 0; i < 5; i++) {
+        const q = JSON.parse(await page.locator('.wl-row').getAttribute('data-puzzle'));
+        assert.equal(q.animals.length, n);
+        assert.equal(await page.locator('.wl-house').count(), n);
+        assert.deepEqual(await page.locator('.wl-name').allTextContents(), q.houses.map((h) => h.name));
+        assert.equal(await page.locator('.wl-clues li').count(), q.clues.length);
+        const place = (a, h) => page.locator(`.wl-animal[data-animal="${a}"]`).click().then(() => page.locator(`.wl-house[data-house="${h}"]`).click());
+        await page.locator('#wl-check').click();
+        assert.match(await page.locator('#feedback').textContent(), /needs a house/);
+        if (i === 0) {
+          // Every animal one house along: a different placement, so a clue must fail.
+          for (let a = 0; a < n; a++) await place(a, (q.place[a] + 1) % n);
+          await page.locator('#wl-check').click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true, 'a wrong placement is not accepted');
+          assert.equal(await page.locator('.wl-clues li.wl-bad').count(), 1);
+          assert.match(await page.locator('#feedback').textContent(), /clue \d/);
+          for (let h = 0; h < n; h++) await page.locator(`.wl-house[data-house="${h}"]`).click();
+          assert.equal(await page.locator('.wl-animal:visible').count(), n, 'tapping a house gives its animal back');
+        }
+        if (i === 1) {
+          // By drag for the first animal, by keyboard for the second.
+          const a = await page.locator('.wl-animal[data-animal="0"]').boundingBox(), b = await page.locator(`.wl-house[data-house="${q.place[0]}"]`).boundingBox();
+          await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 4 });
+          await page.mouse.up();
+          assert.equal(await page.locator(`.wl-house[data-house="${q.place[0]}"]`).getAttribute('data-holds'), '0', 'dragged into the house');
+          await page.locator('.wl-animal[data-animal="1"]').focus();
+          await page.keyboard.press('Enter');
+          await page.locator(`.wl-house[data-house="${q.place[1]}"]`).focus();
+          await page.keyboard.press('Enter');
+          assert.equal(await page.locator(`.wl-house[data-house="${q.place[1]}"]`).getAttribute('data-holds'), '1', 'placed by keyboard');
+          for (let a2 = 2; a2 < n; a2++) await place(a2, q.place[a2]);
+        } else {
+          for (let a = 0; a < n; a++) await place(a, q.place[a]);
+        }
+        await page.locator('#wl-check').click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('who-lives-where');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
   const before = await plays().catch(() => 0);
   for (const [name, fn] of sections) {
     if (only && !name.includes(only)) continue;

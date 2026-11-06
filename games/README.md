@@ -1,6 +1,6 @@
 # Little Learners · Kid Learning Games
 
-80 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+84 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
 
 ## Run and verify
 
@@ -58,7 +58,7 @@ The home page has one job per view. The address hash picks the view, so the Back
 | Subject | `#world/math` | All of that subject's games, easiest first, each showing the ages it suits |
 | Favorites | `#world/favorites` | Games marked with a heart |
 | My stars | `#me` | Rank, XP, streak and badges |
-| All games | `#all` | Search and filters over all 80 games |
+| All games | `#all` | Search and filters over all 84 games |
 
 Nobody is asked their age, and progress is shared on one device. `gamesFor`, `nextFor` and `nextAfter` in `catalogue.js` choose the games.
 
@@ -75,7 +75,7 @@ The colours and sizes are the `Kid theme` section at the end of `assets/css/comm
 
 A missed question comes back the next day, inside its own game. One right answer brings it back after 3 days, and a second right answer clears it. A wrong answer restarts the schedule. It earns 5 XP per right answer and keeps the day streak, but never changes stars or recent scores. The grown-up report lists the trickiest questions.
 
-Each miss is saved as a self-contained copy, since most questions are random. Pictures are stored as HTML. It covers the 69 games built on `QuizEngine` or `KlgRound`. It does not cover memory-match, tamil-memory, tamil-letter-chart, tamil-letter-pop, tamil-tracing, array-garden, multiples-hunt, share-fairly, tamil-word-puzzle, tamil-sentence-words or tamil-missing-letters.
+Each miss is saved as a self-contained copy, since most questions are random. Pictures are stored as HTML. It covers the 73 games built on `QuizEngine` or `KlgRound`. It does not cover memory-match, tamil-memory, tamil-letter-chart, tamil-letter-pop, tamil-tracing, array-garden, multiples-hunt, share-fairly, tamil-word-puzzle, tamil-sentence-words or tamil-missing-letters.
 
 For review to work, a game must:
 
@@ -122,6 +122,19 @@ Memory Garden also has a 15-pair board.
 | Science & world | Stay Safe & Healthy | Choose the safe thing to do in a little story |
 | Tamil | சொல் வரிசை | Put Tamil word tiles in order to make a sentence |
 
+### Puzzle games
+
+Four more Thinking skills games, each a different kind of puzzle. Each has `?level=1|2|3`, and works by tap and keyboard; the two with pieces can also be dragged.
+
+| Game | Ages | What the child does | Levels |
+| ---- | ---- | ------------------- | ------ |
+| Piece Together | 3–9 | Fit a cut-up picture back together. The first slip on a puzzle is only a nudge | 4 pieces over a faint picture, 6 with a small copy beside the board, 9 with no help |
+| Picture Squares | 5+ | Put each picture once in every row and column. Check marks the squares that clash | 3 × 3, 4 × 4, 5 × 5 |
+| Pipe Garden | 5+ | Turn pipes to join the tap to the flower, then turn on the water and see how far it gets | 3 × 3, 4 × 4, 5 × 5 with spare three-way pipes |
+| Who Lives Where? | 5+ | Use clues to put each animal in its house. Check points at a clue that is not true yet | 3, 4 or 5 houses |
+
+Every puzzle starts from a solved state, so it can always be finished. The rules for making them are in `games/picture-squares/puzzle.js`, `games/pipe-garden/puzzle.js`, `games/who-lives-where/puzzle.js` and `games/piece-together/scenes.js`, and they run in node too. `tests/puzzles.test.cjs` generates hundreds of each and checks them with its own solving code: Picture Squares and Who Lives Where? have exactly one answer, a Picture Squares puzzle can be finished without guessing, every clue is needed, and Pipe Garden's route joins up.
+
 ### Tamil review
 
 New Tamil was written by Claude and has not been read by a native speaker. [`docs/TAMIL-REVIEW-v4.md`](docs/TAMIL-REVIEW-v4.md) lists every new line with its English meaning, plus the older lines that were never checked. Please read it before pushing.
@@ -145,7 +158,7 @@ read):
 | `scene.js` · `KlgScene` | emoji scenes: weather, seasons, habitats |
 
 `assets/js/play-kit.js` (`KlgPlayKit`) holds the interaction mechanics:
-`dragToBins`, `orderCards`, `tapHotspots` and `buildFromTiles`. Every one works by
+`dragToBins`, `dragTo`, `orderCards`, `tapHotspots` and `buildFromTiles`. Every one works by
 tap or click and by keyboard. Dragging is an extra. `assets/js/round-kit.js`
 (`KlgRound`) runs the question loop of the hand-built games and records progress.
 `assets/js/word-pictures.js` is the shared word → picture list.
@@ -334,7 +347,7 @@ assets/audio/tamil/        recorded Tamil letters & words + CREDITS.md
 scripts/fetch-tamil-audio.cjs  rebuilds the Tamil audio from Wikimedia Commons
 scripts/new-game.cjs       scaffolds a new hand-built game
 scripts/sync-index.cjs     keeps index.html's count and <noscript> list in step with the catalogue
-games/<game-name>/         one folder per game (index.html + game.js, and questions.js when it has a hand-written bank)
+games/<game-name>/         one folder per game (index.html + game.js, and questions.js or puzzle.js when it has a hand-written bank or a puzzle maker)
 ```
 
 ## Levels
@@ -345,9 +358,9 @@ page you can link to directly.
 
 | Level | Name | Ages | Games |
 | ----- | ---- | ---- | ----- |
-| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers, Sound It Out, Word Families, Sight Word Pop, Story Order, Tamil Days & Colours, My Body, Sort It!, Weather & Seasons, Odd One Out, Number Bonds, Stay Safe & Healthy |
-| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly, Set the Clock, Block Builder, Shape Detectives, Picture Graphs, Sentence Builder, Tamil Picture Sentences, Tamil–English Match, Life Cycles, Who Am I?, Robot Path, Word Detective, Punctuation Pals, சொல் வரிசை |
-| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder, Tamil Word Puzzle, Market Day, Fact Family Triangles, Array Garden, Multiples Hunt, Pizza Fractions, Coin Shop, Measure Lab, Tamil Story Time |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers, Sound It Out, Word Families, Sight Word Pop, Story Order, Tamil Days & Colours, My Body, Sort It!, Weather & Seasons, Odd One Out, Number Bonds, Stay Safe & Healthy, Piece Together |
+| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly, Set the Clock, Block Builder, Shape Detectives, Picture Graphs, Sentence Builder, Tamil Picture Sentences, Tamil–English Match, Life Cycles, Who Am I?, Robot Path, Word Detective, Punctuation Pals, சொல் வரிசை, Picture Squares, Pipe Garden |
+| 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder, Tamil Word Puzzle, Market Day, Fact Family Triangles, Array Garden, Multiples Hunt, Pizza Fractions, Coin Shop, Measure Lab, Tamil Story Time, Who Lives Where? |
 | 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals, Map Explorer |
 
 ## Progress, ranks and badges
@@ -777,11 +790,11 @@ folder with any static file server, e.g.:
 python3 -m http.server 8000
 ```
 
-## Offline use and the iPad
+## Installing it as an app, and offline use
 
 The site works with no internet after one visit. `sw.js` (a service worker,
-generated by `scripts/build-sw.cjs` from `scripts/sw-template.js`) saves all
-429 files on the device the first time any page is opened: every game, script,
+generated by `scripts/build-sw.cjs` from `scripts/sw-template.js`) saves every
+file on the device the first time any page is opened: every game, script,
 picture, the emoji and Tamil fonts and the Tamil recordings (about 15 MB).
 It always tries the network first, so updates appear as soon as you are online,
 and it falls back to the saved copy with no network (or after 4 seconds).
@@ -792,6 +805,11 @@ On an iPad or iPhone: open the site in Safari while online, wait a minute
 Share → **Add to Home Screen**. It then opens full-screen like an app, with
 its own icon, and works in flight mode. English questions use the device's own
 voice, which works offline. Tamil plays the saved recordings.
+
+On Android or a computer, Chrome and Edge can install it: the grown-up panel shows
+an **Install Little Learners** button when the browser allows it, and instructions
+when it does not. Stars are saved per browser, and an installed app on an iPhone or
+iPad may not share them with Safari.
 
 `manifest.webmanifest` and `assets/icons/` give the Home Screen name and icon.
 The worker only handles pages under its own folder, so in the website repo

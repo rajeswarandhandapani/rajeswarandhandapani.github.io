@@ -16,7 +16,9 @@ function synced(html) {
    .map(g => `            <li><a href="games/${g.id}/index.html">${esc(g.icon)} ${esc(g.name)}</a> — ${esc(g.blurb)}</li>`).join('\n');
   return `        <h3>${esc(cat.LEVELS[level].name)} · ${esc(cat.LEVELS[level].ages)}</h3>\n        <ul>\n${items}\n        </ul>`;
  }).join('\n');
- return out.replace(/<!-- noscript:start -->[\s\S]*<!-- noscript:end -->/, `<!-- noscript:start -->\n${blocks}\n        <!-- noscript:end -->`);
+ // Keep the file's own line endings: Git on Windows checks it out with CRLF.
+ const eol = html.includes('\r\n') ? '\r\n' : '\n';
+ return out.replace(/<!-- noscript:start -->[\s\S]*<!-- noscript:end -->/, `<!-- noscript:start -->\n${blocks}\n        <!-- noscript:end -->`.replace(/\n/g, eol));
 }
 
 if (require.main === module) {

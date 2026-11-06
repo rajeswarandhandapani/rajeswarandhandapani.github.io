@@ -8,7 +8,7 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-4a50de4fe420";
+const CACHE = "klg-4fe17717fe66";
 const FILES = [
  "./",
  "./index.html",
@@ -348,8 +348,17 @@ const FILES = [
  "./games/patterns/index.html",
  "./games/picture-graphs/game.js",
  "./games/picture-graphs/index.html",
+ "./games/picture-squares/game.js",
+ "./games/picture-squares/index.html",
+ "./games/picture-squares/puzzle.js",
  "./games/picture-words/game.js",
  "./games/picture-words/index.html",
+ "./games/piece-together/game.js",
+ "./games/piece-together/index.html",
+ "./games/piece-together/scenes.js",
+ "./games/pipe-garden/game.js",
+ "./games/pipe-garden/index.html",
+ "./games/pipe-garden/puzzle.js",
  "./games/punctuation-pals/game.js",
  "./games/punctuation-pals/index.html",
  "./games/punctuation-pals/questions.js",
@@ -446,6 +455,9 @@ const FILES = [
  "./games/who-am-i/game.js",
  "./games/who-am-i/index.html",
  "./games/who-am-i/questions.js",
+ "./games/who-lives-where/game.js",
+ "./games/who-lives-where/index.html",
+ "./games/who-lives-where/puzzle.js",
  "./games/word-detective/game.js",
  "./games/word-detective/index.html",
  "./games/word-detective/questions.js",

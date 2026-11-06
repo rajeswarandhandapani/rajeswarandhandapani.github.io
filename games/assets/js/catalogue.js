@@ -32,7 +32,7 @@
 
   /** Friendly names for the skill tags (the report falls back to the tag text). */
   var SKILL_NAMES = {
-    "logic.memory": "Memory", "logic.patterns": "Patterns", "logic.reasoning": "Reasoning", "logic.coding": "Step-by-step thinking",
+    "logic.memory": "Memory", "logic.patterns": "Patterns", "logic.reasoning": "Reasoning", "logic.coding": "Step-by-step thinking", "logic.spatial": "Seeing how things fit",
     "english.vocabulary": "Picture words", "english.letters": "Letters & sounds", "english.rhyme": "Rhyming",
     "english.comprehension": "Understanding stories", "english.spelling": "Spelling", "english.phonics": "Phonics", "english.sight-words": "Sight words", "english.sentences": "Making sentences", "english.sequencing": "Story order", "english.grammar": "Kinds of words", "english.punctuation": "Punctuation",
     "world.feelings": "Feelings", "world.everyday": "Everyday things", "world.geography": "Countries & capitals",
@@ -127,6 +127,10 @@
     {"id":"number-bonds","name":"Number Bonds","icon":"🫧","blurb":"Find the missing part that makes the whole.","level":1,"subject":"math","skills":["math.add-sub"],"isNew":true},
     {"id":"stay-safe","name":"Stay Safe & Healthy","icon":"🦺","blurb":"Choose the safe and healthy thing to do.","level":1,"subject":"science","skills":["science.safety"],"isNew":true},
     {"id":"tamil-word-order","name":"சொல் வரிசை","icon":"🔀","blurb":"Put Tamil word tiles in order to make a sentence.","level":2,"subject":"tamil","skills":["tamil.sentences"],"isNew":true},
+    {"id":"piece-together","name":"Piece Together","icon":"🧩","blurb":"Fit the picture pieces back into their places.","level":1,"subject":"logic","skills":["logic.spatial"],"isNew":true},
+    {"id":"picture-squares","name":"Picture Squares","icon":"🍓","blurb":"Every picture once in each row and column.","level":2,"subject":"logic","skills":["logic.reasoning"],"isNew":true},
+    {"id":"pipe-garden","name":"Pipe Garden","icon":"🚰","blurb":"Turn the pipes so water reaches the flower.","level":2,"subject":"logic","skills":["logic.spatial"],"isNew":true},
+    {"id":"who-lives-where","name":"Who Lives Where?","icon":"🏘️","blurb":"Use the clues to find each animal's house.","level":3,"subject":"logic","skills":["logic.reasoning"],"isNew":true},
   ];
 
   var PATHS = {
@@ -194,13 +198,17 @@
     },
     logic: {
       title: "Thinking skills path", eyebrow: "PUZZLE IT OUT",
-      note: "Remember, spot patterns, reason from clues, then plan step by step.",
+      note: "Remember, fit pieces, spot patterns, reason from clues, then plan step by step.",
       steps: [
         { game: "memory-match", label: "Remember" },
+        { game: "piece-together", label: "Fit pieces" },
         { game: "odd-one-out", label: "Odd one out" },
         { game: "patterns", label: "Patterns" },
+        { game: "picture-squares", label: "Fill the grid" },
         { game: "who-am-i", label: "Use clues" },
+        { game: "who-lives-where", label: "Solve clues" },
         { game: "robot-path", label: "Plan steps" },
+        { game: "pipe-garden", label: "Join pipes" },
       ],
     },
     science: {
@@ -324,6 +332,10 @@
     "number-bonds": { 1: L1, 2: "", 3: L3 },
     "stay-safe": { 1: "", 2: L2 },
     "tamil-word-order": { 2: L1, 3: "" },
+    "piece-together": { 1: L1, 2: "", 3: L3 },
+    "picture-squares": { 2: L1, 3: "", 4: L3 },
+    "pipe-garden": { 2: L1, 3: "", 4: L3 },
+    "who-lives-where": { 2: L1, 3: "", 4: L3 },
   };
 
   GAMES.forEach(function (game) {
