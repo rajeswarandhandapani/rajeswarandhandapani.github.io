@@ -37,16 +37,41 @@
 
   const PRAISE = ["Wonderful! Top marks!", "Well done — keep going!", "Every try helps your brain grow. Play again!"];
 
-  function finish({ score, total, el, message, praise = PRAISE }) {
+  /** The end of a review round: XP and what was mastered, no stars, then where to go next. */
+  function finishReview({ right, cleared, total, el }) {
+    const reward = KlgProgress.review.finish({ right, cleared });
+    if (right && window.KlgSounds) KlgSounds.fanfare();
+    el.replaceChildren();
+    const big = document.createElement("div");
+    big.className = "tg-finish-score";
+    big.textContent = `${right} / ${total}`;
+    const icon = document.createElement("div");
+    icon.className = "tg-finish-stars";
+    icon.textContent = "🔁";
+    const note = document.createElement("p");
+    note.className = "tg-finish-note";
+    note.textContent = cleared
+      ? `You mastered ${cleared} tricky ${cleared === 1 ? "question" : "questions"}!`
+      : right ? "Nice work! Tricky questions come back once more to make sure they stick." : "Good try! Tricky questions come back tomorrow.";
+    const xp = document.createElement("p");
+    xp.className = "tg-finish-xp";
+    xp.textContent = `+${reward.xp} XP · ${reward.rank.emoji} ${reward.rank.name}` +
+      (reward.newBadges.length ? ` · New badge: ${reward.newBadges.map((b) => b.emoji + " " + b.name).join(", ")}` : "");
+    el.append(big, icon, note, xp, KlgProgress.review.finishLinks());
+    return reward;
+  }
+
+  function finish({ score, total, el, message, praise = PRAISE, bestStreak = 0, mode, beeChampion }) {
     const stars = starsFor(score, total);
     const reward = window.KlgProgress
-      ? KlgProgress.record({ score, total, elapsedMs: 0, bestStreak: 0 })
+      ? KlgProgress.record({ score, total, elapsedMs: 0, bestStreak, mode, beeChampion })
       : null;
     if (stars >= 2) {
       if (window.KlgSounds) KlgSounds.fanfare();
       if (typeof confetti === "function" && !reduced()) confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
     }
     if (el) {
+      if (window.KlgShell) KlgShell.addNextGame(el.closest("#finish-screen, #results-screen"));
       el.replaceChildren();
       const big = document.createElement("div");
       big.className = "tg-finish-score";
@@ -91,5 +116,5 @@
     });
   }
 
-  window.KlgGameKit = { finish, cheer, oops, modeLinks, starsFor };
+  window.KlgGameKit = { finish, finishReview, cheer, oops, modeLinks, starsFor };
 })();

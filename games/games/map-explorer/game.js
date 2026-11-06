@@ -36,11 +36,7 @@
     { id: "arctic", name: "Arctic Ocean", shape: ["ellipse", { cx: 180, cy: 7, rx: 120, ry: 9 }] },
     { id: "southern", name: "Southern Ocean", shape: ["ellipse", { cx: 180, cy: 171, rx: 128, ry: 8 }] },
   ];
-  const HOMES = [
-    ["🦘", "kangaroo", "oceania"], ["🐨", "koala", "oceania"], ["🐼", "giant panda", "asia"], ["🐯", "tiger", "asia"], ["🦁", "lion", "africa"],
-    ["🦒", "giraffe", "africa"], ["🦓", "zebra", "africa"], ["🐧", "emperor penguin", "antarctica"], ["🦙", "llama", "south-america"], ["🦬", "bison", "north-america"],
-    ["🗼", "the Eiffel Tower", "europe"], ["🗽", "the Statue of Liberty", "north-america"], ["🔺", "the pyramids", "africa"], ["🏯", "a Japanese castle", "asia"], ["🏛️", "an ancient Greek temple", "europe"],
-  ];
+  const { HOMES } = window.KlgQuestions;
 
   function drawMap() {
     const svg = document.createElementNS(SVGNS, "svg");
@@ -93,7 +89,7 @@
       if (q.kind === "home") {
         const [emoji, name, home] = q.target;
         answerId = home;
-        const isAnimal = HOMES.indexOf(q.target) < 10;
+        const isAnimal = /^[a-z]/.test(name) && !/^(the|a|an) /.test(name);
         ctx.task(isAnimal ? `Where does the ${name} live? Tap its continent.` : `Where can you find ${name}? Tap its continent.`);
         shown = document.createElement("figure");
         shown.className = "kv-clue";

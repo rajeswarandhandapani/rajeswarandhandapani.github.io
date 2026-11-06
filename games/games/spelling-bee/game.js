@@ -1,6 +1,9 @@
 /**
- * Spelling Bee question generator. The browser's speech synthesis says a
- * word out loud (tap the 🔊 to hear it again) and the child picks the
+ * The "pick the right spelling" quiz, opened with ?level= from Spelling Bee's
+ * More ways to play. It is how written and online bees test spelling. The
+ * training for spoken bees is in bee-coach.js.
+ *
+ * The browser's speech synthesis says a word out loud (tap the 🔊 to hear it again) and the child picks the
  * correct spelling from four choices. Three levels picked with ?level=:
  *
  *  - 1 (default): short phonetic words (cat, ship, rain).
@@ -19,86 +22,7 @@
  * If speech synthesis is unavailable the prompt degrades to the word's
  * emoji + clue ("🐱 a pet that says meow"), so the quiz stays playable.
  */
-const WORD_LEVELS = {
-  1: [
-    { word: "cat", emoji: "🐱", clue: "a pet that says meow" },
-    { word: "dog", emoji: "🐶", clue: "a pet that says woof" },
-    { word: "sun", emoji: "☀️", clue: "it shines in the day sky" },
-    { word: "bed", emoji: "🛏️", clue: "you sleep in it" },
-    { word: "cup", emoji: "🥤", clue: "you drink from it" },
-    { word: "hat", emoji: "🎩", clue: "you wear it on your head" },
-    { word: "fish", emoji: "🐟", clue: "it swims in water" },
-    { word: "ship", emoji: "🚢", clue: "a very big boat" },
-    { word: "tree", emoji: "🌳", clue: "it has leaves and branches" },
-    { word: "book", emoji: "📖", clue: "you read it" },
-    { word: "moon", emoji: "🌙", clue: "it shines at night" },
-    { word: "star", emoji: "⭐", clue: "it twinkles in the sky" },
-    { word: "cake", emoji: "🎂", clue: "a birthday treat" },
-    { word: "frog", emoji: "🐸", clue: "a green hopper that says ribbit" },
-    { word: "milk", emoji: "🥛", clue: "a white drink from cows" },
-    { word: "hand", emoji: "✋", clue: "it has five fingers" },
-    { word: "duck", emoji: "🦆", clue: "a bird that says quack" },
-    { word: "ball", emoji: "⚽", clue: "you kick or throw it" },
-    { word: "sock", emoji: "🧦", clue: "you wear it on your foot" },
-    { word: "rain", emoji: "🌧️", clue: "water falling from clouds" },
-    { word: "blue", emoji: "🔵", clue: "the color of the sky" },
-    { word: "green", emoji: "🟢", clue: "the color of grass" },
-    { word: "jump", emoji: "🤸", clue: "hop up high" },
-    { word: "play", emoji: "🎲", clue: "have fun with games" },
-  ],
-  2: [
-    { word: "apple", emoji: "🍎", clue: "a crunchy red fruit" },
-    { word: "banana", emoji: "🍌", clue: "a long yellow fruit" },
-    { word: "monkey", emoji: "🐵", clue: "it swings in the trees" },
-    { word: "garden", emoji: "🌷", clue: "flowers grow here" },
-    { word: "window", emoji: "🪟", clue: "you look outside through it" },
-    { word: "pencil", emoji: "✏️", clue: "you write with it" },
-    { word: "school", emoji: "🏫", clue: "where you go to learn" },
-    { word: "friend", emoji: "🤝", clue: "someone you love to play with" },
-    { word: "happy", emoji: "😄", clue: "how you feel on your birthday" },
-    { word: "water", emoji: "💧", clue: "you drink it every day" },
-    { word: "mother", emoji: "👩", clue: "another word for mom" },
-    { word: "father", emoji: "👨", clue: "another word for dad" },
-    { word: "yellow", emoji: "🟡", clue: "the color of the sun" },
-    { word: "orange", emoji: "🟠", clue: "a color and a fruit" },
-    { word: "winter", emoji: "⛄", clue: "the coldest season" },
-    { word: "summer", emoji: "🏖️", clue: "the hottest season" },
-    { word: "dinner", emoji: "🍽️", clue: "the evening meal" },
-    { word: "rabbit", emoji: "🐰", clue: "it hops and eats carrots" },
-    { word: "spider", emoji: "🕷️", clue: "it spins a web" },
-    { word: "turtle", emoji: "🐢", clue: "it carries its shell everywhere" },
-    { word: "cookie", emoji: "🍪", clue: "a sweet round treat" },
-    { word: "button", emoji: "🔘", clue: "it keeps your shirt closed" },
-    { word: "little", emoji: "🐜", clue: "very small" },
-    { word: "seven", emoji: "7️⃣", clue: "the number after six" },
-  ],
-  3: [
-    { word: "because", emoji: "🤔", clue: "the word that gives a reason" },
-    { word: "beautiful", emoji: "🌸", clue: "very very pretty" },
-    { word: "elephant", emoji: "🐘", clue: "the biggest land animal" },
-    { word: "umbrella", emoji: "☂️", clue: "keeps you dry in the rain" },
-    { word: "tomorrow", emoji: "📅", clue: "the day after today" },
-    { word: "together", emoji: "🤝", clue: "with each other" },
-    { word: "different", emoji: "🔀", clue: "not the same" },
-    { word: "favorite", emoji: "💖", clue: "the one you like best" },
-    { word: "surprise", emoji: "🎁", clue: "you never saw it coming" },
-    { word: "scissors", emoji: "✂️", clue: "they cut paper" },
-    { word: "knight", emoji: "🛡️", clue: "a soldier in shining armor" },
-    { word: "wrote", emoji: "✍️", clue: "yesterday I ___ a letter" },
-    { word: "laugh", emoji: "😂", clue: "what you do at a funny joke" },
-    { word: "enough", emoji: "🛑", clue: "no more is needed" },
-    { word: "island", emoji: "🏝️", clue: "land with water all around it" },
-    { word: "answer", emoji: "✅", clue: "what you give to a question" },
-    { word: "often", emoji: "🔁", clue: "happening many times" },
-    { word: "always", emoji: "♾️", clue: "every single time" },
-    { word: "thought", emoji: "💭", clue: "an idea inside your head" },
-    { word: "straight", emoji: "📏", clue: "not bendy or curvy" },
-    { word: "whistle", emoji: "😙", clue: "blow air to make a tune" },
-    { word: "squirrel", emoji: "🐿️", clue: "a bushy-tailed nut lover" },
-    { word: "calendar", emoji: "🗓️", clue: "it shows the days and months" },
-    { word: "chocolate", emoji: "🍫", clue: "a sweet brown treat" },
-  ],
-};
+const { WORD_LEVELS } = window.KlgQuestions;
 
 // Real words a generated misspelling could collide with — mostly homophones
 // of game words. A distractor matching any of these would be a fair answer
@@ -114,6 +38,10 @@ const COMMON_WORDS = new Set([
   "sell", "cell", "sent", "cent", "scent", "stair", "stare", "bear",
   "bare", "hair", "hare", "fair", "fare", "later", "latter", "diner",
   "strait", "seen", "scene", "favourite", "colour", "wrote", "root",
+  "whether", "wether", "peace", "piece", "clime", "brake", "break",
+  // Real words the generator can reach. A wrong spelling must not be a real word, or a rude one.
+  "cock", "act", "coop", "cpu", "chip", "mono", "tsar", "nets", "amp", "pin", "rote", "bleu", "rani",
+  "boos", "buss", "mon", "fro", "phish", "tigre", "knig", "bok", "nat", "paly", "bule", "tere",
 ]);
 
 const REAL_WORDS = new Set([
@@ -237,7 +165,6 @@ function generateSpellingQuestion(words) {
     const pool = remaining.length ? remaining : words;
     const entry = pool[randomInt(0, pool.length - 1)];
 
-    if (hasSpeech) speak(entry.word);
     return {
       visual: spellingPicture(entry.emoji),
       prompt: hasSpeech ? "🔊 Tap to hear the word" : entry.clue.charAt(0).toUpperCase() + entry.clue.slice(1),
@@ -279,6 +206,10 @@ const LEVEL_LABELS = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Without ?level= or ?review= this page is bee training instead: see bee-coach.js.
+  const settings = new URLSearchParams(window.location.search);
+  if (!settings.has("level") && !settings.has("review")) return;
+
   const level = getLevel();
   const words = WORD_LEVELS[level];
   const storageKey = "klg-spelling-bee-best-ms:" + level;
@@ -314,10 +245,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const quiz = new QuizEngine({
     totalQuestions: Math.min(15, words.length),
     timePerQuestion: 120,
-    generateQuestion: (askedSet) => {
-      const q = generate(askedSet);
+    generateQuestion: generate,
+    prepareQuestion: (q) => {
       currentSpeech = q.speech || null;
-      return q;
+      if (currentSpeech && hasSpeech) speak(currentSpeech);
     },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");

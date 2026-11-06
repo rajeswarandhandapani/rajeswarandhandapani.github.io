@@ -14,11 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let finished = false;
   let results = [];
   let composing = false;
+  // Level 1 uses only sentences whose answer word is short.
+  const shortWords = new URLSearchParams(location.search).get('level') === '1';
 
   function available() {
     return data.sentences.filter(item =>
       ($('sentence-category').value === 'all' || item.category === $('sentence-category').value) &&
-      (mode === 'word' || data.letters(item.word).length > 1)
+      (mode === 'word' || data.letters(item.word).length > 1) &&
+      (!shortWords || data.letters(item.word).length <= 3)
     );
   }
 
@@ -187,6 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $('typing-results').hidden = true;
     $('start-screen').hidden = false;
     finished = true;
+    // "Change topic" must show the topics, which may be folded under More ways to play.
+    const fold = $('sentence-category').closest('details');
+    if (fold) fold.open = true;
     $('start-btn').focus();
   }
 

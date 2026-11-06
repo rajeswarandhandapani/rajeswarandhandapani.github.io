@@ -1,5 +1,5 @@
 const {chromium}=require('playwright');
-const CAT=require('../assets/js/catalogue.js');const GAME_COUNT=CAT.GAMES.length;const LEVEL4=CAT.GAMES.filter(g=>g.level===4).length;
+const CAT=require('../assets/js/catalogue.js');const GAME_COUNT=CAT.GAMES.length;const LEVEL4=CAT.GAMES.filter(g=>g.levels.some(l=>l.band===4)).length;
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -13,7 +13,8 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  page.on('request',r=>{if(!r.url().startsWith(base)&&!r.url().startsWith('data:'))external.push(r.url());});
  await page.goto(base);await page.evaluate(()=>document.fonts.ready);
  assert.equal(await page.locator('.game-card').count(),GAME_COUNT);
- await page.screenshot({path:'artifacts/home-desktop.png'});
+ await page.evaluate(()=>localStorage.setItem('klg-stage','2'));await page.reload();await page.screenshot({path:'artifacts/home-desktop.png'});
+ await page.goto(`${base}/index.html#all`);await page.reload();
  await page.locator('#game-search').fill('fractions');assert.equal(await page.locator('.game-tile:visible').count(),CAT.GAMES.filter(g=>(g.name+' '+g.blurb).toLowerCase().includes('fractions')).length);
  await page.locator('#game-search').fill('unfindable');assert.ok(await page.locator('#empty-games').isVisible());
  await page.locator('#clear-filters').click();
@@ -25,7 +26,7 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  await page.locator('#level-filter').selectOption('all');
  await page.locator('#game-search').fill('Picture Words');assert.equal(await page.locator('.game-tile:visible').count(),CAT.GAMES.filter(g=>(g.name+' '+g.blurb).toLowerCase().includes('picture words')).length);
  await page.locator('#game-search').fill('');
- await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/home-mobile.png'});
+ await page.setViewportSize({width:390,height:844});await page.goto(`${base}/index.html#home`);await page.reload();await page.screenshot({path:'artifacts/home-mobile.png'});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  const games=fs.readdirSync('games').filter(id=>fs.existsSync(path.join('games',id,'index.html')));
  for(const id of games){
@@ -33,7 +34,8 @@ const base=process.env.BASE_URL||'http://localhost:4173';
   if(['tamil-letter-chart','tamil-letter-pop','tamil-tracing','tamil-word-puzzle','tamil-memory','share-fairly','array-garden','multiples-hunt'].includes(id))continue;
   // New hand-built picture games (marked in their <head>) are played in tests/picture-games-browser.cjs.
   if(fs.readFileSync(path.join('games',id,'index.html'),'utf8').includes('name="klg-handbuilt"'))continue;
-  await page.goto(`${base}/games/${id}/index.html`);await page.locator('#start-btn').click();
+  // Spelling Bee opens on its training (tests/bee-browser.cjs); its quiz has its own address.
+  await page.goto(`${base}/games/${id}/index.html${id==='spelling-bee'?'?level=1':''}`);await page.locator('#start-btn').click();
   if(id==='memory-match')continue;
   if(id==='tamil-sentence-words'||id==='tamil-missing-letters'){
     assert.ok(await page.locator('#tamil-answer').isVisible());
@@ -65,11 +67,11 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  await page.locator('#play-again-btn').click();assert.equal(await page.locator('#question-number').textContent(),'1');
  await page.reload();assert.equal(await page.evaluate(()=>KlgProgress.summary().plays),1);
  // Timed mode expires; practice does not. Use the browser clock rather than waiting.
- await page.clock.install();await page.locator('#play-mode').selectOption('challenge');await page.locator('#start-btn').click();
+ await page.clock.install();await page.evaluate(()=>{document.querySelector('.kid-more').open=true;});await page.locator('[data-play-mode="challenge"]').click();assert.equal(await page.locator('#play-mode').inputValue(),'challenge');await page.locator('#start-btn').click();
  await page.clock.fastForward(25000);assert.match(await page.locator('#quiz-feedback').textContent(),/answer is/);
  await page.clock.fastForward(4000);assert.equal(await page.locator('#question-number').textContent(),'2');
  await page.locator('#quiz-exit').click();await page.clock.fastForward(30000);assert.ok(await page.locator('#start-screen').isVisible());
- await page.locator('#play-mode').selectOption('practice');await page.locator('#start-btn').click();await page.clock.fastForward(60000);assert.equal(await page.locator('#question-number').textContent(),'1');
+ await page.locator('[data-play-mode="practice"]').click();await page.locator('#start-btn').click();await page.clock.fastForward(60000);assert.equal(await page.locator('#question-number').textContent(),'1');
  await page.clock.resume();
  await page.goto(`${base}/games/reading-stories/index.html`);await page.setViewportSize({width:1440,height:1100});await page.locator('#start-btn').click();await page.screenshot({path:'artifacts/story-desktop.png'});
  assert.ok(await page.locator('#quiz-screen .quiz-listen').isVisible());
@@ -110,6 +112,11 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  await page.locator('#start-btn').click();
  assert.equal(await page.locator('.memory-card').count(),20);
  assert.match(await page.locator('#memory-status').textContent(),/0 of 10 pairs/);
+ await page.locator('#memory-change-size').click();
+ await page.locator('#memory-size').selectOption('15');
+ await page.locator('#start-btn').click();
+ assert.equal(await page.locator('.memory-card').count(),30);
+ assert.match(await page.locator('#memory-status').textContent(),/0 of 15 pairs/);
  // Start with invalid storage and with localStorage unavailable.
  await page.evaluate(()=>localStorage.setItem('klg-progress-v1','null'));await page.goto(base);assert.equal(await page.locator('.game-card').count(),GAME_COUNT);
  const blocked=await browser.newPage();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('Storage disabled');}});});await blocked.goto(base);assert.equal(await blocked.locator('.game-card').count(),GAME_COUNT);await blocked.close();

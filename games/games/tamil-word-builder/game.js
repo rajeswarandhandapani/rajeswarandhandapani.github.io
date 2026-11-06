@@ -49,7 +49,7 @@ function splitClusters(word) {
 const BUILDER_WORDS = TAMIL_WORDS.map((w) => ({
   ...w,
   clusters: splitClusters(w.tamil),
-})).filter((w) => w.clusters.length >= 2);
+})).filter((w) => w.clusters.length >= 2 && (new URLSearchParams(location.search).get("level") !== "1" || w.clusters.length <= 3));
 
 const ALL_CLUSTERS = [...new Set(BUILDER_WORDS.flatMap((w) => w.clusters))];
 const WORD_SET = new Set(TAMIL_WORDS.map((w) => w.tamil));

@@ -38,7 +38,7 @@
       let cycle, kind, tries = 0;
       do { cycle = V.pick(CYCLES); kind = level === 1 ? "next" : V.pick(["next", "order"]); } while (asked.has(cycle.name + kind) && ++tries < 40);
       asked.add(cycle.name + kind);
-      return { cycle, kind };
+      return { cycle, kind, gap: V.rand(1, cycle.steps.length - 1) };
     },
     render(q, ctx) {
       const steps = q.cycle.steps;
@@ -67,7 +67,7 @@
         return;
       }
       // "What comes next?": show the stages up to a gap.
-      const gap = V.rand(1, steps.length - 1);
+      const gap = q.gap;
       ctx.task(`The ${q.cycle.name}: what comes next?`);
       const row = document.createElement("div");
       row.className = "kv-cyclerow";
@@ -84,7 +84,7 @@
       hole.setAttribute("aria-label", "What comes next?");
       row.appendChild(hole);
       const answer = steps[gap];
-      const wrongs = V.shuffle(CYCLES.filter((c) => c !== q.cycle).flatMap((c) => c.steps)
+      const wrongs = V.shuffle(CYCLES.filter((c) => c.name !== q.cycle.name).flatMap((c) => c.steps)
         .filter(([e, c]) => e !== answer[0] && c !== answer[1] && !steps.some((s) => s[0] === e || s[1] === c)))
         .filter((s, idx, all) => all.findIndex((x) => x[0] === s[0]) === idx).slice(0, 3);
       const bar = document.createElement("div");

@@ -15,24 +15,7 @@
   const level = Number(new URLSearchParams(location.search).get("level")) === 2 ? 2 : 1;
   KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "1");
 
-  const SETS = {
-    1: [
-      { title: "Living or not living?", bins: [{ id: "living", label: "Living", icon: "🌱" }, { id: "not", label: "Not living", icon: "🪨" }],
-        items: { living: [["🐶", "dog"], ["🌳", "tree"], ["🐟", "fish"], ["🌻", "flower"], ["🐦", "bird"], ["🐛", "caterpillar"]], not: [["🪨", "rock"], ["⚽", "ball"], ["🚗", "car"], ["📖", "book"], ["🪑", "chair"], ["🧸", "teddy bear"]] } },
-      { title: "Does it float or sink?", bins: [{ id: "float", label: "Floats", icon: "🛟" }, { id: "sink", label: "Sinks", icon: "⚓" }],
-        items: { float: [["🪵", "log"], ["🛶", "canoe"], ["🦆", "duck"], ["🍃", "leaf"], ["🦢", "swan"]], sink: [["🪨", "rock"], ["🔑", "key"], ["🪙", "coin"], ["🧱", "brick"], ["⚓", "anchor"]] } },
-      { title: "Day or night?", bins: [{ id: "day", label: "Day", icon: "🌞" }, { id: "night", label: "Night", icon: "🌙" }],
-        items: { day: [["☀️", "sun"], ["🌈", "rainbow"], ["🏖️", "beach"], ["🪁", "kite"], ["🚌", "school bus"]], night: [["🌙", "moon"], ["⭐", "stars"], ["🦉", "owl"], ["🛏️", "bed"], ["🦇", "bat"]] } },
-    ],
-    2: [
-      { title: "Where does it live?", bins: [{ id: "land", label: "Land", icon: "🌍" }, { id: "water", label: "Water", icon: "🌊" }, { id: "air", label: "Air", icon: "☁️" }],
-        items: { land: [["🐘", "elephant"], ["🐄", "cow"], ["🐒", "monkey"], ["🦒", "giraffe"]], water: [["🐟", "fish"], ["🐬", "dolphin"], ["🐙", "octopus"], ["🦀", "crab"]], air: [["🐦", "bird"], ["🦋", "butterfly"], ["🦅", "eagle"], ["🐝", "bee"]] } },
-      { title: "Which food group?", bins: [{ id: "fruit", label: "Fruit", icon: "🍎" }, { id: "veg", label: "Vegetables", icon: "🥕" }, { id: "dairy", label: "Dairy", icon: "🥛" }],
-        items: { fruit: [["🍌", "banana"], ["🍇", "grapes"], ["🍓", "strawberry"], ["🍊", "orange"]], veg: [["🥕", "carrot"], ["🥦", "broccoli"], ["🌽", "corn"], ["🥬", "lettuce"]], dairy: [["🧀", "cheese"], ["🍦", "ice cream"], ["🥛", "milk"], ["🧈", "butter"]] } },
-      { title: "Sky, land or sea?", bins: [{ id: "sky", label: "Sky", icon: "☁️" }, { id: "land", label: "Land", icon: "🌍" }, { id: "sea", label: "Sea", icon: "🌊" }],
-        items: { sky: [["☀️", "sun"], ["⭐", "star"], ["☁️", "cloud"], ["🌈", "rainbow"]], land: [["🏠", "house"], ["🌳", "tree"], ["🚗", "car"], ["⛰️", "mountain"]], sea: [["🐠", "fish"], ["🚢", "ship"], ["🐚", "shell"], ["🐙", "octopus"]] } },
-    ],
-  }[level];
+  const SETS = window.KlgQuestions.SETS[level];
 
   KlgRound.run({
     total: 5,

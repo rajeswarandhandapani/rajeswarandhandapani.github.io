@@ -2,7 +2,8 @@
  * Fractions question generator (grades 2-5), with pictures (KlgFracVis).
  * ?type=identify|picture|equivalent|compare|add practices one skill; the
  * default mixes all five. ?level=1 halves & quarters, 2 (default) up to
- * tenths, 3 bigger denominators with the pictures taken away from compare.
+ * tenths, 3 bigger denominators with the pictures taken away from compare,
+ * 4 adding, subtracting and comparing different denominators.
  *
  * Question kinds:
  *  - identify:   a pie, bar or set of shapes — what fraction is shaded?
@@ -37,7 +38,7 @@ function frac(n, d) {
   return `${n}/${d}`;
 }
 
-const level = [1, 3].includes(Number(new URLSearchParams(window.location.search).get("level")))
+const level = [1, 3, 4].includes(Number(new URLSearchParams(window.location.search).get("level")))
   ? Number(new URLSearchParams(window.location.search).get("level")) : 2;
 const FV = window.KlgFracVis;
 const SET_EMOJI = ["🍓", "🌻", "🐟", "⭐", "🍪", "🎈"];
@@ -244,19 +245,67 @@ function makeAddSubtractQuestion() {
   };
 }
 
+/** Level 4 pairs: the second denominator is a multiple of the first, so one fraction changes. */
+const RELATED_DENOMINATORS = [[2, 4], [2, 6], [2, 8], [2, 10], [3, 6], [3, 9], [3, 12], [4, 8], [4, 12], [5, 10], [6, 12]];
+
+function makeUnlikeAddQuestion() {
+  const [d1, d2] = RELATED_DENOMINATORS[randomInt(0, RELATED_DENOMINATORS.length - 1)];
+  const k = d2 / d1;
+  const adding = randomInt(0, 1) === 1;
+  let n1, n2, result;
+  do {
+    n1 = randomInt(1, d1 - 1);
+    n2 = randomInt(1, d2 - 1);
+    result = adding ? n1 * k + n2 : n1 * k - n2;
+  } while (result < 1 || result >= d2 || n2 % k === 0);
+  const symbol = adding ? "+" : "−";
+  return {
+    visual: FV.stacked([[n1, d1], [n2, d2]], { label: `One bar cut into ${d1} parts with ${n1} shaded, and one cut into ${d2} parts with ${n2} shaded` }),
+    explanation: `${frac(n1, d1)} is the same as ${frac(n1 * k, d2)}. Then ${n1 * k} ${symbol} ${n2} = ${result}, so the answer is ${frac(result, d2)}.`,
+    prompt: `${frac(n1, d1)} ${symbol} ${frac(n2, d2)} = ?`,
+    correctAnswer: frac(result, d2),
+    choices: buildChoices(
+      [result, d2],
+      shuffle([
+        [n1 + n2, d1 + d2],             // added the tops and the bottoms
+        [Math.abs(adding ? n1 + n2 : n1 - n2), d2], // forgot to change the first fraction
+        [result + 1, d2],
+        [result - 1, d2],
+      ])
+    ),
+  };
+}
+
+const MIXED_FRACTIONS = [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [3, 5], [5, 6], [3, 8], [5, 8], [7, 10], [3, 10]];
+
+function makeUnlikeCompareQuestion() {
+  const fractions = shuffle(MIXED_FRACTIONS).slice(0, 4);
+  const biggest = randomInt(0, 1) === 1;
+  const sorted = [...fractions].sort((a, b) => a[0] * b[1] - b[0] * a[1]);
+  const correct = biggest ? sorted[sorted.length - 1] : sorted[0];
+  return {
+    prompt: biggest ? "Which fraction is the BIGGEST?" : "Which fraction is the SMALLEST?",
+    dedupeKey: (biggest ? "big:" : "small:") + sorted.map((f) => frac(...f)).join(","),
+    hintVisual: () => FV.stacked(fractions, { label: "One bar for each fraction, all the same length" }),
+    correctAnswer: frac(...correct),
+    choices: shuffle(fractions.map((f) => frac(...f))),
+    explanation: `${frac(...correct)} covers the ${biggest ? "most" : "least"} of a whole bar.`,
+  };
+}
+
 const QUESTION_KINDS = {
   identify: [makeIdentifyQuestion],
   picture: [makePictureQuestion],
   equivalent: [makeEquivalentQuestion],
-  compare: [makeCompareQuestion],
-  add: [makeAddSubtractQuestion],
+  compare: [level === 4 ? makeUnlikeCompareQuestion : makeCompareQuestion],
+  add: [level === 4 ? makeUnlikeAddQuestion : makeAddSubtractQuestion],
 };
 QUESTION_KINDS.all = [
   makeIdentifyQuestion,
   makePictureQuestion,
   makeEquivalentQuestion,
-  makeCompareQuestion,
-  makeAddSubtractQuestion,
+  ...QUESTION_KINDS.compare,
+  ...QUESTION_KINDS.add,
 ];
 
 function getMode() {

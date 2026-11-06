@@ -27,7 +27,7 @@ function shuffle(array) {
 
 function getRange() {
   const raw = parseInt(new URLSearchParams(window.location.search).get("max"), 10);
-  return raw === 10 || raw === 100 ? raw : 20;
+  return raw === 10 || raw === 100 || raw === 1000 ? raw : 20;
 }
 
 function getOp() {
@@ -38,14 +38,19 @@ function getOp() {
 /** Digit-wise |a−b| per column — what kids get when they subtract the
  *  smaller digit from the larger one and never borrow (52 − 38 → 26). */
 function columnSubtractionError(a, b) {
-  const ones = Math.abs((a % 10) - (b % 10));
-  const tens = Math.abs(Math.floor(a / 10) - Math.floor(b / 10));
-  return tens * 10 + ones;
+  let result = 0;
+  for (let place = 1; a >= place || b >= place; place *= 10) {
+    result += Math.abs((Math.floor(a / place) % 10) - (Math.floor(b / place) % 10)) * place;
+  }
+  return result;
 }
 
 function makeAdditionQuestion(max) {
   let a, b;
-  if (max === 100) {
+  if (max === 1000) {
+    a = randomInt(100, 899);
+    b = randomInt(100, 999 - a);
+  } else if (max === 100) {
     a = randomInt(10, 89);
     b = randomInt(10, 99 - a);
   } else {
@@ -57,7 +62,10 @@ function makeAdditionQuestion(max) {
 
 function makeSubtractionQuestion(max) {
   let a, b;
-  if (max === 100) {
+  if (max === 1000) {
+    a = randomInt(201, 999);
+    b = randomInt(100, a - 1);
+  } else if (max === 100) {
     a = randomInt(21, 99);
     b = randomInt(10, a - 1);
   } else {
@@ -69,12 +77,12 @@ function makeSubtractionQuestion(max) {
 
 function makeDistractors({ a, b, symbol, correct }, max) {
   const candidates = [];
-  if (max === 100) {
+  if (max >= 100) {
     if (symbol === "−") {
       const columns = columnSubtractionError(a, b);
       if (columns !== correct) candidates.push(columns);
     }
-    candidates.push(...shuffle([correct - 10, correct + 10]));
+    candidates.push(...shuffle(max === 1000 ? [correct - 100, correct + 100, correct - 10, correct + 10] : [correct - 10, correct + 10]));
   }
   candidates.push(...shuffle([correct - 1, correct + 1, correct - 2, correct + 2]));
 
@@ -107,7 +115,7 @@ function symbolNode(text) {
 function pictureFor(q, max) {
   const box = document.createElement("div");
   box.className = "kv-row kv-addsub";
-  if (max === 100) {
+  if (max >= 100) {
     const left = BK.blocks(q.a, { compact: true });
     const right = BK.blocks(q.b, { compact: true });
     box.append(left, symbolNode(q.symbol), right);
@@ -158,11 +166,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const max = getRange();
   const op = getOp();
   const totalQuestions = 20;
-  const timePerQuestion = max === 100 ? 15 : 10;
+  const timePerQuestion = max === 1000 ? 25 : max === 100 ? 15 : 10;
   const storageKey = `klg-addsub-best-ms:${op}:${max}`;
 
   const opLabels = { mix: "Addition + subtraction", add: "Addition", sub: "Subtraction" };
-  const rangeLabels = { 10: "within 10", 20: "within 20", 100: "two-digit numbers" };
+  const rangeLabels = { 10: "within 10", 20: "within 20", 100: "two-digit numbers", 1000: "three-digit numbers" };
   document.getElementById("mode-label").textContent = `${opLabels[op]} • ${rangeLabels[max]}`;
   document.getElementById("quiz-info").textContent =
     `${totalQuestions} questions • ${timePerQuestion} seconds each • multiple choice`;

@@ -103,6 +103,10 @@
       addBar.className = "kv-controls";
       if (level > 1) addBar.append(button("+ 100", "Add a hundred flat", add("h")));
       addBar.append(button("+ 10", "Add a ten rod", add("t")), button("+ 1", "Add a one cube", add("o")));
+      // Blocks can be tapped away too, but a one cube is far too small for a small finger.
+      const take = (k) => () => { if (counts[k] > 0) { counts[k] -= 1; ws.paint(); update(); } };
+      if (level > 1) addBar.append(button("− 100", "Take away a hundred flat", take("h")));
+      addBar.append(button("− 10", "Take away a ten rod", take("t")), button("− 1", "Take away a one cube", take("o")));
       const tradeOnes = button("10 ones → 1 ten", "Trade ten ones for one ten", () => { if (counts.o >= 10) { counts.o -= 10; counts.t += 1; ws.paint(); update(); } });
       const tradeTens = button("10 tens → 1 hundred", "Trade ten tens for one hundred", () => { if (counts.t >= 10) { counts.t -= 10; counts.h += 1; ws.paint(); update(); } });
       const tradeBar = document.createElement("div");

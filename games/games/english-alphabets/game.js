@@ -189,7 +189,6 @@ function pickUnasked(keys, askedSet) {
 
 function generateListenQuestion(askedSet) {
   const letter = pickUnasked(LETTERS, askedSet);
-  speak(letter);
   return {
     prompt: hasSpeech ? "🔊" : letter.toLowerCase(),
     dedupeKey: letter,
@@ -250,7 +249,6 @@ function generatePhonicsQuestion(askedSet) {
   const banned = SAME_SOUND[answer] || "";
   const preferred = [...UPPER_LOOKALIKES[answer]].filter((l) => !banned.includes(l));
   const pool = LETTERS.filter((l) => !banned.includes(l));
-  speak(entry.word);
   return {
     prompt: hasSpeech ? entry.emoji : `${entry.emoji} ${entry.word}`,
     explanation: `${entry.word} starts with ${answer}.`,
@@ -372,10 +370,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const quiz = new QuizEngine({
     totalQuestions: config.totalQuestions,
     timePerQuestion: config.timePerQuestion,
-    generateQuestion: (askedSet) => {
-      const q = config.generate(askedSet);
+    generateQuestion: config.generate,
+    prepareQuestion: (q) => {
       currentSpeech = q.speech || null;
-      return q;
+      if (currentSpeech) speak(currentSpeech);
     },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");

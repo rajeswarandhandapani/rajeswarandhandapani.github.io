@@ -368,3 +368,31 @@ button.kv-swatch:disabled { opacity: 0.3; }
 .kv-itemcell .kv-choice-text { font-size: 0.78rem; overflow-wrap: anywhere; text-align: center; line-height: 1.1; }
 .kv-pcell { padding: 3px 1px; border-width: 2px; }
 @media (max-width: 360px) { .kv-solar { --k: 0.6; gap: 3px; } .kv-pname { font-size: 0.5rem; } }
+
+/* v4 games: Odd One Out, Who Am I?, Robot Path, Punctuation Pals, Number Bonds */
+.kv-oddgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
+.kv-oddcell { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px; min-height: 104px; border: 2px solid #4055b5; border-radius: 14px; background: #fff; color: #203341; }
+.kv-oddcell:hover:not(:disabled) { background: #eef1ff; }
+.kv-oddcell:disabled { opacity: 0.45; }
+.kv-oddcell .kv-emoji { font-size: 2.4rem; line-height: 1.1; }
+.kv-clues { text-align: left; font-size: 1.1rem; font-weight: 600; margin: 8px 0 12px; padding-left: 26px; }
+.kv-clues li { margin-bottom: 4px; }
+.kv-long-answers { flex-direction: column; align-items: stretch; }
+.kv-long-answers .kv-btn { padding: 10px 14px; text-align: left; }
+.kv-answer { overflow-wrap: anywhere; }
+.kv-sentence-line { font-size: 1.5rem; font-weight: 700; text-align: center; margin: 14px 0; overflow-wrap: anywhere; }
+.kv-blank { color: #b34c13; margin-left: 2px; }
+.kv-marks .kv-btn { min-width: 76px; min-height: 66px; font-size: 2.2rem; line-height: 1; }
+.kv-tamil-tiles .pk-tile, .kv-tamil-tiles .pk-aslot { font-size: 1.15rem; }
+.rp-grid { display: grid; grid-template-columns: repeat(var(--rp-size), minmax(0, 1fr)); gap: 4px; width: min(100%, 300px); margin: 8px auto; }
+.rp-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #edf3f7; border-radius: 8px; font-size: clamp(1.2rem, 8vw, 2rem); line-height: 1; }
+.rp-trail { background: #cfe8d5; }
+.rp-plan { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-height: 40px; margin: 8px 0; padding: 6px; background: #f5f8fa; border-radius: 10px; font-size: 1.15rem; color: #52606b; }
+.rp-arrows .kv-btn { font-size: 1.5rem; line-height: 1; }
+.nb-bond { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: 10px 0 14px; position: relative; }
+.nb-parts { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; width: 100%; }
+.nb-circle { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 88px; min-height: 88px; padding: 8px; border-radius: 50px; font-size: 1.7rem; }
+.nb-circle b { line-height: 1.1; }
+.nb-whole { background: #fff2df; border: 3px solid #b34c13; }
+.nb-part { background: #e8f3ff; border: 3px solid #4055b5; flex: 0 1 44%; max-width: 44%; }
+.nb-counters { display: block; font-size: 0.85rem; line-height: 1.25; text-align: center; overflow-wrap: anywhere; word-break: break-all; max-width: 100%; }

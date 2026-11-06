@@ -49,9 +49,15 @@ const fakeAudio = () => {
   // --- Home: Tamil tab and learning path -----------------------------------
   await page.goto(base);
   assert.equal(await page.locator('.game-card').count(), CAT.GAMES.length);
-  await page.locator('#path-tabs [data-path="tamil"]').click();
-  assert.equal(await page.locator('.tamil-steps li').count(), CAT.PATHS.tamil.steps.length);
-  await page.locator('#path-jump').click();
+  await page.evaluate(() => localStorage.setItem('klg-stage', '1'));
+  await page.goto(`${base}/index.html#home`);
+  await page.reload();
+  await page.locator('.kid-world-link[href="#world/tamil"]').click();
+  await page.waitForFunction(() => document.body.dataset.world === 'tamil');
+  assert.equal(await page.locator('.game-tile:visible').count(), CAT.gamesFor('tamil').length);
+  assert.ok(CAT.PATHS.tamil.steps.every((step) => CAT.byId(step.game)), 'every Tamil path step is a real game');
+  await page.goto(`${base}/index.html#all`);
+  await page.locator('.subject-tabs [data-subject="tamil"]').click();
   assert.equal(await page.locator('.game-tile:visible').count(), TAMIL_COUNT);
   assert.equal(await page.locator('.subject-tabs [data-subject="tamil"]').getAttribute('aria-pressed'), 'true');
   await noOverflow('home');

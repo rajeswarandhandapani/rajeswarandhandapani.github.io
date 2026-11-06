@@ -166,9 +166,28 @@ function makeRemainderQuestion(divisors) {
   };
 }
 
+/** Level 4: a two-digit number shared by a one-digit number, with no remainder. */
+function makeBigQuestion(divisors) {
+  const usable = divisors.filter((d) => d <= 9);
+  const divisor = pick(usable.length ? usable : [2, 3, 4, 5, 6, 7, 8, 9]);
+  const quotient = randomInt(11, Math.floor(99 / divisor));
+  const dividend = divisor * quotient;
+  const tens = Math.floor(quotient / 10) * 10;
+  const ones = quotient - tens;
+  const steps = ones
+    ? `${divisor} × ${tens} = ${divisor * tens} and ${divisor} × ${ones} = ${divisor * ones}, which make ${dividend}.`
+    : `${divisor} × ${tens} = ${dividend}.`;
+  return {
+    prompt: `${dividend} ÷ ${divisor} = ?`,
+    explanation: `${steps} So ${dividend} ÷ ${divisor} = ${quotient}.`,
+    correctAnswer: quotient,
+    choices: numericChoices(quotient, [quotient + 1, quotient - 1, quotient + 10, quotient - 10, quotient + 2, divisor]),
+  };
+}
+
 function getLevel() {
   const level = parseInt(new URLSearchParams(window.location.search).get("level"), 10);
-  return [1, 2, 3].includes(level) ? level : 2;
+  return [1, 2, 3, 4].includes(level) ? level : 2;
 }
 
 /** ?tables=6,7,8 restricts the divisors, like the multiplication game. */
@@ -217,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     1: "Sharing fairly — dividing by 2, 3, 4 and 5",
     2: "Division facts and word problems up to ÷10",
     3: "Division with remainders — the tricky stuff",
+    4: "Big division — two-digit numbers shared by one-digit numbers",
   };
   document.getElementById("mode-label").textContent =
     labels[level] + (divisors.length < 9 ? ` (÷ ${divisors.join(", ")})` : "");
@@ -243,6 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
     totalQuestions,
     timePerQuestion: 20,
     generateQuestion: () => {
+      if (level === 4) return makeBigQuestion(divisors);
       const kinds =
         level === 1
           ? ["fact", "fact", "fact", "word"]

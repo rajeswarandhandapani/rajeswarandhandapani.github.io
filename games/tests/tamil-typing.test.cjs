@@ -3,9 +3,9 @@ const assert = require('node:assert/strict');
 const data = require('../assets/js/tamil-sentences-data.js');
 
 test('sentence bank has distinct contexts and complete Tamil targets', () => {
-  assert.equal(data.sentences.length, 32);
-  assert.equal(new Set(data.sentences.map(item => item.id)).size, 32);
-  assert.equal(new Set(data.sentences.map(item => item.before + item.word + item.after)).size, 32);
+  assert.equal(data.sentences.length, 60);
+  assert.equal(new Set(data.sentences.map(item => item.id)).size, 60);
+  assert.equal(new Set(data.sentences.map(item => item.before + item.word + item.after)).size, 60);
   for (const item of data.sentences) {
     assert.match(item.word, /^[\u0B80-\u0BFF]+$/u);
     assert.ok(item.before || item.after);

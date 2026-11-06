@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240">
+  <g fill="#fff">
+    <g opacity=".16"><ellipse cx="170" cy="70" rx="84" ry="22"/><circle cx="140" cy="56" r="26"/><circle cx="186" cy="48" r="34"/><circle cx="226" cy="62" r="20"/></g>
+    <g opacity=".1"><ellipse cx="620" cy="170" rx="120" ry="26"/><circle cx="572" cy="150" r="34"/><circle cx="636" cy="136" r="46"/><circle cx="692" cy="156" r="28"/></g>
+    <g opacity=".14"><ellipse cx="1000" cy="84" rx="92" ry="20"/><circle cx="966" cy="70" r="24"/><circle cx="1014" cy="58" r="32"/><circle cx="1056" cy="74" r="18"/></g>
+  </g>
+</svg>

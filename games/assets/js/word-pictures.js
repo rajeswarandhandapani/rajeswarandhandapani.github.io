@@ -29,6 +29,8 @@
     mail: "✉️", wall: "🧱", block: "🧱", game: "🎮", flame: "🔥", dot: "⚫", ten: "🔟", man: "👨", hug: "🤗",
     // body
     hand: "✋", foot: "🦶", eye: "👀", ear: "👂", nose: "👃", mouth: "👄", tooth: "🦷",
+    // word families
+    red: "🔴", sled: "🛷", wing: "🪽", knee: "🦵", coat: "🧥", pan: "🍳", pet: "🐾",
     // actions & feelings (used by opposites)
     run: "🏃", sleep: "😴", nap: "😴", laugh: "😂", cry: "😢", happy: "😊", sad: "😢", hot: "🥵", cold: "🥶", wet: "💦", dry: "🏜️",
     day: "🌞", night: "🌙", up: "⬆️", down: "⬇️", open: "📖", closed: "📕", full: "🍽️", empty: "🫙", fast: "🐇", slow: "🐢",

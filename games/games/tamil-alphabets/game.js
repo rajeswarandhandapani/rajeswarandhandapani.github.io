@@ -348,12 +348,12 @@ document.addEventListener("DOMContentLoaded", () => {
     timePerQuestion,
     generateQuestion: (askedSet) => {
       const q = generate(askedSet);
-      currentSpeech = q.speech || null;
       // After the answer, show a real word that uses the letter, with its picture.
       const example = exampleWordFor(isListen ? q.correctAnswer : q.prompt);
       if (example) q.explanation = `Example: ${example.emoji} ${example.tamil} (${example.english}).`;
       return q;
     },
+    prepareQuestion: (q) => { currentSpeech = q.speech || null; },
     // Listen mode speaks once the question is on screen; both modes say the
     // letter again after an answer so sound and shape stay linked.
     onQuestionShown: (q) => { if (isListen && q.speech) speakTamil(q.speech); },

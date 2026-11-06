@@ -1,18 +1,6 @@
 'use strict';
-const HABITATS = [
- ['🐪','camel','Desert','Camels can survive with little water, and their wide feet help them walk on sand.'],
- ['🐬','dolphin','Ocean','Dolphins are mammals that swim in the ocean and come to the surface to breathe air.'],
- ['🐻‍❄️','polar bear','Arctic','Polar bears have thick fur and fat that help them stay warm in the cold Arctic.'],
- ['🐒','monkey','Forest','Many monkeys live in forests, where trees provide food and shelter.'],
- ['🦁','lion','Grassland','Lions often live in grasslands where they can hunt animals such as zebras.'],
- ['🐸','frog','Pond','Many frogs live near ponds. Their young, called tadpoles, grow in water.'],
- ['🦈','shark','Ocean','Most sharks live in salt water and breathe through gills.'],
- ['🐧','emperor penguin','Antarctica','Emperor penguins live in Antarctica. They huddle together to stay warm.'],
- ['🦒','giraffe','Grassland','Giraffes live in African grasslands and open woodlands, reaching leaves high in trees.'],
- ['🦧','orangutan','Rainforest','Orangutans spend much of their time in rainforest trees.'],
- ['🐟','clownfish','Coral reef','Clownfish live among sea anemones on warm ocean reefs.'],
- ['🦇','bat resting during the day','Cave','Many bats rest in caves during the day and look for food at night.']
-];
+const HABITATS = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.HABITATS_2 : window.KlgQuestions.HABITATS;
+const withArticle = (name) => (/^[aeiou]/i.test(name) ? 'an ' : 'a ') + name;
 const SCENE_FOR = { Desert: "desert", Ocean: "ocean", Arctic: "arctic", Antarctica: "arctic", Forest: "forest", Rainforest: "rainforest",
  Grassland: "grassland", Pond: "pond", "Coral reef": "reef", Cave: "cave" };
 const NEUTRAL = {
@@ -43,18 +31,18 @@ function animalPicture(emoji, animal) {
  const f = document.createElement('figure');
  f.className = 'kv-clue';
  f.setAttribute('role', 'img');
- f.setAttribute('aria-label', 'A ' + animal);
+ f.setAttribute('aria-label', withArticle(animal));
  f.innerHTML = '<span aria-hidden="true">' + emoji + '</span>';
  return f;
 }
 document.addEventListener('DOMContentLoaded', () => {
  const quiz = new QuizEngine({totalQuestions:10,timePerQuestion:25,generateQuestion:()=>{
-  const [emoji,animal,correct,explanation]=HABITATS[Math.floor(Math.random()*HABITATS.length)];
+  const [emoji,animal,correct,explanation,alsoFair=[]]=HABITATS[Math.floor(Math.random()*HABITATS.length)];
   // Antarctica and the Arctic look alike and Ocean/Coral reef overlap, so keep wrong choices clearly different places.
   const conflicts = { Arctic: ['Antarctica'], Antarctica: ['Arctic'], Ocean: ['Coral reef'], 'Coral reef': ['Ocean'], Forest: ['Rainforest'], Rainforest: ['Forest'] };
-  const others=[...new Set(HABITATS.map(row=>row[2]))].filter(place=>place!==correct && !(conflicts[correct]||[]).includes(place)).sort(()=>Math.random()-.5).slice(0,3);
+  const others=[...new Set(HABITATS.map(row=>row[2]))].filter(place=>place!==correct && !(conflicts[correct]||[]).includes(place) && !alsoFair.includes(place)).sort(()=>Math.random()-.5).slice(0,3);
   const choices=[correct,...others].sort(()=>Math.random()-.5);
-  const q={visual:animalPicture(emoji,animal),prompt:`Where would you find a ${animal}?`,reviewPrompt:`${emoji} Where would you find a ${animal}?`,dedupeKey:animal,correctAnswer:correct,choices,explanation,choiceVisuals:{},choiceLabels:{},noChoiceListen:true};
+  const q={visual:animalPicture(emoji,animal),prompt:`Where would you find ${withArticle(animal)}?`,reviewPrompt:`${emoji} Where would you find ${withArticle(animal)}?`,dedupeKey:animal,correctAnswer:correct,choices,explanation,choiceVisuals:{},choiceLabels:{},noChoiceListen:true};
   choices.forEach(place=>{q.choiceVisuals[place]=habitatChoice(place);q.choiceLabels[place]=place;});
   return q;
  }});

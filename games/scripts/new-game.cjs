@@ -31,7 +31,7 @@ fs.mkdirSync(dir, { recursive: true });
 
 const levelLinks = (opt.levels || '').split('|').filter(Boolean);
 const modeLinks = (opt.modes || '').split('|').filter(Boolean).map(m => m.split(':'));
-const scripts = ['sounds.js', 'progress.js', 'game-kit.js', 'math-visuals.js', ...(opt.scripts ? opt.scripts.split(',') : []), 'round-kit.js'];
+const scripts = ['sounds.js', 'catalogue.js', 'progress.js', 'game-kit.js', 'math-visuals.js', ...(opt.scripts ? opt.scripts.split(',') : []), 'round-kit.js'];
 const links = (container, param, items, fallbackIndex) => items.length
  ? `        <div id="${container}" class="d-flex flex-wrap justify-content-center gap-2 mb-3">\n${items.map((it, i) => {
    const [value, label] = Array.isArray(it) ? it : [String(i + 1), it];
@@ -99,6 +99,7 @@ ${links('mode-links', 'mode', modeLinks, 0)}${links('level-links', 'level', leve
   <script src="../../assets/vendor/confetti.browser.min.js"></script>
 ${scripts.map(s => `  <script src="../../assets/js/${s}"></script>`).join('\n')}
   <script src="game.js"></script>
+  <script src="../../assets/js/page-shell.js"></script>
 </body>
 </html>
 `;
@@ -138,4 +139,4 @@ if (!cat.includes(`id: "${id}"`) && !cat.includes(`"id":"${id}"`)) {
  fs.writeFileSync(catPath, cat);
 }
 require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'build-sw.cjs')], { stdio: 'inherit' });
-console.log(`Created games/${id}/, listed it in the catalogue and added it to the offline list. Now run: npm run sync:index`);
+console.log(`Created games/${id}/, listed it in the catalogue and added it to the offline list. Add its levels to GAME_LEVELS in catalogue.js, then run: npm run sync:index`);
