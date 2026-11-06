@@ -10,6 +10,9 @@
  *       item back; a right one keeps it in the bin. onPlace(item, bin, ok).
  *       Returns { remaining(), placed(), items }.
  *
+ *   dragTo(el, selector, onDrop)
+ *       Lets a game's own pieces be dragged onto spots that are also tappable.
+ *
  *   orderCards({ host, cards, order, onChange })
  *       cards: [{ id, node|text }]  order: the ids in the right order
  *       Tap cards to fill slots 1, 2, 3…; tap a filled slot to take it back.
@@ -129,6 +132,33 @@
       pool.appendChild(el);
     });
     return { remaining: () => items.length - placedIds.length, placed: () => placedIds.slice(), items: itemEls };
+  }
+
+  /** Pointer drag as an extra: onDrop(spotEl) gets whatever matches selector under the finger. */
+  function dragTo(el, selector, onDrop) {
+    el.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      const startX = e.clientX, startY = e.clientY;
+      let moved = false;
+      const move = (ev) => {
+        if (!moved && Math.hypot(ev.clientX - startX, ev.clientY - startY) < 8) return;
+        moved = true;
+        el.style.transform = "translate(" + (ev.clientX - startX) + "px," + (ev.clientY - startY) + "px)";
+        el.style.zIndex = "5";
+        el.style.pointerEvents = "none";
+      };
+      const up = (ev) => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+        el.style.transform = ""; el.style.zIndex = ""; el.style.pointerEvents = "";
+        if (!moved) return;
+        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+        const spot = under && under.closest(selector);
+        if (spot) onDrop(spot);
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
   }
 
   function orderCards({ host, cards, order, onChange }) {
@@ -253,5 +283,5 @@
     return api;
   }
 
-  window.KlgPlayKit = { dragToBins, orderCards, tapHotspots, buildFromTiles, shuffled };
+  window.KlgPlayKit = { dragToBins, dragTo, orderCards, tapHotspots, buildFromTiles, shuffled };
 })();

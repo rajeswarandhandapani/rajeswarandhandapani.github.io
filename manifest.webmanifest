@@ -1,7 +1,7 @@
 {
   "name": "Little Learners",
   "short_name": "Little Learners",
-  "description": "72 picture-first learning games for kids: math, English, Tamil and science.",
+  "description": "Picture-first learning games for kids: math, English, Tamil and science.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

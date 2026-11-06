@@ -14,6 +14,17 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
 
   // First visit, online: the service worker saves everything.
   await page.goto(base + '/index.html');
+  // The grown-up panel must not claim the games are saved before they are.
+  await page.locator('#parent-open').click();
+  const early = await page.evaluate(async () => {
+    const text = document.getElementById('offline-status').textContent;
+    const keys = (await caches.keys()).filter((k) => k.startsWith('klg-'));
+    const counts = await Promise.all(keys.map(async (k) => (await (await caches.open(k)).keys()).length));
+    return { text, saved: Math.max(0, ...counts) };
+  });
+  assert.ok(early.saved > 0 || !/Saved on this device/.test(early.text), `said "${early.text}" with ${early.saved} files saved`);
+  assert.ok((await page.locator('#install-help').textContent()).length > 0, 'the panel explains how to install');
+  await page.keyboard.press('Escape');
   const scope = await page.evaluate(async () => (await navigator.serviceWorker.ready).scope);
   assert.ok(scope.startsWith(base + '/'), `service worker scope ${scope} stays inside ${base}/`);
   const expected = await page.evaluate(async () => {
@@ -44,6 +55,8 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
     await page.goto(`${base}/games/${path}`);
     await page.locator('#start-btn').click();
     await page.waitForTimeout(300);
+    // Spelling Bee opens a new word on a study card, and its keys come after.
+    if (await page.locator('#bee-study-go').count()) await page.locator('#bee-study-go').click();
     const playing = await page.locator('.quiz-choice-btn, #stage button, #stage [role=button], .memory-card, .bee-key').count();
     assert.ok(playing > 0, `${path} plays offline`);
     console.log('PASS offline:', path);
