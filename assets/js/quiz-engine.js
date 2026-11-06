@@ -17,6 +17,11 @@
  *       "💡 Show me" button, for drills that should not show the picture
  *       unless the child asks
  *     formatAnswer: (value) => String(value),   // optional
+ *     prepareQuestion: (question) => { ... },   // optional, before render.
+ *       // Per-question page setup (speaking, prompt classes) goes here, not in
+ *       // generateQuestion: review rounds replay saved questions and never
+ *       // call the generator. Question objects must stay plain data, apart
+ *       // from the picture fields (visual, hintVisual, solution, choiceVisuals).
  *     onQuestionShown: (question) => { ... },   // optional, after render
  *     onAnswered: (question, isCorrect, selected) => { ... }, // optional
  *     onFinish: (result) => { ... },            // optional, receives
@@ -45,6 +50,8 @@ class QuizEngine {
     this.totalQuestions = options.totalQuestions || 25;
     this.timePerQuestion = options.timePerQuestion || 10;
     this.generateQuestion = options.generateQuestion;
+    this.prepareQuestion = options.prepareQuestion || (() => {});
+    this._setupReview();
     this.formatAnswer = options.formatAnswer || ((v) => String(v));
     this.onFinish = options.onFinish || (() => {});
     this.onQuestionShown = options.onQuestionShown || (() => {});
@@ -69,6 +76,81 @@ class QuizEngine {
     this.transitionTimer = null;
     this.speechAvailable = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
     this._installLearningControls();
+    if (this.review) KlgProgress.review.showIntro(this.totalQuestions);
+  }
+
+  /** On a ?review=1 page with questions due, the round replays those instead of new ones. */
+  _setupReview() {
+    this.review = null;
+    const store = window.KlgProgress && KlgProgress.review;
+    if (!store || !store.isActive()) return;
+    const items = store.dueHere(QuizEngine.REVIEW_LIMIT);
+    if (!items.length) return;
+    this.review = { queue: items, next: 0, right: 0, cleared: 0 };
+    this.totalQuestions = items.length;
+    this.generateQuestion = () => {
+      const item = this.review.queue[this.review.next];
+      this.review.next += 1;
+      return QuizEngine._fromSnapshot(item.snapshot, item.id);
+    };
+  }
+
+  /**
+   * A self-contained copy of a question: plain fields as they are, and every
+   * picture as HTML, because pictures are DOM nodes or functions that cannot be
+   * stored. The live picture is read from the page so it matches what was shown.
+   */
+  _snapshot(q) {
+    const toHtml = (value) => {
+      const node = typeof value === 'function' ? value() : value;
+      return node && node.outerHTML ? node.outerHTML : '';
+    };
+    const copy = JSON.parse(JSON.stringify(q, (key, value) => (QuizEngine.PICTURE_FIELDS.includes(key) ? undefined : value)));
+    const pictures = {};
+    if (q.visual && this.visualBox) pictures.visual = this.visualBox.innerHTML;
+    if (q.hintVisual) pictures.hintVisual = toHtml(q.hintVisual);
+    if (q.solution) pictures.solution = toHtml(q.solution);
+    if (q.choiceVisuals) {
+      pictures.choiceVisuals = {};
+      Object.keys(q.choiceVisuals).forEach((choice) => { pictures.choiceVisuals[choice] = toHtml(q.choiceVisuals[choice]); });
+    }
+    copy.pictures = pictures;
+    return copy;
+  }
+
+  static _fromSnapshot(snapshot, reviewId) {
+    const toNode = (html) => {
+      const box = document.createElement('template');
+      box.innerHTML = html;
+      return box.content.childElementCount === 1 ? box.content.firstElementChild : box.content;
+    };
+    const { pictures = {}, ...q } = snapshot;
+    q.reviewId = reviewId;
+    if (pictures.visual) q.visual = () => toNode(pictures.visual);
+    if (pictures.hintVisual) q.hintVisual = () => toNode(pictures.hintVisual);
+    if (pictures.solution) q.solution = () => toNode(pictures.solution);
+    if (pictures.choiceVisuals) {
+      q.choiceVisuals = {};
+      Object.keys(pictures.choiceVisuals).forEach((choice) => { q.choiceVisuals[choice] = toNode(pictures.choiceVisuals[choice]); });
+    }
+    return q;
+  }
+
+  _saveMiss(selected) {
+    const store = window.KlgProgress && KlgProgress.review;
+    const q = this.currentQuestion;
+    if (!store || this.review || selected === null) return;
+    try {
+      const correct = q.correctAnswer;
+      store.miss({
+        key: String(q.dedupeKey !== undefined ? q.dedupeKey : q.prompt),
+        snapshot: this._snapshot(q),
+        prompt: q.reviewPrompt || q.prompt,
+        answer: (q.choiceLabels && q.choiceLabels[correct]) || this.formatAnswer(correct),
+      });
+    } catch (e) {
+      /* a question that cannot be copied simply is not reviewed */
+    }
   }
 
   _cacheDom() {
@@ -141,7 +223,7 @@ class QuizEngine {
     this.el.resultsScreen.tabIndex = -1;
     const tools = document.createElement('div');
     tools.className = 'quiz-tools';
-    tools.innerHTML = '<button type="button" id="quiz-exit">← Change activity</button><span class="small text-muted">Take your time. You’re learning!</span>';
+    tools.innerHTML = '<button type="button" id="quiz-exit">← Change activity</button><span id="quiz-encourage" class="small text-muted">Take your time. You’re learning!</span>';
     this.el.quizScreen.prepend(tools);
     this.listenButton = document.createElement('button');
     this.listenButton.type = 'button';
@@ -170,8 +252,17 @@ class QuizEngine {
   start() {
     clearInterval(this.timerInterval);
     clearTimeout(this.transitionTimer);
-    this.practice = document.getElementById('play-mode').value === 'practice';
-    this.el.quizScreen.querySelector('.quiz-tools span').textContent = this.practice ? 'Take your time. You’re learning!' : 'Timed challenge · give it a try!';
+    this.practice = !!this.review || document.getElementById('play-mode').value === 'practice';
+    if (this.review) {
+      // Leaving part-way and coming back carries on with whatever is still due.
+      this.review.queue = KlgProgress.review.dueHere(QuizEngine.REVIEW_LIMIT);
+      this.review.next = 0;
+      this.review.right = 0;
+      this.review.cleared = 0;
+      this.totalQuestions = this.review.queue.length;
+      this.el.totalQuestions.textContent = this.totalQuestions;
+    }
+    document.getElementById('quiz-encourage').textContent = this.practice ? 'Take your time. You’re learning!' : 'Timed challenge · give it a try!';
     this.currentIndex = 0;
     this.score = 0;
     this.streak = 0;
@@ -198,6 +289,7 @@ class QuizEngine {
     this.nextButton.hidden = true;
     this.currentIndex += 1;
     this.currentQuestion = this._makeUniqueQuestion();
+    this.prepareQuestion(this.currentQuestion);
     this.el.questionNumber.textContent = this.currentIndex;
     this.el.questionText.textContent = this.currentQuestion.prompt;
     this._renderVisual(this.currentQuestion.visual);
@@ -217,6 +309,8 @@ class QuizEngine {
     this._startTimer();
     this.questionStartMs = Date.now();
     this.el.questionText.focus({ preventScroll: true });
+    // The last answer may have scrolled the page down to Next.
+    if (window.scrollY > 0) window.scrollTo(0, 0);
     if (this.listenButton.hidden === false) this._speakQuestion();
     this.onQuestionShown(this.currentQuestion);
   }
@@ -372,6 +466,14 @@ class QuizEngine {
       });
     }
     this._updateScorePill();
+    // Before onAnswered: some games swap the picture for its solved version there.
+    if (this.review) {
+      const outcome = KlgProgress.review.answered(this.currentQuestion.reviewId, isCorrect);
+      if (isCorrect) this.review.right += 1;
+      if (outcome === 'cleared') this.review.cleared += 1;
+    } else if (!isCorrect) {
+      this._saveMiss(selected);
+    }
     this.onAnswered(this.currentQuestion, isCorrect, selected);
 
     this.el.choicesContainer.querySelectorAll('.quiz-choice-btn').forEach((btn) => {
@@ -386,10 +488,15 @@ class QuizEngine {
 
     this.feedback.textContent = (isCorrect ? 'Yes! Well done. ' : `Good try! The answer is ${answerLabel}. `) + (this.currentQuestion.explanation || '');
     if (this.practice) {
-      this.nextButton.textContent = this.currentIndex === this.totalQuestions ? 'See my stars →' : 'Next question →';
+      const last = this.review ? 'All done →' : 'See my stars →';
+      this.nextButton.textContent = this.currentIndex === this.totalQuestions ? last : 'Next question →';
       this.nextButton.hidden = false;
       this.nextButton.focus({ preventScroll: true });
-    } else {
+    }
+    // On a short screen the feedback can land below the fold. Next sticks to the
+    // bottom of the screen, and the feedback's scroll margin keeps it clear of Next.
+    this.feedback.scrollIntoView({ block: 'nearest' });
+    if (!this.practice) {
       this.transitionTimer = setTimeout(() => this._nextQuestion(), isCorrect ? this.correctDelay : Math.max(this.incorrectDelay, 3500));
     }
   }
@@ -467,6 +574,7 @@ class QuizEngine {
     this.el.resultsScreen.classList.remove("d-none");
     this.el.resultsScreen.focus({ preventScroll: true });
     if (this.el.progressFill) this.el.progressFill.style.width = "100%";
+    if (this.review) { this._finishReview(); return; }
 
     const pct = this.score / this.totalQuestions;
     this._animateScoreCountUp();
@@ -516,6 +624,33 @@ class QuizEngine {
       if (time) time.textContent = 'Practice complete · every little step counts.';
     }
     this._recordProgress();
+    if (window.KlgShell) KlgShell.addNextGame(this.el.resultsScreen);
+  }
+
+  _finishReview() {
+    const { right, cleared } = this.review;
+    this._animateScoreCountUp();
+    this.el.resultsEmoji.textContent = '🔁';
+    this.el.resultsStars.innerHTML = '';
+    this.el.resultsMessage.textContent = cleared
+      ? `You mastered ${cleared} tricky ${cleared === 1 ? 'question' : 'questions'}!`
+      : right ? 'Nice work! Tricky questions come back once more to make sure they stick.' : 'Good try! Tricky questions come back tomorrow.';
+    const heading = this.el.resultsScreen.querySelector('h1, h2');
+    if (heading) heading.textContent = 'Review complete!';
+    if (right && window.KlgSounds) KlgSounds.fanfare();
+    this._renderReview();
+    const time = document.getElementById('results-time');
+    if (time) time.textContent = '';
+    const reward = KlgProgress.review.finish({ right, cleared });
+    this._renderReward(reward);
+    const again = document.getElementById('play-again-btn');
+    if (again) { again.hidden = true; again.style.display = 'none'; }
+    // The review's own links say where to go next, so the usual "More games" link would repeat them.
+    this.el.resultsScreen.querySelectorAll('a[href*="index.html"]').forEach((a) => { a.style.display = 'none'; });
+    document.getElementById('klg-review-links')?.remove();
+    const links = KlgProgress.review.finishLinks();
+    links.id = 'klg-review-links';
+    this.el.resultsScreen.appendChild(links);
   }
 
   /**
@@ -629,6 +764,7 @@ class QuizEngine {
   }
 
   _renderReview() {
+    // (the list of missed questions on the results screen, not the review round)
     if (!this.el.resultsReview) return;
     this.el.resultsReview.innerHTML = "";
 
@@ -683,3 +819,6 @@ class QuizEngine {
     })();
   }
 }
+
+QuizEngine.REVIEW_LIMIT = 10;
+QuizEngine.PICTURE_FIELDS = ['visual', 'hintVisual', 'solution', 'choiceVisuals'];

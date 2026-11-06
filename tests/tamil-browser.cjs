@@ -41,6 +41,7 @@ const base = process.env.BASE_URL || 'http://localhost:4173';
     for (const mode of ['word', 'letters']) {
       const slug = mode === 'word' ? 'tamil-sentence-words' : 'tamil-missing-letters';
       await page.goto(`${base}/games/${slug}/index.html`);
+      await page.locator('.kid-more summary').click();
       await page.locator('#sentence-category').selectOption('animals');
       await page.locator('#start-btn').click();
       assert.ok(await page.locator('#tamil-answer').isVisible());
@@ -115,6 +116,7 @@ const base = process.env.BASE_URL || 'http://localhost:4173';
       assert.equal(await page.evaluate(id => KlgProgress.gameStats(id).plays, slug), 1, 'Unfinished round must not record');
       await page.reload();
       assert.equal(await page.evaluate(id => KlgProgress.gameStats(id).plays, slug), 1, 'Progress must persist');
+      await page.locator('.kid-more summary').click();
       for (const width of [320, 390, 768, 1366]) {
         await page.setViewportSize({ width, height: 1000 });
         await page.locator('#sentence-category').selectOption('nature');
@@ -126,13 +128,13 @@ const base = process.env.BASE_URL || 'http://localhost:4173';
       }
       console.log(`PASS ${slug}: typed answers, IME, retries, screen keyboard, Unicode, round completion, progress, four layouts`);
     }
-    await page.goto(base);
+    await page.goto(`${base}/index.html#all`);
     await page.locator('#game-search').fill('Tamil');
     assert.ok(await page.locator('.game-tile:visible').count() >= 10);
     await page.locator('#game-search').fill('');
     await page.locator('button[data-subject="tamil"]').click();
     assert.equal(await page.locator('.game-tile:visible').count(), TAMIL_COUNT);
-    assert.ok(await page.locator('[data-game="tamil-sentence-words"]').isVisible());
+    assert.ok(await page.locator('.game-card[data-game="tamil-sentence-words"]').isVisible());
     assert.deepEqual(errors, []);
     console.log('PASS Tamil discovery and no browser errors');
   } finally { await browser.close(); }

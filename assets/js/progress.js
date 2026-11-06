@@ -17,6 +17,7 @@
  *   currentGameId()-> "multiplication" (folder name) or null
  *   rankFor(xp)    -> { index, name, emoji, min, next }
  *   reset()        -> wipes everything (used by the "start over" link)
+ *   review         -> missed questions that come back later (see below)
  *   RANKS, BADGES
  *
  * Storage is wrapped in try/catch throughout: in private mode nothing
@@ -129,8 +130,8 @@
       id: "picture-pro",
       emoji: "🖼️",
       name: "Picture Pro",
-      hint: "Try 10 of the newest picture games",
-      earned: function (s) { return catalogue().filter(function (g) { return g.isNew && s.games[g.id]; }).length >= 10; },
+      hint: "Try 10 of the hands-on picture games",
+      earned: function (s) { return catalogue().filter(function (g) { return g.v3 && s.games[g.id]; }).length >= 10; },
     },
     {
       id: "path-finder",
@@ -157,7 +158,24 @@
       hint: "Beat your own earlier score in a game",
       earned: function (s, ctx) { return !!(ctx && ctx.improved); },
     },
+    {
+      id: "second-chance",
+      emoji: "🔁",
+      name: "Second Chance",
+      hint: "Clear a tricky question in a review round",
+      earned: function (s, ctx) { return !!(ctx && ctx.cleared > 0); },
+    },
+    {
+      id: "bee-champion",
+      emoji: "🏆",
+      name: "Bee Champion",
+      hint: "Win a mock spelling bee",
+      earned: function (s, ctx) { return !!(ctx && ctx.beeChampion); },
+    },
   ];
+
+  /** Badges a review round may unlock. Its score says nothing about "perfect" or speed. */
+  var REVIEW_BADGES = ["second-chance", "day-3", "day-7"];
 
   /** Game list from catalogue.js when the page loaded it (empty otherwise). */
   function catalogue() {
@@ -257,7 +275,8 @@
 
   /** Folder name of the game being played, e.g. /games/counting/ -> counting. */
   function currentGameId() {
-    var match = window.location.pathname.match(/\/games\/([^/]+)\//);
+    // Anchored at the end: on the website the path is /games/games/counting/index.html.
+    var match = window.location.pathname.match(/\/games\/([^/]+)\/[^/]*$/);
     return match ? match[1] : null;
   }
 
@@ -294,6 +313,14 @@
     };
   }
 
+  function touchDayStreak(data, day) {
+    if (data.lastDay === day) return;
+    var gap = data.lastDay ? daysBetween(data.lastDay, day) : null;
+    data.streak = gap === 1 ? data.streak + 1 : 1;
+    data.lastDay = day;
+    data.bestStreak = Math.max(data.bestStreak || 0, data.streak);
+  }
+
   function record(result) {
     var gameId = result.gameId || currentGameId() || "unknown";
     var total = result.total || 0;
@@ -316,12 +343,7 @@
     data.plays += 1;
 
     var day = today();
-    if (data.lastDay !== day) {
-      var gap = data.lastDay ? daysBetween(data.lastDay, day) : null;
-      data.streak = gap === 1 ? data.streak + 1 : 1;
-      data.lastDay = day;
-      data.bestStreak = Math.max(data.bestStreak || 0, data.streak);
-    }
+    touchDayStreak(data, day);
 
     var g = data.games[gameId] || { plays: 0, bestScore: 0, total: total, bestStars: 0, bestMs: 0 };
     var previousPlays = g.plays;
@@ -344,7 +366,7 @@
     data.games[gameId] = g;
 
     var stats = derived(data);
-    var context = { score: score, total: total, bestStreak: bestStreak, elapsedMs: elapsedMs, improved: isBest && previousPlays > 0 };
+    var context = { score: score, total: total, bestStreak: bestStreak, elapsedMs: elapsedMs, improved: isBest && previousPlays > 0, beeChampion: !!result.beeChampion };
     var newBadges = [];
     BADGES.forEach(function (badge) {
       if (!data.badges[badge.id] && badge.earned(stats, context)) {
@@ -370,6 +392,252 @@
     };
   }
 
+  /**
+   * Review My Mistakes. A missed question is saved as a self-contained copy
+   * (questions are random, so it cannot be regenerated) and comes back:
+   *   miss → 1 day → right → 3 days → right → cleared.
+   * A miss during review goes back to the 1-day step.
+   *
+   * Reviewing never changes game stars or recent scores: a round made only of
+   * hard questions would otherwise drag the grown-up report down.
+   */
+  var REVIEW_KEY = "klg-review-v1";
+  // Bump to throw away saved copies if a shipped question turns out to be wrong.
+  var REVIEW_EPOCH = 1;
+  var REVIEW_MAX_ITEMS = 100;
+  var REVIEW_MAX_CHARS = 1000000;
+  var REVIEW_MAX_ITEM_CHARS = 50000;
+  var REVIEW_GAPS = [1, 3];
+  var REVIEW_XP = 5;
+  var ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+  function addDays(iso, days) {
+    var d = new Date(iso + "T12:00:00");
+    d.setDate(d.getDate() + days);
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function validReviewItem(it) {
+    return !!it && typeof it === "object" && typeof it.id === "string" && typeof it.gameId === "string" &&
+      typeof it.query === "string" && typeof it.due === "string" && ISO_DAY.test(it.due) &&
+      !!it.snapshot && typeof it.snapshot === "object" && (it.step === 0 || it.step === 1);
+  }
+
+  function loadReview() {
+    var fresh = { epoch: REVIEW_EPOCH, items: [], cleared: 0 };
+    try {
+      var data = JSON.parse(localStorage.getItem(REVIEW_KEY));
+      if (!data || data.epoch !== REVIEW_EPOCH || !Array.isArray(data.items)) return fresh;
+      data.items = data.items.filter(validReviewItem);
+      data.cleared = Number.isFinite(data.cleared) && data.cleared > 0 ? data.cleared : 0;
+      return data;
+    } catch (e) {
+      return fresh;
+    }
+  }
+
+  function saveReview(data) {
+    // Oldest questions go first, so the store can never crowd out the rest of the site.
+    while (data.items.length > REVIEW_MAX_ITEMS) data.items.shift();
+    var text = JSON.stringify(data);
+    while (text.length > REVIEW_MAX_CHARS && data.items.length) {
+      data.items.shift();
+      text = JSON.stringify(data);
+    }
+    try {
+      localStorage.setItem(REVIEW_KEY, text);
+    } catch (e) {
+      /* private mode — review just isn't offered */
+    }
+  }
+
+  /** The page's settings without the review flag: "?review=1&level=2" -> "level=2". */
+  function reviewQuery() {
+    return String((window.location && window.location.search) || "").replace(/^\?/, "").split("&")
+      .filter(function (part) { return part && !/^review=/.test(part); }).join("&");
+  }
+
+  function reviewHref(group) {
+    return "games/" + group.gameId + "/index.html?" + (group.query ? group.query + "&" : "") + "review=1";
+  }
+
+  /** Games with questions ready today, in the order the questions were missed. */
+  function dueGroups(items) {
+    var day = today();
+    var groups = [];
+    items.filter(function (it) { return it.due <= day; }).forEach(function (it) {
+      var group = groups.filter(function (g) { return g.gameId === it.gameId && g.query === it.query; })[0];
+      if (!group) {
+        group = { gameId: it.gameId, query: it.query, count: 0 };
+        group.href = reviewHref(group);
+        groups.push(group);
+      }
+      group.count += 1;
+    });
+    return groups;
+  }
+
+  var review = {
+    /** True on a page opened with ?review=1. */
+    isActive: function () {
+      return /[?&]review=1(&|$)/.test(String((window.location && window.location.search) || ""));
+    },
+
+    /**
+     * Saves a miss. item = { key, snapshot, prompt?, answer? }.
+     * Returns the stored id, or null when the question cannot be saved.
+     */
+    miss: function (item) {
+      var gameId = item.gameId || currentGameId();
+      if (!gameId || !item.snapshot) return null;
+      var query = item.query !== undefined ? item.query : reviewQuery();
+      if (JSON.stringify(item.snapshot).length > REVIEW_MAX_ITEM_CHARS) return null;
+      var id = gameId + "|" + query + "|" + item.key;
+      var data = loadReview();
+      var existing = data.items.filter(function (it) { return it.id === id; })[0];
+      var due = addDays(today(), REVIEW_GAPS[0]);
+      if (existing) {
+        existing.misses = (existing.misses || 0) + 1;
+        existing.step = 0;
+        existing.due = due;
+        existing.snapshot = item.snapshot;
+      } else {
+        data.items.push({
+          id: id, gameId: gameId, query: query, snapshot: item.snapshot, step: 0, due: due, misses: 1,
+          prompt: String(item.prompt || "").slice(0, 300), answer: String(item.answer || "").slice(0, 200),
+        });
+      }
+      saveReview(data);
+      return id;
+    },
+
+    /** Adds the answer once it is known (hand-built games only learn it when the question closes). */
+    note: function (id, answer) {
+      var data = loadReview();
+      var it = data.items.filter(function (x) { return x.id === id; })[0];
+      if (!it || !answer) return;
+      it.answer = String(answer).slice(0, 200);
+      saveReview(data);
+    },
+
+    /** Questions ready now for this page's game and settings, oldest miss first. */
+    dueHere: function (limit) {
+      var gameId = currentGameId();
+      var query = reviewQuery();
+      var day = today();
+      var list = loadReview().items.filter(function (it) { return it.gameId === gameId && it.query === query && it.due <= day; });
+      return limit ? list.slice(0, limit) : list;
+    },
+
+    /** Moves a question along its schedule. Returns "cleared", "later" or "again". */
+    answered: function (id, correct) {
+      var data = loadReview();
+      var index = data.items.findIndex(function (x) { return x.id === id; });
+      if (index < 0) return "again";
+      var it = data.items[index];
+      var outcome;
+      if (!correct) {
+        it.step = 0;
+        it.misses = (it.misses || 0) + 1;
+        it.due = addDays(today(), REVIEW_GAPS[0]);
+        outcome = "again";
+      } else if (it.step + 1 >= REVIEW_GAPS.length) {
+        data.items.splice(index, 1);
+        data.cleared += 1;
+        outcome = "cleared";
+      } else {
+        it.step += 1;
+        it.due = addDays(today(), REVIEW_GAPS[it.step]);
+        outcome = "later";
+      }
+      saveReview(data);
+      return outcome;
+    },
+
+    /** { due, waiting, cleared, groups: [{ gameId, query, count, href }], next } */
+    summary: function () {
+      var data = loadReview();
+      var groups = dueGroups(data.items);
+      var due = groups.reduce(function (sum, g) { return sum + g.count; }, 0);
+      return { due: due, waiting: data.items.length - due, cleared: data.cleared, groups: groups };
+    },
+
+    /**
+     * Prepares a game's start screen for review: says what is happening and
+     * removes the level and mode links, which would leave the review.
+     */
+    showIntro: function (count) {
+      var start = document.getElementById("start-screen");
+      if (!start) return;
+      start.querySelectorAll('[id$="-links"], .quiz-settings, #best-time-note, #quiz-info').forEach(function (el) { el.hidden = true; el.style.display = "none"; });
+      var intro = document.getElementById("klg-review-intro") || document.createElement("p");
+      intro.id = "klg-review-intro";
+      intro.className = "klg-review-intro";
+      intro.textContent = "🔁 Review time! " + count + (count === 1 ? " tricky question" : " tricky questions") + " to try again. No timer, no rush.";
+      var button = document.getElementById("start-btn");
+      if (!intro.parentNode && button) button.parentNode.insertBefore(intro, button);
+    },
+
+    /** "Next game" (when more is due) and "home" links for the end of a review round. */
+    finishLinks: function () {
+      var box = document.createElement("div");
+      box.className = "klg-review-links";
+      var next = dueGroups(loadReview().items)[0];
+      var game = next && window.KlgCatalogue && window.KlgCatalogue.byId(next.gameId);
+      if (next) {
+        var more = document.createElement("a");
+        more.id = "klg-review-next";
+        more.className = "btn btn-lg btn-primary fw-bold";
+        more.href = "../../" + next.href;
+        more.textContent = "Next: " + (game ? game.name : "another game") + " →";
+        box.appendChild(more);
+      }
+      var home = document.createElement("a");
+      home.id = "klg-review-home";
+      home.className = "btn btn-lg btn-outline-secondary fw-bold";
+      home.href = "../../index.html";
+      home.textContent = "🏠 Back to all games";
+      box.appendChild(home);
+      return box;
+    },
+
+    /** The hardest saved questions for the grown-up report, most missed first. */
+    tricky: function (limit) {
+      return loadReview().items.slice().sort(function (a, b) { return (b.misses || 0) - (a.misses || 0); })
+        .slice(0, limit || 10)
+        .map(function (it) { return { gameId: it.gameId, prompt: it.prompt, answer: it.answer, misses: it.misses || 1 }; });
+    },
+
+    /**
+     * Banks a finished review round: 5 XP per right answer and the day streak,
+     * nothing else. result = { right, cleared }.
+     */
+    finish: function (result) {
+      var right = result.right || 0;
+      var data = load();
+      var beforeRank = rankFor(data.xp);
+      var xp = right * REVIEW_XP;
+      data.xp += xp;
+      var day = today();
+      touchDayStreak(data, day);
+      var stats = derived(data);
+      var context = { cleared: result.cleared || 0 };
+      var newBadges = [];
+      BADGES.forEach(function (badge) {
+        if (REVIEW_BADGES.indexOf(badge.id) >= 0 && !data.badges[badge.id] && badge.earned(stats, context)) {
+          data.badges[badge.id] = day;
+          newBadges.push(badge);
+        }
+      });
+      save(data);
+      var afterRank = rankFor(data.xp);
+      return {
+        xp: xp, totalXp: data.xp, rank: afterRank, rankUp: afterRank.index > beforeRank.index, newBadges: newBadges,
+        dayStreak: data.streak, toNextRank: afterRank.next ? afterRank.next.min - data.xp : 0,
+      };
+    },
+  };
+
   // Offline support: every page loads this file, so it registers the service
   // worker (sw.js at the site root, built by scripts/build-sw.cjs).
   try {
@@ -394,9 +662,12 @@
     pathsDone: function () { return pathsDone(derived(load())); },
     rankFor: rankFor,
     starsFor: starsFor,
+    review: review,
     reset: function () {
       try {
         localStorage.removeItem(KEY);
+        localStorage.removeItem(REVIEW_KEY);
+        localStorage.removeItem("klg-bee-v1");
       } catch (e) {
         /* nothing to do */
       }

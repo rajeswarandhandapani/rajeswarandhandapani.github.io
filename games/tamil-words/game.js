@@ -155,8 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const quiz = new QuizEngine({
     totalQuestions,
     timePerQuestion: 120,
-    generateQuestion: () => {
-      const q = kinds[randomInt(0, kinds.length - 1)]();
+    generateQuestion: () => kinds[randomInt(0, kinds.length - 1)](),
+    prepareQuestion: (q) => {
       // Emoji prompts render huge with Tamil choices; Tamil-word prompts
       // use the Tamil font with English choices.
       questionText.classList.toggle("quiz-question-xl", q.kind === "picture");
@@ -165,7 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
       // A Tamil-word prompt can be tapped to hear it (real voice recording).
       questionText.classList.toggle("klg-tappable", q.kind === "meaning" || q.kind === "wordpic");
       currentWord = q.word;
-      return q;
     },
     onQuestionShown: (q) => { if ((q.kind === "meaning" || q.kind === "wordpic") && window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },
     onAnswered: (q) => { if (window.KlgTamilAudio) KlgTamilAudio.say(q.word.tamil); },

@@ -1,7 +1,7 @@
 /**
  * Comparing numbers question generator.
  * ?type=biggest|smallest|symbol picks one skill (default mixes all three);
- * ?max=10|100|1000 picks the number range (default 100). Type and range
+ * ?max=10|100|1000|10000 picks the number range (default 100). Type and range
  * combine freely.
  *
  * Question kinds:
@@ -38,7 +38,7 @@ function formatNumber(n) {
 
 function getMaxNumber() {
   const raw = parseInt(new URLSearchParams(window.location.search).get("max"), 10);
-  return raw === 10 || raw === 1000 ? raw : 100;
+  return raw === 10 || raw === 1000 || raw === 10000 ? raw : 100;
 }
 
 const BK = window.KlgBlocks;
@@ -66,7 +66,7 @@ function pictureChoice(n, max) {
 }
 
 function withPictures(q, numbers, max) {
-  if (max === 1000) return q;
+  if (max >= 1000) return q;
   q.choiceVisuals = {};
   q.choiceLabels = {};
   numbers.forEach((n) => {
@@ -94,6 +94,9 @@ function scrambledDigitSet(max) {
       b = randomInt(1, 9);
     } while (b === a);
     [a * 10 + b, b * 10 + a, a * 11, b * 11].forEach((n) => numbers.add(n));
+  } else if (max === 10000) {
+    const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4);
+    while (numbers.size < 4) numbers.add(shuffle(digits).reduce((n, d) => n * 10 + d, 0));
   } else {
     const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3);
     const [a, b, c] = digits;
@@ -107,8 +110,9 @@ function scrambledDigitSet(max) {
 
 /** Four distinct numbers bunched close together. */
 function closeNumberSet(max) {
-  const spread = max === 10 ? 4 : max === 100 ? 12 : 60;
-  const base = randomInt(1, max - spread);
+  const spread = max === 10 ? 4 : max === 100 ? 12 : max === 1000 ? 60 : 300;
+  // Stays under 10,000 at the top range: the picture charts show four digits.
+  const base = randomInt(1, (max === 10000 ? max - 1 : max) - spread);
   const numbers = new Set();
   while (numbers.size < 4) {
     numbers.add(base + randomInt(0, spread));
@@ -126,7 +130,7 @@ function makeBiggestQuestion(max) {
   return withPictures({
     prompt: "Tap the BIGGEST number!",
     dedupeKey: "big:" + [...numbers].sort((a, b) => a - b).join(","),
-    explanation: `${formatNumber(Math.max(...numbers))} is the biggest. Compare the tens first, then the ones.`,
+    explanation: `${formatNumber(Math.max(...numbers))} is the biggest. Compare the biggest place first.`,
     correctAnswer: Math.max(...numbers),
     choices: shuffle(numbers),
   }, numbers, max);
@@ -137,7 +141,7 @@ function makeSmallestQuestion(max) {
   return withPictures({
     prompt: "Tap the SMALLEST number!",
     dedupeKey: "small:" + [...numbers].sort((a, b) => a - b).join(","),
-    explanation: `${formatNumber(Math.min(...numbers))} is the smallest. Compare the tens first, then the ones.`,
+    explanation: `${formatNumber(Math.min(...numbers))} is the smallest. Compare the biggest place first.`,
     correctAnswer: Math.min(...numbers),
     choices: shuffle(numbers),
   }, numbers, max);
@@ -145,8 +149,9 @@ function makeSmallestQuestion(max) {
 
 function makeSymbolQuestion(max) {
   let a, b;
+  const top = max === 10000 ? max - 1 : max;
   if (Math.random() < 0.2) {
-    a = b = randomInt(1, max); // equals must stay a live option
+    a = b = randomInt(1, top); // equals must stay a live option
   } else if (max >= 100 && Math.random() < 0.5) {
     // Same digits swapped: 37 vs 73 — the compare-the-wrong-digit trap.
     const x = randomInt(1, 9);
@@ -154,20 +159,20 @@ function makeSymbolQuestion(max) {
     do {
       y = randomInt(1, 9);
     } while (y === x);
-    const scale = max === 1000 ? randomInt(0, 1) : 0;
+    const scale = max === 10000 ? randomInt(0, 2) : max === 1000 ? randomInt(0, 1) : 0;
     a = (x * 10 + y) * 10 ** scale;
     b = (y * 10 + x) * 10 ** scale;
   } else {
-    a = randomInt(1, max);
+    a = randomInt(1, top);
     do {
-      b = randomInt(Math.max(1, a - 15), Math.min(max, a + 15));
+      b = randomInt(Math.max(1, a - 15), Math.min(top, a + 15));
     } while (b === a);
   }
   const correct = a < b ? "<" : a > b ? ">" : "=";
   const row = document.createElement("div");
   row.className = "kv-row";
   [a, b].forEach((n) => {
-    const pic = max === 1000 ? BK.chart(n) : quantityPicture(n, max);
+    const pic = max >= 1000 ? BK.chart(n) : quantityPicture(n, max);
     const cell = document.createElement("div");
     cell.className = "kv-choice";
     const text = document.createElement("div");

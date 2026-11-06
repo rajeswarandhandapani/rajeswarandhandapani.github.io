@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17b890"/><stop offset="1" stop-color="#0a5c43"/></linearGradient>
+    <radialGradient id="sea" cx=".35" cy=".3"><stop offset="0" stop-color="#7fd8ff"/><stop offset="1" stop-color="#1668c9"/></radialGradient>
+    <clipPath id="ball"><circle cx="200" cy="100" r="62"/></clipPath>
+  </defs>
+  <rect width="400" height="260" fill="url(#bg)"/>
+  <circle cx="350" cy="40" r="90" fill="#fff" opacity=".09"/>
+  <g fill="#fff" opacity=".8"><ellipse cx="66" cy="74" rx="34" ry="10"/><circle cx="54" cy="66" r="12"/><circle cx="74" cy="62" r="16"/></g>
+  <path d="M112 130c40 30 136 30 176 0" fill="none" stroke="#ffc531" stroke-width="5" stroke-linecap="round" opacity="0"/>
+  <circle cx="200" cy="100" r="62" fill="url(#sea)"/>
+  <g clip-path="url(#ball)" fill="#4fd07a">
+    <path d="M150 58c18-14 44-12 52 2s-8 20-20 24-10 18-22 18-26-30-10-44z"/>
+    <path d="M214 92c14-8 34-4 44 8s-2 40-16 50-20-6-22-20-18-30-6-38z"/>
+    <path d="M226 42c12-4 28 2 30 10s-16 12-26 8-14-16-4-18z"/>
+  </g>
+  <circle cx="200" cy="100" r="62" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>
+  <ellipse cx="200" cy="100" rx="96" ry="26" fill="none" stroke="#ffe08a" stroke-width="5" transform="rotate(-18 200 100)" stroke-dasharray="172 90" stroke-dashoffset="-84"/>
+  <g transform="translate(308 62) rotate(32)">
+    <path d="M0-30c11 10 14 30 10 46H-10C-14 0-11-20 0-30z" fill="#fff"/><circle cy="-8" r="6" fill="#1668c9"/>
+    <path d="M-10 6l-10 16 12-4zM10 6l10 16-12-4z" fill="#f25f5c"/><path d="M-6 16q6 18 12 0z" fill="#ffc531"/>
+  </g>
+  <g fill="#0a5c43" opacity=".9"><circle cx="340" cy="176" r="26" fill="#25c47f"/><rect x="335" y="190" width="10" height="26" rx="3" fill="#6b3f18"/></g>
+</svg>

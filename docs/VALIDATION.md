@@ -77,3 +77,117 @@ Reviewed Chromium screenshots of the desktop home, phone home/library, counting,
 - The same test passed with the build copied into a `games/` sub-folder of another site (`BASE_URL=http://localhost:8123/games`). The worker's scope was `/games/`, so the rest of the website is not affected.
 - `tests/catalogue.test.cjs` fails if `sw.js` misses a file or lists one that no longer exists.
 - Practical limit: tested in Chromium only. iPad Safari supports service workers and Add to Home Screen, but it was not tried on a real iPad. Safari may clear saved data for sites not opened for several weeks, unless the site was added to the Home Screen.
+
+## Version 4 · November 5, 2026
+
+The library has 80 games. This release adds Review My Mistakes, bigger question banks, 8 games, harder number levels, and a home page and game frame a child can use alone.
+
+### Layout, measured on a 390×844 phone
+
+| | Version 3 | Version 4 |
+| --- | --- | --- |
+| Distance to the first way into a game | 1,876px | 130px |
+| Words to read on the home view | 291 before the first game | 36 |
+| Places to tap on the home view | 40 before the first game | 14, not counting speakers |
+| Home page height | 23,514px, about 28 screens | 844px, one screen |
+| Taps from a first visit to playing | scrolling, then 2 | 3 |
+| Words on a game's start screen | 62 on average | 20 typical, 29 at most |
+| Play button below the screen | 8 games | none |
+| Question starts at | y≈358 | y≈198 |
+| Next below the screen after an answer | 16 of 40 quiz games (15 on a landscape iPad) | none |
+
+### Automated checks
+
+- `npm test` (74 tests): progress, the review schedule at each step, game ids inside the website's folder, every hand-written bank (size against round length, no repeats, one right answer, every picture in the bundled font), the catalogue, and the new game-choosing helpers. Every game can be reached from an age and a subject.
+- `npm run test:ux`, at 320×568, 390×844, 810×1080, 1080×810 and 1366×900:
+  - A first visit reaches a game in three taps. Play next is always on the first screen, and all six tiles are too, except at 320×568.
+  - All 79 start screens: Play is on screen with no scrolling, with at most 30 words.
+  - Controls are at least 44×44px on the home page, start screens and play screens, with the exceptions listed below.
+  - After an answer, Next and feedback are on screen and uncovered, in all 69 games with a shared engine.
+  - All answers fit on the screen from 390×844 up, with the exception listed below. 320×568 was not held to this.
+  - Back, Home, Easier and Harder work. The age survives a reload, and everything works with storage blocked or from the keyboard alone. Each speaker says the right words (checked with a recording stub). Key text passes 4.5:1 contrast.
+- `npm run test:review` plays all 69 covered games, plus 35 other settings: miss a question, reopen with `?review=1`, and check the same prompt, picture and answer come back and move along the schedule. Also run at 320px.
+- `npm run test:levels` works every answer out again from the screen. `npm run test:newgames` plays the eight new games with real taps at 320 and 390px, including a real wrong tap carried into a review round, and a whole 15-pair Memory Garden.
+- All earlier suites were updated for the new navigation, keeping what each one checks, and pass: `test:e2e`, `test:math`, `test:pictures` (also at 320px), `test:tamil`, `test:tamil-games`, `test:offline`, `npm run build`. The offline test now plays a review round with no network. 429 files are saved for offline use.
+- The built site was also served from inside a `games/` folder, as on the website: the offline test, a review run and the navigation checks pass there.
+
+### Bugs found and fixed
+
+- **Live on the website:** every game reported its id as `games`, because the path there is `/games/games/counting/`. All stars and scores were lumped into one entry. Records already saved under that entry stay there.
+- **Next below the screen** after an answer, in the numbers above.
+- Picture Pro, Path Finder and All-Rounder could never be earned, because game pages did not load the catalogue. The 21 hand-built games could never earn the streak badges.
+- Spelling Bee could offer real words as misspellings, including a rude word generated from "sock".
+- Word Families cards for "pan" and "pet" had no picture. Animal Homes said "a emperor penguin".
+- Block Builder could only remove a one cube by tapping a 12px target. It now has − buttons.
+- Card descriptions showed literal `&ndash;` text.
+
+### Exceptions the checks allow
+
+- Array Garden and Multiples Hunt use ten-by-ten boards, which cannot give each square 44px on a phone. Their squares are as big as the screen allows (about 23px at 320px wide). They reach 44px on tablets.
+- Block Builder's small blocks can still be tapped, but its − buttons do the same job at full size.
+- கதை நேரம் shows a four-picture story, so it scrolls before its question.
+- Memory Garden, the Tamil typing games and the Tamil Letter Chart have the new top bar and start screen, but keep their own play and end screens.
+
+### Practical limits
+
+- **No child has used this.** The layout checks measure size, position and wording, not whether a 4-year-old understands it. Please watch one try it.
+- Tested in Linux Chromium only, not on a real iPad, phone, Safari or Firefox, and not with a real finger. Lettering uses the device's own rounded font where there is one, so an iPad will look different from the screenshots checked here.
+- **The new Tamil has not been read by a native speaker.** `docs/TAMIL-REVIEW-v4.md` lists every new line, and the older lines that were never checked. It also asks one question about the word order game, which accepts only the written order although Tamil word order is flexible.
+- New English and science questions are checked by tests for structure, and for accuracy only by Claude's own reading.
+- Speakers on the home page use the device's voice, in English, so Tamil-named games speak their English description.
+- Age bands are suggestions, and the choice is a shared setting on the device, not a child profile.
+
+## Spelling Bee training · November 6, 2026
+
+Upgraded Spelling Bee from multiple choice to training for a real bee, for a 3rd grader.
+
+**What the research changed**
+
+| Finding | What the game does |
+| --- | --- |
+| 2027 Suggested Rules: a speller may ask for a meaning, sentence, part of speech or origin, but not a slower reading | Clue buttons match that list. Slowly is in practice only |
+| Rule 5: changing a letter while retracing is a disqualification | Start over keeps the first letters, and a change ends the turn |
+| Rule 8: if nobody is right everyone stays, and a sole correct speller wins at once | The mock bee ends this way, with no extra championship word |
+| Rule 1: rounds can be spelling or vocabulary, oral, written or online | School Bee has vocabulary rounds. The older quiz stays for written and online bees |
+| Rule 2: the last words can come from outside the study lists | Hard tiers in the last rounds, and 25 pattern lessons |
+| Spelling aloud is the real format | Grown-up mode, where the child spells out loud |
+
+**Word bank checks**
+
+- All 603 words have an English entry on Wiktionary, read one at a time with a script. The first pass was rate-limited, so 230 words were read again slowly.
+- Origins and parts of speech were compared with Wiktionary, and every disagreement was reviewed by hand. That changed 17 origins, mostly words built in English from smaller parts. Merriam-Webster Unabridged is the bee's only authority and was not checked, so an origin can still differ from it.
+- `tests/bee.test.cjs` checks that a meaning never contains the word, a written sentence hides it, no word can be read two ways, and every pattern has enough words.
+
+**Bugs found while building it**
+
+- The training and the quiz both had `#play-again-btn`, which would have broken Play Again in one of them. Each mode now removes the other's screens, and a test checks for duplicates.
+- The keyboard hid Hear the word at 320×568, and the row of spellers hid clue buttons at 390×664. Short screens now have a compact layout, tested at 375×553 and 390×664 too, because real phones lose height to the browser's bars.
+- 🧑‍🏫 draws as two pictures in the bundled emoji font, so Grown-up uses 🗣️.
+- Reopening the game undid a list chosen in My words, or a pasted school list, because the age button's list stays in the address and was applied on every load. It now applies only when it changes.
+
+**Limits**
+
+- Chromium only, with a stand-in for the device voice. No real voice has been heard reading these words, and a device voice can mispronounce unusual ones such as dachshund. That is worth a listen before relying on it.
+- No child has used it. Rival strength is tuned by simulation so a perfect speller needs about 7 rounds to win a Classroom Bee and about 9 to win a School Bee. It is not based on real bee results.
+- All 450 words on the supplied study list are in the game. The file does not label One, Two and Three Bee: the split into three lists of 150 is inferred from the third-grade sheet being numbers 101 to 150 and from difficulty starting over at 151 and 301.
+- The official part of speech and meaning are copied from the supplied file, and a test compares them when the file is present. The 375 simple meanings, sentences, origins and patterns added with them were written for this game and have not been checked by a person. Origins are not official, and 11 uncertain ones are left out.
+- Three Bee is very hard for a third grader, and a device voice is likely to struggle with words such as *trichobothria*, *spes phthisica* and *Bildungsroman*. Some list words are about grown-up subjects (*fascism*, *segregation*, *leprosy*, *sputum*, *yakuza*), and the official meanings are read as written. A grown-up may want to look through them.
+- For the 11 words with a hyphen, a space or an accent, the child taps letters only, and the note about saying "hyphen" or pausing on stage is the usual practice, not a rule from the supplied sheet. Check with the local bee.
+- *ginger* is listed on the supplied sheet as an adjective, though its meaning describes the plant. The game follows the sheet, and its sentence (ginger cookies) fits both.
+- Word progress is saved on one device and browser only.
+
+## Levels inside each game · November 6, 2026
+
+The home page no longer asks for an age. Each subject shows all its games, easiest first, and 79 of the 80 games have 2 to 4 levels labelled by age. The Tamil Letter Chart has none, because it is a chart to explore.
+
+| Where the levels came from | Games |
+| --- | --- |
+| Settings the game already had, labelled with ages | 65 |
+| 218 new harder questions | 8: Picture Words, Feelings Faces, What Do We Use?, Animal Homes, Story Detectives, Stay Safe, Who Am I?, Punctuation Pals |
+| Existing questions split into easier and harder | 2: Baby Animals, Science Quiz |
+| Existing words or sentences filtered by length, so no new Tamil to review | 4: Tamil Sentence Words, Tamil Missing Letters, Tamil Word Builder, சொல் வரிசை |
+
+**Checks.** Every level of every game was opened and started at 390×844, with the right button marked and no errors. A catalogue test confirms that each game really reads its setting, and bank tests cover size and pictures. `tests/ux-browser.cjs` covers remembering a level.
+
+**Limits.** Which age a level suits is my judgment from its content, not a tested fit. No child has tried these levels. A 3-year-old can now see every game in a subject, including ones with no level for their age. The age shown on each card and the easiest-first order are the only guidance.
+

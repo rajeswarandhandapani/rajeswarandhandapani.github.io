@@ -1,7 +1,7 @@
 /**
  * Multiplication tables question generator.
  * Reads ?tables=6,7,8 from the URL to restrict practice to specific tables;
- * defaults to tables 1-11.
+ * defaults to tables 1-12.
  *
  * Best-time record: answering time is tracked by QuizEngine; a record is
  * saved (per table selection, in localStorage) only for perfect scores so
@@ -10,12 +10,12 @@
 function getSelectedTables() {
   const params = new URLSearchParams(window.location.search);
   const raw = params.get("tables");
-  if (!raw) return [...Array(11)].map((_, i) => i + 1);
+  if (!raw) return [...Array(12)].map((_, i) => i + 1);
   const tables = raw
     .split(",")
     .map((n) => parseInt(n, 10))
-    .filter((n) => Number.isInteger(n) && n >= 1 && n <= 11);
-  return tables.length ? tables : [...Array(11)].map((_, i) => i + 1);
+    .filter((n) => Number.isInteger(n) && n >= 1 && n <= 12);
+  return tables.length ? tables : [...Array(12)].map((_, i) => i + 1);
 }
 
 function randomInt(min, max) {
@@ -32,7 +32,7 @@ function shuffle(array) {
 }
 
 function generateMultiplicationQuestion(tables) {
-  const allPairs = tables.flatMap((a) => [...Array(11)].map((_, i) => [a, i + 1]));
+  const allPairs = tables.flatMap((a) => [...Array(12)].map((_, i) => [a, i + 1]));
   return (askedSet) => {
     const available = allPairs.filter(
       ([a, b]) => !askedSet.has(`${a} × ${b}`) && !askedSet.has(`${b} × ${a}`)
@@ -84,11 +84,11 @@ function formatSeconds(ms) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const tables = getSelectedTables();
-  const totalQuestions = Math.min(25, tables.length * 11);
+  const totalQuestions = Math.min(25, tables.length * 12);
   const storageKey = bestTimeKey(tables);
 
   document.getElementById("tables-label").textContent =
-    tables.length === 11 ? "Tables 1-11" : `Table${tables.length > 1 ? "s" : ""} ${tables.join(", ")}`;
+    tables.length === 12 ? "Tables 1-12" : `Table${tables.length > 1 ? "s" : ""} ${tables.join(", ")}`;
   document.getElementById("quiz-info").textContent =
     `${totalQuestions} questions • 10 seconds each • multiple choice`;
 

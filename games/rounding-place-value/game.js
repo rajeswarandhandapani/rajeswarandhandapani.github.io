@@ -4,7 +4,8 @@
  * defaults to a mix of both.
  *
  * Pictures (KlgBlocks and a rounding number line) come with ?level=1
- * (3-digit numbers) and ?level=2 (default, 4-digit). ?level=3 is the plain
+ * (3-digit numbers) and ?level=2 (default, 4-digit). ?level=4 is plain and
+ * 5-digit, up to the nearest ten thousand. ?level=3 is the plain
  * text drill with no pictures.
  *
  * Question kinds:
@@ -39,10 +40,10 @@ function formatNumber(n) {
   return n.toLocaleString("en-US");
 }
 
-const level = [1, 3].includes(Number(new URLSearchParams(window.location.search).get("level")))
+const level = [1, 3, 4].includes(Number(new URLSearchParams(window.location.search).get("level")))
   ? Number(new URLSearchParams(window.location.search).get("level")) : 2;
 const PICTURES = level < 3;
-const LEN = level === 1 ? 3 : 4;
+const LEN = level === 1 ? 3 : level === 4 ? 5 : 4;
 const BK = window.KlgBlocks;
 const V = window.KlgMathVis;
 
@@ -51,6 +52,7 @@ const PLACES = [
   { name: "tens", value: 10, key: "t" },
   { name: "hundreds", value: 100, key: "h" },
   { name: "thousands", value: 1000, key: "th" },
+  { name: "ten thousands", value: 10000, key: "tth" },
 ].slice(0, LEN);
 
 /** Number line between the two multiples n sits between; the dashed line is halfway. */
@@ -88,7 +90,11 @@ function randomDistinctDigitNumber() {
   return { digits, number: digits.reduce((n, d) => n * 10 + d, 0) };
 }
 
-const ROUNDING_UNITS = [
+const ROUNDING_UNITS = level === 4 ? [
+  { unit: 100, name: "hundred", min: 1040, max: 98765 },
+  { unit: 1000, name: "thousand", min: 10420, max: 98765 },
+  { unit: 10000, name: "ten thousand", min: 10420, max: 94999 },
+] : [
   { unit: 10, name: "ten", min: 13, max: 987 },
   { unit: 100, name: "hundred", min: 104, max: level === 1 ? 987 : 9876 },
   { unit: 1000, name: "thousand", min: 1042, max: 9876 },
@@ -230,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const labels = {
     all: "Rounding + place value",
-    rounding: "Rounding to the nearest 10, 100 and 1,000",
+    rounding: level === 4 ? "Rounding to the nearest 100, 1,000 and 10,000" : "Rounding to the nearest 10, 100 and 1,000",
     placevalue: "Digits, their values and expanded form",
   };
   document.getElementById("mode-label").textContent = labels[mode];

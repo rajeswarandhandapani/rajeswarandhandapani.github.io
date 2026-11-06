@@ -52,7 +52,7 @@
       const counts = distinct(4, each, hi, each);
       const rows = set.items.map(([emoji, label], idx) => ({ emoji, label, count: counts[idx] }));
       const style = level === 1 ? "picto" : V.pick(["picto", "bars"]);
-      return { kind, set, rows, each, style, ask: V.shuffle(rows.slice()) };
+      return { kind, set, rows, each, style, ask: V.shuffle(rows.slice()), askMost: Math.random() < 0.5 };
     },
     render(q, ctx) {
       const chart = q.kind === "tally" ? null : q.style === "bars"
@@ -81,7 +81,7 @@
       if (q.kind === "most") {
         const most = q.rows.reduce((x, y) => (y.count > x.count ? y : x));
         const fewest = q.rows.reduce((x, y) => (y.count < x.count ? y : x));
-        const askMost = Math.random() < 0.5;
+        const askMost = q.askMost;
         const target = askMost ? most : fewest;
         ctx.task(`Which has the ${askMost ? "most" : "fewest"}?`);
         V.shuffle(q.rows.slice()).forEach((r) => {

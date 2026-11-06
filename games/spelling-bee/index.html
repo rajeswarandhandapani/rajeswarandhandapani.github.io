@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spelling Bee | Kid Learning Games</title>
-  <meta name="description" content="Spelling bee for kids — listen to the word and pick the correct spelling. Three levels." />
+  <meta name="description" content="Train for a real spelling bee: hear the word, ask for clues, spell it letter by letter, learn the patterns and run a mock bee." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>" />
   <link
     href="../../assets/vendor/bootstrap.min.css"
@@ -13,6 +13,7 @@
   <link href="../../assets/css/common.css" rel="stylesheet" />
   <link href="../../assets/css/math-visuals.css" rel="stylesheet" />
   <link href="../../assets/css/visuals.css" rel="stylesheet" />
+  <link href="bee.css" rel="stylesheet" />
 </head>
 <body>
   <a class="skip-link" href="#start-btn">Skip to activity</a>
@@ -30,13 +31,25 @@
         <div class="game-card-icon mb-2">🐝</div>
         <h1 class="h3 fw-bold">Spelling Bee</h1>
         <p class="text-muted" id="mode-label"></p>
+        <div id="bee-modes" class="bee-modes kid-after-play">
+          <button id="bee-mock-btn" type="button" class="bee-mode"><span aria-hidden="true">🔔</span> Mock Bee</button>
+          <button id="bee-patterns-btn" type="button" class="bee-mode"><span aria-hidden="true">🧩</span> Spelling rules</button>
+          <button id="bee-oral-btn" type="button" class="bee-mode"><span aria-hidden="true">🗣️</span> Spell aloud</button>
+          <button id="bee-words-btn" type="button" class="bee-mode"><span aria-hidden="true">📋</span> My words</button>
+        </div>
+        <p id="how-coach" class="text-muted mb-1"><small>
+          Train for a real spelling bee. See each new word first. Then hear it, ask for clues and spell it.
+          Your practice words come back on the days you need them. In the Mock Bee,
+          one wrong letter rings the bell. Turn your sound on.
+        </small></p>
+        <p id="levels-title" class="bee-levels-title">Pick the right spelling, for written and online bees</p>
         <div id="mode-links" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-          <a class="btn btn-sm btn-outline-secondary" href="index.html">Level 1 🐣</a>
+          <a class="btn btn-sm btn-outline-secondary" href="?level=1">Level 1 🐣</a>
           <a class="btn btn-sm btn-outline-secondary" href="?level=2">Level 2 🐥</a>
           <a class="btn btn-sm btn-outline-secondary" href="?level=3">Level 3 🦅</a>
         </div>
-        <p>15 questions &bull; 2 minutes each &bull; multiple choice</p>
-        <p class="text-muted mb-1"><small>
+        <p id="legacy-info">15 questions &bull; 2 minutes each &bull; multiple choice</p>
+        <p id="how-legacy" class="text-muted mb-1"><small>
           Listen 👂 — a word is said out loud. Tap the 🔊 any time to hear it
           again, then tap the correct spelling. Watch out: the wrong answers
           look almost right! Turn your sound on.
@@ -46,6 +59,32 @@
         <button id="start-btn" class="btn btn-lg text-white fw-bold px-5 mt-2" style="background: var(--klg-purple);">
           Start Quiz
         </button>
+      </div>
+    </div>
+
+    <!-- Bee training: bee-coach.js fills this in -->
+    <section id="bee-app" class="card quiz-card p-3 d-none" aria-label="Spelling Bee training">
+      <div class="card-body">
+        <div class="bee-tools">
+          <button id="bee-back" type="button" class="bee-tool">⬅ Back</button>
+          <span id="bee-progress" class="bee-progress"></span>
+          <span id="bee-pill" class="bee-pill" hidden></span>
+        </div>
+        <div id="bee-body"></div>
+      </div>
+    </section>
+
+    <!-- End of a training round or a mock bee -->
+    <div id="finish-screen" class="card results-card p-4 text-center d-none">
+      <div class="card-body">
+        <div id="bee-finish-body"></div>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <button id="play-again-btn" type="button" class="btn btn-lg text-white fw-bold px-4" style="background: var(--klg-purple);">
+            Play Again
+          </button>
+          <a href="../../index.html" class="btn btn-lg btn-outline-secondary fw-bold px-4">More Games</a>
+        </div>
+        <div id="bee-recap" class="bee-recap"></div>
       </div>
     </div>
 
@@ -101,11 +140,18 @@
 
   <script src="../../assets/vendor/confetti.browser.min.js"></script>
   <script src="../../assets/js/sounds.js"></script>
+  <script src="../../assets/js/catalogue.js"></script>
   <script src="../../assets/js/progress.js"></script>
   <script src="../../assets/js/quiz-engine.js"></script>
   <script src="../../assets/js/math-visuals.js"></script>
   <script src="../../assets/js/word-pictures.js"></script>
   <script src="../../assets/js/game-kit.js"></script>
+  <script src="questions.js"></script>
+  <script src="bee-study.js"></script>
+  <script src="bee-words.js"></script>
+  <script src="bee-core.js"></script>
+  <script src="bee-coach.js"></script>
   <script src="game.js"></script>
+  <script src="../../assets/js/page-shell.js"></script>
 </body>
 </html>

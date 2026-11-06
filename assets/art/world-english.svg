@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a15be0"/><stop offset="1" stop-color="#4a1f96"/></linearGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e6dcfb"/></linearGradient>
+  </defs>
+  <rect width="400" height="260" fill="url(#bg)"/>
+  <circle cx="60" cy="30" r="90" fill="#fff" opacity=".09"/><circle cx="370" cy="230" r="110" fill="#2a0f6b" opacity=".35"/>
+  <path d="M200 182c-30-16-66-20-102-14v-60c36-6 72-2 102 14 30-16 66-20 102-14v60c-36-6-72-2-102 14z" fill="#2f1173"/>
+  <path d="M200 170c-28-16-62-20-94-14V100c32-6 66-2 94 14z" fill="url(#page)"/>
+  <path d="M200 170c28-16 62-20 94-14V100c-32-6-66-2-94 14z" fill="url(#page)"/>
+  <path d="M122 118c20-2 42 0 62 8M122 134c20-2 42 0 62 8M278 118c-20-2-42 0-62 8M278 134c-20-2-42 0-62 8" fill="none" stroke="#c6b2ee" stroke-width="5" stroke-linecap="round"/>
+  <g font-family="'Arial Rounded MT Bold',Arial,sans-serif" font-weight="900" text-anchor="middle">
+    <text x="146" y="82" font-size="50" fill="#ffc531" transform="rotate(-12 146 82)">A</text>
+    <text x="204" y="66" font-size="56" fill="#ff8fb1">b</text>
+    <text x="260" y="84" font-size="48" fill="#7fe3ff" transform="rotate(12 260 84)">C</text>
+  </g>
+  <g fill="#fff"><path d="M88 62l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path d="M316 54l2.4 7 7 2.4-7 2.4-2.4 7-2.4-7-7-2.4 7-2.4z" opacity=".85"/><path d="M332 120l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" opacity=".7"/></g>
+</svg>

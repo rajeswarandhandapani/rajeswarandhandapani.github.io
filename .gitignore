@@ -9,3 +9,5 @@ dist/
 
 # Raw audio downloads (scripts/fetch-tamil-audio.cjs)
 .cache/
+
+/reference-data/

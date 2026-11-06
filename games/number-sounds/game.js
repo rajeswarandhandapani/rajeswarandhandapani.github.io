@@ -85,7 +85,6 @@ function generateNumberQuestion(max) {
     }
     const pool = available.length ? available : [...Array(max)].map((_, i) => i + 1);
     const n = pool[randomInt(0, pool.length - 1)];
-    speakNumber(n);
     return {
       prompt: hasSpeech ? "🔊" : numberWord(n),
       dedupeKey: n,
@@ -156,10 +155,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const quiz = new QuizEngine({
     totalQuestions,
     timePerQuestion: 15,
-    generateQuestion: (askedSet) => {
-      const q = generate(askedSet);
+    generateQuestion: generate,
+    prepareQuestion: (q) => {
       currentNumber = q.number;
-      return q;
+      speakNumber(q.number);
     },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");

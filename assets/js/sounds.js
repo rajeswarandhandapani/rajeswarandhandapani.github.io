@@ -82,6 +82,11 @@
   }
 
   var KlgSounds = {
+    /** The judges' bell in a mock spelling bee: one clear, kind ding. */
+    bell: function () {
+      tone(1319, { type: "sine", dur: 0.9, vol: 0.4 });
+      tone(2637, { type: "sine", dur: 0.5, vol: 0.12 });
+    },
     isMuted: function () {
       return muted;
     },

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="340" viewBox="0 0 1600 340" preserveAspectRatio="xMidYMax slice">
+  <!-- Black at low opacity, so the hills take their colour from whatever sky is behind them. -->
+  <path fill="#000" opacity=".14" d="M0 150C170 70 330 70 520 140s330 60 500-10 380-60 580 40v170H0z"/>
+  <g fill="#000" opacity=".12">
+    <path d="M246 96l26 56h-52z"/><path d="M1180 76l30 62h-60z"/><path d="M1240 92l22 48h-44z"/><path d="M720 118l24 44h-48z"/>
+  </g>
+  <path fill="#000" opacity=".2" d="M0 216c220-70 420-60 640 0s430 50 620-10 240-50 340-30v164H0z"/>
+  <g fill="#000" opacity=".24">
+    <circle cx="130" cy="176" r="24"/><rect x="125" y="190" width="10" height="34"/>
+    <circle cx="176" cy="192" r="16"/><rect x="172" y="202" width="8" height="24"/>
+    <circle cx="1040" cy="196" r="22"/><rect x="1035" y="208" width="10" height="34"/>
+    <path d="M1340 118l26 68h-52z"/><path d="M1340 150l32 62h-64z"/>
+  </g>
+  <path fill="#000" opacity=".3" d="M0 280c260-56 500-46 760-8s560 34 840-24v92H0z"/>
+  <g fill="#ffe08a" opacity=".85">
+    <circle cx="340" cy="262" r="2.4"/><circle cx="470" cy="246" r="1.8"/><circle cx="880" cy="256" r="2.2"/><circle cx="1210" cy="240" r="1.8"/><circle cx="1470" cy="228" r="2.4"/><circle cx="640" cy="240" r="1.6"/>
+  </g>
+</svg>

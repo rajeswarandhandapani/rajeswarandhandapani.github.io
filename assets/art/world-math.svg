@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3f9bff"/><stop offset="1" stop-color="#1a3fa8"/></linearGradient>
+  </defs>
+  <rect width="400" height="260" fill="url(#bg)"/>
+  <circle cx="340" cy="30" r="90" fill="#fff" opacity=".1"/><circle cx="40" cy="240" r="110" fill="#0b1f6b" opacity=".35"/>
+  <g fill="#fff" opacity=".35" font-family="Arial,sans-serif" font-weight="900">
+    <text x="48" y="66" font-size="44">+</text><text x="328" y="78" font-size="42">×</text><text x="60" y="150" font-size="36">÷</text><text x="332" y="154" font-size="40">=</text>
+  </g>
+  <g font-family="'Arial Rounded MT Bold',Arial,sans-serif" font-weight="900" font-size="46" text-anchor="middle">
+    <g><path d="M118 118l18-14h62l-18 14z" fill="#ff9d97"/><path d="M180 118l18-14v62l-18 14z" fill="#c23c3c"/><rect x="118" y="118" width="62" height="62" rx="6" fill="#f25f5c"/><text x="149" y="165" fill="#fff">1</text></g>
+    <g><path d="M198 118l18-14h62l-18 14z" fill="#ffe59a"/><path d="M260 118l18-14v62l-18 14z" fill="#d49a12"/><rect x="198" y="118" width="62" height="62" rx="6" fill="#ffc531"/><text x="229" y="165" fill="#5b3a00">2</text></g>
+    <g><path d="M158 56l18-14h62l-18 14z" fill="#a4f2d4"/><path d="M220 56l18-14v62l-18 14z" fill="#1b9c74"/><rect x="158" y="56" width="62" height="62" rx="6" fill="#2fd2a0"/><text x="189" y="103" fill="#063f30">3</text></g>
+  </g>
+</svg>

@@ -14,20 +14,7 @@
   const level = Number(new URLSearchParams(location.search).get("level")) === 2 ? 2 : 1;
   KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "1");
 
-  const STORIES = [
-    { name: "A seed grows", steps: [["🌱", "Plant the seed"], ["💧", "Water it"], ["🌿", "It grows"], ["🌼", "It makes a bud"], ["🌻", "A flower!"]] },
-    { name: "Getting ready", steps: [["⏰", "Wake up"], ["🪥", "Brush your teeth"], ["👕", "Get dressed"], ["🥣", "Eat breakfast"], ["🚌", "Go to school"]] },
-    { name: "A butterfly", steps: [["🥚", "An egg"], ["🐛", "A caterpillar"], ["🍃", "It eats leaves"], ["🦋", "A butterfly"]] },
-    { name: "A chick", steps: [["🥚", "An egg"], ["🐣", "A chick hatches"], ["🐥", "The chick grows"], ["🐔", "A hen"]] },
-    { name: "A rainy day", steps: [["☁️", "Clouds gather"], ["🌧️", "It rains"], ["☔", "We use an umbrella"], ["🌈", "A rainbow shows"]] },
-    { name: "Ice cream", steps: [["🍦", "A new ice cream"], ["☀️", "The sun shines"], ["💧", "It starts to melt"], ["🫠", "It is all melted"]] },
-    { name: "A birthday", steps: [["🎈", "The party starts"], ["🎶", "We sing"], ["🎂", "Blow out the candles"], ["🎁", "Open the presents"]] },
-    { name: "A day", steps: [["🌅", "Sunrise"], ["☀️", "Midday"], ["🌇", "Sunset"], ["🌙", "Night"]] },
-    { name: "Baking cookies", steps: [["🥣", "Mix the dough"], ["🍪", "Shape the cookies"], ["🔥", "Bake them"], ["😋", "Eat them!"]] },
-    { name: "Washing hands", steps: [["🚰", "Wet your hands"], ["🧼", "Add soap"], ["👐", "Scrub well"], ["🧻", "Rinse and dry"]] },
-    { name: "A snowman", steps: [["❄️", "Snow falls"], ["⛄", "Roll big snowballs"], ["🥕", "Add a carrot nose"], ["🧣", "Add a scarf"]] },
-    { name: "A trip to the park", steps: [["🎒", "Pack a bag"], ["🚶", "Walk to the park"], ["🛝", "Play on the slide"], ["🏠", "Go home"]] },
-  ];
+  const { STORIES } = window.KlgQuestions;
   const WORDS = ["First", "Next", "Then", "Then", "Last"];
 
   KlgRound.run({

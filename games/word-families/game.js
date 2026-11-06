@@ -7,8 +7,7 @@
  * Tap a picture to pick it up, then tap a house (the sort kit also lets a
  * finger drag it there). A wrong house gives the picture back and ends the
  * chance of a point for that round; the round is done when every picture is home.
- * Families are by ending sound and spelling: -at, -an, -ap, -en, -et, -og,
- * -ug, -un, -ot, -ip.
+ * Families are by ending sound and spelling. Level 1 uses the short ones.
  */
 (function () {
   "use strict";
@@ -17,17 +16,13 @@
   const level = Number(new URLSearchParams(location.search).get("level")) === 2 ? 2 : 1;
   KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "1");
 
-  const FAMILIES = {
-    at: ["cat", "hat", "bat", "rat"], an: ["can", "man", "pan", "van"], ap: ["cap", "map", "nap"], en: ["hen", "pen", "ten"],
-    et: ["net", "pet", "jet"], og: ["dog", "frog", "log"], ug: ["bug", "mug", "hug"], un: ["sun", "run", "bun"],
-    ot: ["pot", "dot", "hot"], ip: ["ship", "lip", "chip"],
-  };
+  const { FAMILIES, FIRST_FAMILIES } = window.KlgQuestions;
 
   KlgRound.run({
     total: 5,
     make(i, asked) {
       let keys, tries = 0;
-      do { keys = V.shuffle(Object.keys(FAMILIES)).slice(0, level === 1 ? 2 : 3); } while (asked.has(keys.slice().sort().join()) && ++tries < 30);
+      do { keys = V.shuffle(level === 1 ? FIRST_FAMILIES : Object.keys(FAMILIES)).slice(0, level === 1 ? 2 : 3); } while (asked.has(keys.slice().sort().join()) && ++tries < 30);
       asked.add(keys.slice().sort().join());
       const items = [];
       keys.forEach((k) => V.shuffle(FAMILIES[k]).slice(0, level === 1 ? 2 : V.rand(2, 3)).forEach((w) => items.push({ word: w, family: k })));

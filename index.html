@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Little Learners | 72 learning games for kids</title>
-  <meta name="description" content="Explore 72 playful learning activities for kids: math, English, Tamil (with real voice recordings), science, stories, pictures, and memory. Learn at your own pace with untimed practice." />
+  <title>Little Learners | 80 learning games for kids</title>
+  <meta name="description" content="Explore 80 playful learning activities for kids: math, English, Tamil (with real voice recordings), science, stories, pictures, and memory. Learn at your own pace with untimed practice." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>" />
   <link
     href="assets/vendor/bootstrap.min.css"
@@ -12,7 +12,7 @@
   />
   <link href="assets/css/common.css" rel="stylesheet" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#203e45" />
+  <meta name="theme-color" content="#1b1250" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Little Learners" />
@@ -20,61 +20,69 @@
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
 </head>
 <body class="learning-home">
-  <a class="skip-link" href="#library">Skip to games</a>
-  <header class="app-header"><a class="brand" href="index.html"><span class="brand-mark">✦</span> little<span> learners</span></a><span class="header-note">A little play. A lot of discovery.</span><button class="parent-link" id="parent-open">For grown-ups</button></header>
-  <div class="app-layout">
-  <aside class="app-sidebar"><div class="sidebar-label">YOUR LEARNING SPACE</div><a class="side-active" href="#library">▦ &nbsp; Explore games</a><a href="#learning-progress">☆ &nbsp; My progress</a><a href="#daily-adventure">◉ &nbsp; Daily discovery</a><div class="sidebar-note"><span>🌱</span><strong>Small steps, big discoveries.</strong><p>Try something new. Mistakes help your brain grow!</p></div><span class="sidebar-foot">Made for curious minds</span></aside>
-  <main class="home-main">
-    <section class="welcome"><div><div class="eyebrow">LET’S LEARN SOMETHING NEW</div><h1>Your next adventure<br>starts with a little play<span>.</span></h1><p>Numbers, words, and wonderful discoveries. What will you explore today?</p><a class="primary-link" href="#library">Find a game <span>↗</span></a></div><div class="welcome-sticker" aria-hidden="true"><span>✦</span><b>PLAY<br>LEARN<br>GROW.</b><small>ONE DISCOVERY AT A TIME</small></div></section>
-    <div class="dashboard-row">
-    <!-- Player card: rank, XP bar, streak and badges (filled in by home.js) -->
-    <div id="learning-progress" class="card klg-player-card mb-4">
-      <div class="card-body p-4">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <div id="player-rank-emoji" class="klg-player-rank">🐣</div>
-          <div class="flex-grow-1" style="min-width: 220px;">
-            <div class="h4 fw-bold mb-1" id="player-rank-name">Curious Chick</div>
-            <div class="klg-xp-track">
-              <div id="player-xp-fill" class="klg-xp-fill"></div>
+  <a class="skip-link" href="#main">Skip to games</a>
+  <div class="kid-clouds" aria-hidden="true"></div>
+  <header class="kid-top">
+    <a class="kid-logo" href="#home" aria-label="Little Learners home"><img src="assets/art/owl.svg" alt="" width="46" height="46"><b>Little Learners</b></a>
+    <a class="kid-chip" id="stars-chip" href="#me"></a>
+  </header>
+  <main id="main" class="kid-main">
+    <section class="kid-view" data-view="home" hidden>
+      <div class="kid-title kid-hello"><img class="kid-owl" src="assets/art/owl.svg" alt="" width="84" height="84"><div class="kid-bubble"><h1 tabindex="-1">What shall we play?</h1><span id="home-title-say"></span></div></div>
+      <div id="play-next-wrap" class="kid-next-wrap">
+        <a id="play-next" class="kid-play-next" href="#"><span class="kid-play-arrow" aria-hidden="true">▶</span><span class="kid-play-words"><b>Play next</b><small id="play-next-name"></small></span><span id="play-next-pic" class="kid-play-pic" aria-hidden="true"></span></a>
+      </div>
+      <!-- Review My Mistakes: shown only when questions are ready -->
+      <div id="review-card" class="klg-review-card" hidden>
+        <div><div id="review-count" class="fw-bold"></div><div id="review-note" class="small"></div></div>
+        <a id="review-link" class="kid-review-go" href="#">🔁 Try again</a>
+      </div>
+      <div id="home-level" class="kid-levelcard"></div>
+      <div id="worlds" class="kid-worlds"></div>
+      <div class="kid-row">
+        <a id="daily-link" class="kid-soft" href="#"><small>Today’s game</small><span id="daily-name"></span></a>
+        <button id="surprise-btn" type="button" class="kid-soft">🎲 Surprise me</button>
+      </div>
+    </section>
+
+    <section class="kid-view" data-view="me" hidden>
+      <div class="kid-title kid-title-back"><a class="kid-back" href="#home">⬅ Back</a><h1 tabindex="-1">⭐ My stars</h1></div>
+      <div id="learning-progress" class="card klg-player-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div id="player-rank-emoji" class="klg-player-rank">🐣</div>
+            <div class="flex-grow-1" style="min-width: 200px;">
+              <div class="h4 fw-bold mb-1" id="player-rank-name">Curious Chick</div>
+              <div class="klg-xp-track"><div id="player-xp-fill" class="klg-xp-fill"></div></div>
+              <div class="small fw-bold mt-1" id="player-xp-caption"></div>
             </div>
-            <div class="small fw-bold mt-1" id="player-xp-caption">Play a game to start earning XP!</div>
+            <div class="d-flex gap-2 flex-wrap" id="player-stats"></div>
           </div>
-          <div class="d-flex gap-2 flex-wrap" id="player-stats"></div>
         </div>
-
-        <div class="klg-badge-shelf mt-3" id="player-badges"></div>
-
       </div>
-    </div>
-
-    <!-- Daily challenge -->
-    <div id="daily-adventure" class="card klg-daily-card mb-4">
-      <div class="card-body d-flex align-items-center justify-content-between gap-3 flex-wrap">
-        <div>
-          <div class="fw-bold" style="color: var(--klg-pink);">✦ DAILY DISCOVERY</div>
-          <div class="h5 fw-bold mb-0" id="daily-name">&nbsp;</div>
-          <div class="text-muted small" id="daily-note">Beat it once a day to keep your streak alive.</div>
-        </div>
-        <a id="daily-link" class="btn btn-lg text-white fw-bold px-4" style="background: var(--klg-pink);" href="#">
-          Let’s play ↗
-        </a>
-      </div>
-    </div>
-
-    </div>
-    <section id="paths" class="tamil-path learning-paths" aria-labelledby="paths-title">
-      <div class="tamil-path-head">
-        <div><div class="eyebrow" id="path-eyebrow"></div><h2 id="paths-title"></h2><p id="path-note"></p></div>
-        <div class="path-tabs" id="path-tabs" role="group" aria-label="Choose a learning path"></div>
-      </div>
-      <ol class="tamil-steps" id="path-steps"></ol>
-      <p class="path-next" id="path-next" role="status"></p>
+      <h2 class="kid-subhead">🏅 My badges</h2>
+      <div class="kid-badges" id="player-badges"></div>
     </section>
-    <section id="library" class="library-controls"><div class="library-heading"><div><div class="eyebrow">FOLLOW YOUR CURIOSITY</div><h2>What shall we play?</h2></div><button id="surprise-btn" type="button" class="surprise-button">🎲 Surprise me</button></div>
-    <div class="search-row"><label class="search-box"><span aria-hidden="true">⌕</span><input id="game-search" type="search" placeholder="Find a game…" aria-label="Search games"></label><label class="level-select">Learning stage <select id="level-filter"><option value="all">All ages & stages</option><option value="1">First steps · ages 3–5</option><option value="2">Building blocks · ages 5–7</option><option value="3">Level up · ages 7–9</option><option value="4">Brain boost · ages 9+</option></select></label></div>
-    <div class="subject-tabs" id="subject-tabs" role="group" aria-label="Filter by subject"></div><p id="filter-status" class="filter-status" role="status"></p><div id="empty-games" hidden><h3>No games found yet</h3><p>Try another word or learning stage.</p><button id="clear-filters">Show all games</button></div>
+
+    <section class="kid-view" data-view="world" hidden>
+      <div id="world-head" class="kid-world-head"><a class="kid-back" href="#home">⬅ Back</a><h1 id="world-title" tabindex="-1"></h1><span id="world-say"></span></div>
+      <p id="path-next" class="path-next" role="status"></p>
+      <p id="world-empty" class="kid-empty" hidden>♡ Tap the heart on a game to keep it here.</p>
     </section>
-    <div id="levels"></div>
+
+    <section id="library" class="kid-view library-controls" data-view="all" hidden>
+      <div class="kid-title kid-title-back"><a class="kid-back" href="#home">⬅ Back</a><h1 tabindex="-1">All games</h1></div>
+      <div class="search-row"><label class="search-box"><span aria-hidden="true">⌕</span><input id="game-search" type="search" placeholder="Find a game…" aria-label="Search games"></label><label class="level-select">Age <select id="level-filter"><option value="all">All ages</option><option value="1">🐣 Ages 3–5</option><option value="2">🧱 Ages 5–7</option><option value="3">🚀 Ages 7–9</option><option value="4">🧠 Ages 9+</option></select></label></div>
+      <div class="subject-tabs" id="subject-tabs" role="group" aria-label="Filter by subject"></div>
+      <p id="filter-status" class="filter-status" role="status"></p>
+      <div id="empty-games" hidden><h3>No games found yet</h3><p>Try another word or age.</p><button id="clear-filters">Show all games</button></div>
+    </section>
+
+    <div id="levels" class="kid-cards" hidden></div>
+
+    <section class="kid-view kid-world-foot" data-view="world" hidden>
+      <a class="kid-quiet" href="#all">See every game</a>
+    </section>
     <noscript>
       <nav aria-label="All games">
         <h2>All games</h2>
@@ -85,13 +93,13 @@
             <li><a href="games/picture-words/index.html">🖼️ Picture Words</a> — Hear a word. Find its picture.</li>
             <li><a href="games/feelings-faces/index.html">😊 Feelings Faces</a> — Listen to a story. Choose a face.</li>
             <li><a href="games/everyday-tools/index.html">🪥 What Do We Use?</a> — Find the tool for each little job.</li>
-            <li><a href="games/number-sounds/index.html">🔊 Number Sounds</a> — Hear the number, tap the numeral</li>
+            <li><a href="games/number-sounds/index.html">🗣️ Number Sounds</a> — Hear the number, tap the numeral</li>
             <li><a href="games/counting/index.html">🍎 Counting</a> — Count the pictures, tap the number</li>
             <li><a href="games/shapes-colors/index.html">🔷 Shapes &amp; Colors</a> — Name shapes, colors, sides &amp; corners</li>
-            <li><a href="games/english-alphabets/index.html">🔤 English Alphabets</a> — Hear, match &amp; order letters A&amp;ndash;Z</li>
-            <li><a href="games/tamil-alphabets/index.html">அ Tamil Alphabets</a> — Read or listen &amp;mdash; vowels, consonants &amp; more</li>
-            <li><a href="games/rhyming-words/index.html">🎵 Rhyming Words</a> — Cat, hat, bat &amp;mdash; find the rhyme</li>
-            <li><a href="games/baby-animals/index.html">🐣 Baby Animals</a> — A baby cow is a&amp;hellip;? Name them all!</li>
+            <li><a href="games/english-alphabets/index.html">🔤 English Alphabets</a> — Hear, match &amp; order letters A–Z</li>
+            <li><a href="games/tamil-alphabets/index.html">அ Tamil Alphabets</a> — Read or listen — vowels, consonants &amp; more</li>
+            <li><a href="games/rhyming-words/index.html">🎵 Rhyming Words</a> — Cat, hat, bat — find the rhyme</li>
+            <li><a href="games/baby-animals/index.html">🐣 Baby Animals</a> — A baby cow is a…? Name them all!</li>
             <li><a href="games/tamil-letter-chart/index.html">அ Tamil Letter Chart</a> — Tap any of 247 letters to hear a real voice.</li>
             <li><a href="games/tamil-listen-find/index.html">👂 Listen &amp; Find</a> — Hear a Tamil word. Tap its picture.</li>
             <li><a href="games/tamil-letter-pop/index.html">🫧 Letter Bubbles</a> — Hear a Tamil letter. Pop its bubble!</li>
@@ -105,6 +113,9 @@
             <li><a href="games/my-body/index.html">🧍 My Body</a> — Tap body parts on the picture and match the five senses.</li>
             <li><a href="games/sort-it/index.html">🗂️ Sort It!</a> — Sort pictures: living or not, land, water or air, float or sink.</li>
             <li><a href="games/weather-wear/index.html">☔ Weather &amp; Seasons</a> — Dress for the weather and name the season.</li>
+            <li><a href="games/odd-one-out/index.html">🧐 Odd One Out</a> — Find the picture that does not belong, then hear why.</li>
+            <li><a href="games/number-bonds/index.html">🫧 Number Bonds</a> — Find the missing part that makes the whole.</li>
+            <li><a href="games/stay-safe/index.html">🦺 Stay Safe &amp; Healthy</a> — Choose the safe and healthy thing to do.</li>
         </ul>
         <h3>Building Blocks · Ages 5–7</h3>
         <ul>
@@ -114,7 +125,7 @@
             <li><a href="games/reading-stories/index.html">📖 Story Detectives</a> — Read a little story. Find the clues.</li>
             <li><a href="games/comparing-numbers/index.html">⚖️ Comparing Numbers</a> — Biggest, smallest &amp; the &lt; > = signs</li>
             <li><a href="games/addition-subtraction/index.html">➕ Addition &amp; Subtraction</a> — Facts within 10, 20 or two-digit</li>
-            <li><a href="games/patterns/index.html">🔁 Patterns &amp; Skip Counting</a> — 2, 4, 6&amp;hellip; what comes next?</li>
+            <li><a href="games/patterns/index.html">🔁 Patterns &amp; Skip Counting</a> — 2, 4, 6… what comes next?</li>
             <li><a href="games/opposites/index.html">↔️ Opposites</a> — Opposite words &amp; words that match</li>
             <li><a href="games/calendar/index.html">📅 Calendar</a> — Days of the week &amp; months of the year</li>
             <li><a href="games/tamil-words/index.html">🐘 Tamil Words</a> — Match pictures &amp; meanings to Tamil words</li>
@@ -134,16 +145,21 @@
             <li><a href="games/tamil-picture-sentences/index.html">🖼️ படம் பார்த்து சொல்</a> — Read a Tamil sentence and pick the picture it tells about.</li>
             <li><a href="games/tamil-english-match/index.html">🔗 Tamil–English Match</a> — Match Tamil words to their pictures and English words.</li>
             <li><a href="games/life-cycles/index.html">🦋 Life Cycles</a> — Put the stages of a butterfly, frog, plant or chicken in order.</li>
+            <li><a href="games/who-am-i/index.html">🕵️ Who Am I?</a> — Read one clue at a time and work out the answer.</li>
+            <li><a href="games/robot-path/index.html">🤖 Robot Path</a> — Plan arrow steps to guide a robot to the star.</li>
+            <li><a href="games/word-detective/index.html">🔍 Word Detective</a> — Sort naming words, doing words and describing words.</li>
+            <li><a href="games/punctuation-pals/index.html">❗ Punctuation Pals</a> — Choose the full stop, question mark or exclamation mark.</li>
+            <li><a href="games/tamil-word-order/index.html">🔀 சொல் வரிசை</a> — Put Tamil word tiles in order to make a sentence.</li>
         </ul>
         <h3>Level Up · Ages 7–9</h3>
         <ul>
-            <li><a href="games/multiplication/index.html">✖️ Multiplication Tables</a> — 25 timed questions on tables 1-11</li>
-            <li><a href="games/division/index.html">➗ Division</a> — Share it out &amp;mdash; facts &amp; remainders</li>
+            <li><a href="games/multiplication/index.html">✖️ Multiplication Tables</a> — 25 timed questions on tables 1-12</li>
+            <li><a href="games/division/index.html">➗ Division</a> — Share it out — facts &amp; remainders</li>
             <li><a href="games/fractions/index.html">🍕 Fractions</a> — Pictures, equivalents, comparing &amp; adding</li>
             <li><a href="games/time/index.html">🕒 Time &amp; Elapsed Time</a> — Read clocks &amp; work out end times</li>
             <li><a href="games/money/index.html">💰 Money &amp; Making Change</a> — Count coins &amp; make change</li>
             <li><a href="games/measurement/index.html">📏 Measurement</a> — Units, converting &amp; comparing sizes</li>
-            <li><a href="games/spelling-bee/index.html">🐝 Spelling Bee</a> — Hear the word, pick the right spelling</li>
+            <li><a href="games/spelling-bee/index.html">🐝 Spelling Bee</a> — Train for a real bee: hear it, ask for clues, spell it</li>
             <li><a href="games/tamil-word-builder/index.html">🧩 Tamil Word Builder</a> — Fill in the missing Tamil letter</li>
             <li><a href="games/tamil-word-puzzle/index.html">🧱 Tamil Word Puzzle</a> — Hear a word. Build it from letter tiles.</li>
             <li><a href="games/market-day/index.html">🛒 Market Day</a> — Shop, farm and trip stories: × or ÷?</li>
@@ -166,9 +182,9 @@
         <!-- noscript:end -->
       </nav>
     </noscript>
-  <footer class="home-footer"><span>✦ Little learners, big possibilities.</span><span>Progress stays on this browser · No account needed</span></footer>
-  </main></div>
-  <dialog id="parent-dialog"><div class="dialog-heading"><h2>For grown-ups</h2><button id="parent-close" aria-label="Close grown-up information">✕</button></div><p>Choose a stage as a starting point, then follow your child’s interests. Ages are a guide, not a limit.</p><h3>Learning without pressure</h3><p>Every game starts in untimed practice. Children can read feedback and move on when ready. A timed challenge is optional.</p><h3>Progress & privacy</h3><p>Stars, favorites, and achievements are saved in this browser. They are not synced between devices. Clearing browser data removes them.</p><h3>Use it offline</h3><p>Every game, picture and Tamil recording is saved on this device the first time you visit, so the games keep working without internet. On an iPad or iPhone, tap Share → <b>Add to Home Screen</b> to open it like an app.</p><p id="offline-status" class="small"></p><p id="parent-summary"></p><div id="parent-report"></div><button id="reset-progress" class="reset-button">Reset learning progress</button><p class="small">This removes earned progress on this browser after confirmation.</p></dialog>
+  </main>
+  <footer class="home-footer"><button class="kid-quiet parent-link" id="parent-open">For grown-ups</button><span>Progress stays on this device.</span></footer>
+  <dialog id="parent-dialog"><div class="dialog-heading"><h2>For grown-ups</h2><button id="parent-close" aria-label="Close grown-up information">✕</button></div><p>Your child chooses an age on the first visit, and the games follow it. Ages are a guide, not a limit: tap the age at the top of the page, or Easier and Harder under a subject's games, to change it. <a id="see-all-grownup" href="#all">See and search all 80 games</a>.</p><h3>Learning without pressure</h3><p>Every game starts in untimed practice. Children can read feedback and move on when ready. A timed challenge is optional, under More ways to play.</p><h3>Progress &amp; privacy</h3><p>Stars, favorites, and achievements are saved in this browser. They are not synced between devices. Clearing browser data removes them.</p><h3>Use it offline</h3><p>Every game, picture and Tamil recording is saved on this device the first time you visit, so the games keep working without internet. On an iPad or iPhone, tap Share → <b>Add to Home Screen</b> to open it like an app.</p><p id="offline-status" class="small"></p><p id="parent-summary"></p><div id="parent-report"></div><button id="reset-progress" class="reset-button">Reset learning progress</button><p class="small">This removes earned progress on this browser after confirmation.</p><h3>Badges</h3><div id="parent-badge-list" class="parent-badges"></div></dialog>
   <script src="assets/js/sounds.js"></script>
   <script src="assets/js/catalogue.js"></script>
   <script src="assets/js/progress.js"></script>

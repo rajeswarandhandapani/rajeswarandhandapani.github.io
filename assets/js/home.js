@@ -1,135 +1,25 @@
 /**
- * Landing page behaviour: the player card (rank, XP, streak, badges), the
- * daily challenge, per-card stars and the "surprise me" button.
+ * The home page: one job per view, so a child who cannot read yet can still get
+ * to a game. The address hash picks the view, so the Back button and links work.
  *
- * The game list comes from catalogue.js (window.KlgCatalogue): the level
- * sections, subject tabs, learning paths and the grown-up report are all
- * rendered from it, so adding a game is one line in the catalogue.
+ *   (none)        ▶ Play next, 🔁 Try again when due, rank and streak, six picture tiles with progress
+ *   #world/math   that subject's games, easiest first
+ *   #world/favorites  the games marked with a heart
+ *   #me           rank, XP, streak and badges
+ *   #all          search and filters over every game
+ *
+ * Every game comes from catalogue.js (window.KlgCatalogue), so adding a game is
+ * one line in the catalogue. All the cards stay in one grid, shown and ordered
+ * according to the view. Nobody is asked their age: each game has its own levels.
  */
 (function () {
   "use strict";
-
-  function cards() {
-    return Array.from(document.querySelectorAll(".game-card[data-game]"));
-  }
-
-  function cardInfo(card) {
-    var link = card.closest("a");
-    return {
-      id: card.getAttribute("data-game"),
-      name: (card.querySelector("h3") || {}).textContent || card.getAttribute("data-game"),
-      emoji: (card.querySelector(".game-card-icon") || {}).textContent || "🎮",
-      href: link ? link.getAttribute("href") : "#",
-      card: card,
-    };
-  }
-
-  /** Same game for everyone all day, a different one tomorrow. */
-  function dailyIndex(count) {
-    var d = new Date();
-    var seed = d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
-    // A small scramble so consecutive days don't just walk down the list.
-    // Kept well inside safe-integer range so it stays exact.
-    var mixed = (seed * 9301 + 49297) % 233280;
-    return Math.floor((mixed / 233280) * count) % count;
-  }
-
-  function renderPlayer(summary) {
-    var rank = summary.rank;
-    document.getElementById("player-rank-emoji").textContent = rank.emoji;
-    document.getElementById("player-rank-name").textContent = rank.name;
-
-    var next = rank.next;
-    var span = next ? next.min - rank.min : 1;
-    var into = summary.xp - rank.min;
-    document.getElementById("player-xp-fill").style.width =
-      (next ? Math.min(100, (into / span) * 100) : 100) + "%";
-    document.getElementById("player-xp-caption").textContent = next
-      ? summary.xp + " XP · " + (next.min - summary.xp) + " to " + next.emoji + " " + next.name
-      : summary.xp + " XP · top rank reached! 👑";
-
-    var stats = [
-      ["🎮", summary.plays, summary.plays === 1 ? "quiz played" : "quizzes played"],
-      ["⭐", summary.stars, "stars"],
-      ["🔥", summary.dayStreak, summary.dayStreak === 1 ? "day streak" : "day streak"],
-      ["🏅", Object.keys(summary.badges).length + "/" + KlgProgress.BADGES.length, "badges"],
-    ];
-    document.getElementById("player-stats").innerHTML = stats
-      .map(function (s) {
-        return (
-          '<div class="klg-player-stat text-center"><div>' +
-          s[0] +
-          " " +
-          s[1] +
-          '</div><div class="small fw-normal">' +
-          s[2] +
-          "</div></div>"
-        );
-      })
-      .join("");
-
-    var shelf = document.getElementById("player-badges");
-    shelf.innerHTML = "";
-    KlgProgress.BADGES.forEach(function (badge) {
-      var earned = !!summary.badges[badge.id];
-      var chip = document.createElement("span");
-      chip.className = "klg-badge-chip" + (earned ? "" : " locked");
-      chip.textContent = badge.emoji;
-      chip.title = earned ? badge.name + " — earned!" : badge.name + ": " + badge.hint;
-      shelf.appendChild(chip);
-    });
-  }
-
-  function decorateCards(summary) {
-    cards().forEach(function (card) {
-      var stats = summary.games[card.getAttribute("data-game")];
-      var body = card.querySelector(".card-body");
-
-      var flag = document.createElement("span");
-      flag.className = "klg-card-flag";
-      var stars = document.createElement("div");
-      stars.className = "klg-card-stars";
-
-      if (!stats) {
-        // On a first visit everything is new, and 25 NEW flags say nothing.
-        // Once there's some history the flag marks what's left to try.
-        if (summary.plays > 0 || card.getAttribute("data-new")) {
-          flag.textContent = "NEW";
-          card.appendChild(flag);
-        }
-        stars.textContent = "☆☆☆";
-        stars.style.opacity = "0.35";
-      } else {
-        stars.textContent =
-          "⭐".repeat(stats.bestStars) + "☆".repeat(3 - stats.bestStars);
-        if (stats.bestStars === 3) {
-          flag.textContent = "3 STARS";
-          card.appendChild(flag);
-        }
-      }
-      body.appendChild(stars);
-    });
-  }
-
-  function renderDaily(summary) {
-    var all = cards().map(cardInfo);
-    if (!all.length) return;
-    var game = all[dailyIndex(all.length)];
-    document.getElementById("daily-name").textContent = game.emoji + " " + game.name;
-    document.getElementById("daily-link").setAttribute("href", game.href);
-
-    var note = document.getElementById("daily-note");
-    if (summary.dayStreak > 0) {
-      note.textContent =
-        "🔥 " +
-        summary.dayStreak +
-        (summary.dayStreak === 1 ? " day" : " days") +
-        " in a row — play any game today to keep it going.";
-    } else {
-      note.textContent = "Play any game today to start a streak.";
-    }
-  }
-
+  const $ = (id) => document.getElementById(id);
+  const FAVORITES_KEY = "klg-favorites";
+  const canSpeak = !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== "undefined";
+  let favorites = [];
+  let summary = null;
+  let firstRoute = true;
 
   function esc(text) {
     return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -140,121 +30,394 @@
   }
 
   function writePref(key, value) {
-    try { localStorage.setItem(key, value); } catch (e) { /* not saved */ }
+    try { localStorage.setItem(key, value); } catch (e) { /* lasts for this visit only */ }
   }
 
-  /** Subject tabs and the four level sections, from the catalogue. */
-  function renderLibrary() {
-    var cat = window.KlgCatalogue;
-    var tabs = document.getElementById("subject-tabs");
-    var levels = document.getElementById("levels");
-    if (!cat || !tabs || !levels) return;
+  function say(text) {
+    if (!canSpeak || !text) return;
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(String(text).replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim());
+    utterance.lang = "en-US";
+    utterance.rate = 0.88;
+    speechSynthesis.speak(utterance);
+  }
 
-    var tabHtml = '<button data-subject="all" aria-pressed="true">All games</button>';
-    Object.keys(cat.SUBJECTS).forEach(function (key) {
-      var cls = key === "tamil" ? ' class="tamil-tab"' : "";
+  /** A speaker button that says `text` (a string, or a function for text that changes). */
+  function speaker(text, label) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "kid-say";
+    button.textContent = "🔊";
+    button.hidden = !canSpeak;
+    const words = () => (typeof text === "function" ? text() : text);
+    button.setAttribute("aria-label", "Hear: " + (label || words()));
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      say(words());
+    });
+    return button;
+  }
+
+  /** What to say for a game. The voice is English, so Tamil names use the English description. */
+  function spokenName(game) {
+    return /[஀-௿]/.test(game.name) ? game.blurb : game.name;
+  }
+
+  /* ---------- the game cards ---------- */
+
+  function renderCards() {
+    const cat = window.KlgCatalogue;
+    const tabs = $("subject-tabs");
+    let tabHtml = '<button data-subject="all" aria-pressed="true">All games</button>';
+    Object.keys(cat.SUBJECTS).forEach((key) => {
+      const cls = key === "tamil" ? ' class="tamil-tab"' : "";
       tabHtml += '<button data-subject="' + key + '" aria-pressed="false"' + cls + ">" + esc(cat.SUBJECTS[key].label) + "</button>";
     });
     tabHtml += '<button data-subject="favorites" aria-pressed="false">♡ Favorites</button>';
     tabs.innerHTML = tabHtml;
 
-    var html = "";
-    Object.keys(cat.LEVELS).forEach(function (n) {
-      var level = cat.LEVELS[n];
-      var games = cat.GAMES.filter(function (g) { return String(g.level) === n; });
-      html += '<section id="level-' + n + '" class="mb-5"><div class="klg-level-heading klg-level-' + n + '">' +
-        '<span class="klg-level-pill">LEVEL ' + n + '</span><h2 class="h4 fw-bold mb-0">' + esc(level.name) + " " + level.emoji + "</h2>" +
-        '<span class="text-muted small">' + esc(level.ages) + " · " + esc(level.note) + "</span></div>" +
-        '<div class="row g-4 justify-content-center mt-1">';
-      games.forEach(function (g) {
-        html += '<div class="col-12 col-sm-6 col-lg-4"><a href="games/' + g.id + '/index.html" class="text-decoration-none">' +
-          '<div class="card game-card" data-game="' + g.id + '" data-subject="' + g.subject + '"' + (g.isNew ? ' data-new="1"' : "") + '>' +
-          '<div class="card-body text-center p-4"><div class="game-card-icon mb-3">' + esc(g.icon) + "</div>" +
-          '<h3 class="h4 fw-bold text-dark">' + esc(g.name) + '</h3><p class="text-muted mb-0">' + esc(g.blurb) + "</p></div></div></a></div>";
+    const grid = $("levels");
+    grid.replaceChildren();
+    cat.GAMES.forEach((game) => {
+      const tile = document.createElement("div");
+      tile.className = "game-tile";
+      tile.dataset.game = game.id;
+      tile.innerHTML = '<a href="games/' + game.id + '/index.html" class="text-decoration-none"><div class="card game-card" data-game="' + game.id + '" data-subject="' + game.subject + '" data-level="' + game.level + '" data-ages="' + game.levels.map((l) => l.band).join(",") + '"' + (game.isNew ? ' data-new="1"' : "") + ">" +
+        '<div class="card-body"><div class="game-card-icon">' + esc(game.icon) + "</div>" +
+        "<h3>" + esc(game.name) + '</h3><p class="kid-blurb">' + esc(game.blurb) + '</p><div class="kid-card-ages">Ages ' + esc(cat.agesLabel(game)) + "</div></div></div></a>";
+      tile.appendChild(speaker(() => spokenName(game), game.name));
+      const favorite = document.createElement("button");
+      favorite.className = "favorite-button";
+      favorite.type = "button";
+      favorite.setAttribute("aria-label", "Favorite " + game.name);
+      favorite.addEventListener("click", () => {
+        favorites = favorites.includes(game.id) ? favorites.filter((id) => id !== game.id) : [...favorites, game.id];
+        writePref(FAVORITES_KEY, JSON.stringify(favorites));
+        paintFavorite(favorite, game.id);
+        showCards();
       });
-      html += "</div></section>";
+      paintFavorite(favorite, game.id);
+      tile.appendChild(favorite);
+      grid.appendChild(tile);
     });
-    levels.innerHTML = html;
   }
 
-  /** Learning paths: pick one, see its steps, ticks for starred steps and what is next. */
-  function renderPaths(summary) {
-    var cat = window.KlgCatalogue;
-    var root = document.getElementById("paths");
-    if (!cat || !root) return;
-    var keys = Object.keys(cat.PATHS);
-    var current = readPref("klg-path", "math");
-    if (keys.indexOf(current) < 0) current = keys[0];
-    var tabs = document.getElementById("path-tabs");
+  function paintFavorite(button, id) {
+    const on = favorites.includes(id);
+    button.textContent = on ? "♥" : "♡";
+    button.setAttribute("aria-pressed", String(on));
+  }
 
-    function paint() {
-      var path = cat.PATHS[current];
-      document.getElementById("path-eyebrow").textContent = path.eyebrow;
-      document.getElementById("paths-title").textContent = path.title;
-      document.getElementById("path-note").textContent = path.note;
+  function decorateCards() {
+    document.querySelectorAll(".game-card[data-game]").forEach((card) => {
+      const stats = summary.games[card.dataset.game];
+      const body = card.querySelector(".card-body");
+      if (card.dataset.new && !stats) {
+        const flag = document.createElement("span");
+        flag.className = "klg-card-flag";
+        flag.textContent = "NEW";
+        card.appendChild(flag);
+      }
+      const stars = document.createElement("div");
+      stars.className = "klg-card-stars";
+      const earned = stats ? stats.bestStars : 0;
+      stars.textContent = "⭐".repeat(earned) + "☆".repeat(3 - earned);
+      stars.setAttribute("aria-label", earned + (earned === 1 ? " star" : " stars"));
+      body.appendChild(stars);
+    });
+  }
 
-      var nextStep = null;
-      var items = path.steps.map(function (step, i) {
-        var game = cat.byId(step.game);
-        var stats = summary.games[step.game];
-        var done = !!(stats && stats.bestStars > 0);
-        if (!done && !nextStep) nextStep = { step: step, game: game };
-        var isNext = nextStep && nextStep.step === step;
-        var glyph = current === "tamil" && /[஀-௿]/.test(game.icon) ? " tamil-glyph" : "";
-        return '<li><a href="games/' + game.id + '/index.html"' + (done ? ' class="done"' : isNext ? ' class="next-up"' : "") + ">" +
-          '<span class="step-n">' + (i + 1) + '</span><span class="step-icon' + glyph + '">' + esc(game.icon) + "</span>" +
-          "<b>" + esc(step.label) + "</b><small>" + esc(game.name) + "</small>" +
-          (done ? '<span class="step-tick" aria-label="Done">✓</span>' : isNext ? '<span class="step-chip">Next up</span>' : "") + "</a></li>";
-      });
-      document.getElementById("path-steps").innerHTML = items.join("");
-      document.getElementById("path-next").textContent = nextStep
-        ? "Next up: " + nextStep.step.label + " · " + nextStep.game.name
-        : "🎉 You have a star in every step of this path!";
+  /** Shows the cards this view asks for, in order, and marks progress along the way. */
+  function showCards() {
+    const view = document.body.dataset.view;
+    const world = document.body.dataset.world;
+    const grid = $("levels");
+    grid.hidden = view !== "world" && view !== "all";
+    if (grid.hidden) return;
+    if (view === "all") return filterAll();
 
-      tabs.querySelectorAll("button[data-path]").forEach(function (b) {
-        b.setAttribute("aria-pressed", String(b.getAttribute("data-path") === current));
-      });
-      var count = cat.GAMES.filter(function (g) { return g.subject === current; }).length;
-      var jump = document.getElementById("path-jump");
-      jump.textContent = "See all " + count + " " + cat.SUBJECTS[current].label.replace(/^\S+\s/, "") + " games →";
-      jump.id = "path-jump";
+    const cat = window.KlgCatalogue;
+    const list = world === "favorites"
+      ? favorites.map((id) => cat.byId(id)).filter(Boolean)
+      : cat.gamesFor(world);
+    const order = new Map(list.map((game, i) => [game.id, i]));
+    const nextGame = world === "favorites" ? null : list.filter((g) => !(summary.games[g.id] && summary.games[g.id].bestStars > 0))[0];
+    grid.querySelectorAll(".game-tile").forEach((tile) => {
+      const id = tile.dataset.game;
+      tile.hidden = !order.has(id);
+      tile.style.order = order.has(id) ? order.get(id) : "";
+      markProgress(tile, id, nextGame);
+    });
+    $("world-empty").hidden = list.length > 0;
+    const status = $("path-next");
+    if (world === "favorites") status.textContent = "";
+    else if (nextGame) status.textContent = "Next up: " + nextLabel(nextGame);
+    else status.textContent = "🎉 You have a star in every game here!";
+  }
+
+  /** A path step's short label and the game's name, as in "Hear numbers · Number Sounds". */
+  function nextLabel(game) {
+    const path = KlgCatalogue.PATHS[game.subject];
+    const step = path && path.steps.filter((s) => s.game === game.id)[0];
+    return step ? step.label + " · " + game.name : game.name;
+  }
+
+  function markProgress(tile, id, nextGame) {
+    const card = tile.querySelector(".game-card");
+    const done = !!(summary.games[id] && summary.games[id].bestStars > 0);
+    const isNext = !!nextGame && nextGame.id === id;
+    card.classList.toggle("done", done);
+    card.classList.toggle("next-up", isNext);
+    let chip = card.querySelector(".kid-next-chip");
+    if (isNext && !chip) {
+      chip = document.createElement("span");
+      chip.className = "kid-next-chip";
+      chip.textContent = "Next up";
+      card.appendChild(chip);
+    } else if (!isNext && chip) {
+      chip.remove();
     }
-
-    tabs.innerHTML = keys.map(function (key) {
-      return '<button type="button" data-path="' + key + '" aria-pressed="false">' + esc(cat.SUBJECTS[key].label) + "</button>";
-    }).join("") + '<button type="button" id="path-jump" class="surprise-button"></button>';
-    tabs.querySelectorAll("button[data-path]").forEach(function (b) {
-      b.addEventListener("click", function () { current = b.getAttribute("data-path"); writePref("klg-path", current); paint(); });
-    });
-    document.getElementById("path-jump").addEventListener("click", function () {
-      var search = document.getElementById("game-search");
-      var level = document.getElementById("level-filter");
-      search.value = ""; search.dispatchEvent(new Event("input"));
-      level.value = "all"; level.dispatchEvent(new Event("change"));
-      var tab = document.querySelector('.subject-tabs [data-subject="' + current + '"]');
-      if (tab) tab.click();
-      document.getElementById("library").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-    });
-    paint();
   }
 
-  /** Grown-up report: stars, recent accuracy and what to practise, per subject. */
+  /* ---------- #all: search and filters over every game ---------- */
+
+  let subjectFilter = "all";
+
+  function filterAll() {
+    const search = $("game-search").value.trim().toLowerCase();
+    const level = $("level-filter").value;
+    let count = 0;
+    document.querySelectorAll("#levels .game-tile").forEach((tile, index) => {
+      const card = tile.querySelector(".game-card");
+      const matches = card.textContent.toLowerCase().includes(search) &&
+        (level === "all" || card.dataset.ages.split(",").includes(level) || (!card.dataset.ages && card.dataset.level === level)) &&
+        (subjectFilter === "all" || (subjectFilter === "favorites" ? favorites.includes(tile.dataset.game) : card.dataset.subject === subjectFilter));
+      tile.hidden = !matches;
+      tile.style.order = Number(card.dataset.level) * 1000 + index;
+      markProgress(tile, tile.dataset.game, null);
+      if (matches) count += 1;
+    });
+    $("filter-status").textContent = count + (count === 1 ? " game" : " games");
+    $("empty-games").hidden = count !== 0;
+  }
+
+  function wireFilters() {
+    const search = $("game-search");
+    const level = $("level-filter");
+    search.addEventListener("input", filterAll);
+    level.addEventListener("change", filterAll);
+    document.querySelectorAll(".subject-tabs button").forEach((button) => button.addEventListener("click", () => {
+      subjectFilter = button.dataset.subject;
+      document.querySelectorAll(".subject-tabs button").forEach((tab) => tab.setAttribute("aria-pressed", String(tab === button)));
+      filterAll();
+    }));
+    $("clear-filters").addEventListener("click", () => {
+      search.value = "";
+      level.value = "all";
+      document.querySelector('.subject-tabs [data-subject="all"]').click();
+      search.focus();
+    });
+  }
+
+  /* ---------- the home view ---------- */
+
+  function renderWorldTiles() {
+    const cat = window.KlgCatalogue;
+    const box = $("worlds");
+    box.replaceChildren();
+    const add = (key, name, icon, words, attrs) => {
+      const tile = document.createElement("div");
+      tile.className = "kid-world";
+      Object.keys(attrs).forEach((k) => { tile.dataset[k] = attrs[k]; });
+      const link = document.createElement("a");
+      link.className = "kid-world-link";
+      link.href = "#world/" + key;
+      link.setAttribute("aria-label", words);
+      link.innerHTML = '<span class="kid-world-icon" aria-hidden="true">' + esc(icon) + '</span><b></b><span class="kid-world-count" aria-hidden="true"></span>';
+      link.querySelector("b").textContent = name;
+      tile.append(link, speaker(words));
+      box.appendChild(tile);
+    };
+    Object.keys(cat.SUBJECTS).forEach((key) => {
+      const subject = cat.SUBJECTS[key];
+      add(key, subject.kid, subject.icon, subject.say, { subject: key });
+    });
+    add("favorites", "Favorites", "♥", "Favorites", { world: "favorites" });
+  }
+
+  /** How many of a subject's games have a star: { done, total }. */
+  function subjectProgress(key) {
+    const list = KlgCatalogue.gamesFor(key);
+    return { done: list.filter((g) => summary.games[g.id] && summary.games[g.id].bestStars > 0).length, total: list.length };
+  }
+
+  function progressHtml(key) {
+    const p = subjectProgress(key);
+    return "⭐ " + p.done + "/" + p.total + '<span class="kid-world-bar"><i style="width:' + Math.round((p.done / p.total) * 100) + '%"></i></span>';
+  }
+
+  function paintWorldCounts() {
+    document.querySelectorAll(".kid-world").forEach((tile) => {
+      tile.querySelector(".kid-world-count").innerHTML = tile.dataset.subject ? progressHtml(tile.dataset.subject) : "♥ " + favorites.length;
+    });
+  }
+
+  /** The rank, how far to the next one, and the numbers a child is proud of. */
+  function paintLevel() {
+    const rank = summary.rank;
+    const fill = rank.next ? Math.min(100, ((summary.xp - rank.min) / (rank.next.min - rank.min)) * 100) : 100;
+    $("home-level").innerHTML = '<span class="kid-levelcard-pic" aria-hidden="true">' + rank.emoji + '</span><div class="kid-levelcard-rank"><b>' + esc(rank.name) + '</b><div class="kid-xp"><i style="width:' + fill + '%"></i></div></div>' +
+      '<div class="kid-levelcard-stats"><span>🔥 ' + summary.dayStreak + "</span><span>🎮 " + summary.plays + "</span><span>🏅 " + Object.keys(summary.badges).length + "</span></div>";
+  }
+
+  function renderHome() {
+    const cat = window.KlgCatalogue;
+    paintWorldCounts();
+    paintLevel();
+    const next = cat.nextFor(summary.games, readPref("klg-path", ""));
+    if (next) {
+      $("play-next").setAttribute("href", "games/" + next.id + "/index.html");
+      $("play-next").dataset.subject = next.subject;
+      $("play-next-name").textContent = next.name;
+      $("play-next-pic").textContent = next.icon;
+      $("play-next-wrap").dataset.subject = next.subject;
+    }
+    const list = cat.GAMES;
+    const today = list[dailyIndex(list.length)];
+    if (today) {
+      $("daily-name").textContent = today.icon + " " + today.name;
+      $("daily-link").setAttribute("href", "games/" + today.id + "/index.html");
+    }
+    renderReviewCard();
+  }
+
+  /** Same game all day, a different one tomorrow. */
+  function dailyIndex(count) {
+    const d = new Date();
+    const seed = d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
+    // A small scramble so consecutive days don't just walk down the list.
+    const mixed = (seed * 9301 + 49297) % 233280;
+    return Math.floor((mixed / 233280) * count) % count;
+  }
+
+  /** The Review card appears only when missed questions are ready for another try. */
+  function renderReviewCard() {
+    const card = $("review-card");
+    const review = KlgProgress.review.summary();
+    card.hidden = review.due === 0;
+    if (!review.due) return;
+    $("review-count").textContent = review.due + (review.due === 1 ? " question" : " questions") + " ready for another try";
+    const games = review.groups.length;
+    $("review-note").textContent = "From " + games + (games === 1 ? " game." : " games.");
+    $("review-link").setAttribute("href", review.groups[0].href);
+  }
+
+  /* ---------- the top bar ---------- */
+
+  function paintTopBar() {
+    const stars = $("stars-chip");
+    stars.textContent = "⭐ " + summary.stars;
+    stars.setAttribute("aria-label", summary.stars + (summary.stars === 1 ? " star" : " stars") + ". See my stars.");
+    const sound = $("klg-mute-btn");
+    const bar = document.querySelector(".kid-top");
+    if (sound && sound.parentNode !== bar) bar.appendChild(sound);
+  }
+
+  /* ---------- #me ---------- */
+
+  function renderPlayer() {
+    const rank = summary.rank;
+    $("player-rank-emoji").textContent = rank.emoji;
+    $("player-rank-name").textContent = rank.name;
+    const next = rank.next;
+    const span = next ? next.min - rank.min : 1;
+    const into = summary.xp - rank.min;
+    $("player-xp-fill").style.width = (next ? Math.min(100, (into / span) * 100) : 100) + "%";
+    $("player-xp-caption").textContent = next
+      ? summary.xp + " XP · " + (next.min - summary.xp) + " to " + next.emoji + " " + next.name
+      : summary.xp + " XP · top rank reached! 👑";
+
+    const stats = [
+      ["🎮", summary.plays, summary.plays === 1 ? "game played" : "games played"],
+      ["⭐", summary.stars, "stars"],
+      ["🔥", summary.dayStreak, "day streak"],
+      ["🏅", Object.keys(summary.badges).length + "/" + KlgProgress.BADGES.length, "badges"],
+    ];
+    $("player-stats").innerHTML = stats.map((s) =>
+      '<div class="klg-player-stat text-center"><div>' + s[0] + " " + s[1] + '</div><div class="small fw-normal">' + s[2] + "</div></div>").join("");
+
+    const shelf = $("player-badges");
+    shelf.replaceChildren();
+    KlgProgress.BADGES.forEach((badge) => {
+      const earned = !!summary.badges[badge.id];
+      const chip = document.createElement("div");
+      chip.className = "klg-badge-chip" + (earned ? "" : " locked");
+      chip.title = earned ? badge.name + " — earned!" : badge.name + ": " + badge.hint;
+      chip.innerHTML = '<span class="kid-badge-pic" aria-hidden="true">' + badge.emoji + "</span><b></b>";
+      chip.querySelector("b").textContent = badge.name;
+      shelf.appendChild(chip);
+    });
+  }
+
+  /* ---------- the subject view ---------- */
+
+  function renderWorld(world) {
+    const cat = window.KlgCatalogue;
+    const subject = cat.SUBJECTS[world];
+    const name = subject ? subject.kid : "Favorites";
+    const icon = subject ? subject.icon : "♥";
+    const words = subject ? subject.say : "Favorites";
+    const head = $("world-head");
+    if (subject) head.dataset.subject = world;
+    else delete head.dataset.subject;
+    $("world-title").textContent = icon + " " + name;
+    $("world-say").replaceWith(Object.assign(speaker(words), { id: "world-say" }));
+
+    if (subject) writePref("klg-path", world);
+  }
+
+  /* ---------- views ---------- */
+
+  function route() {
+    const cat = window.KlgCatalogue;
+    const hash = location.hash.replace(/^#/, "");
+    let view = "home";
+    let world = "";
+    if (hash === "me" || hash === "all") view = hash;
+    else if (hash.indexOf("world/") === 0) {
+      const key = hash.slice(6);
+      if (cat.SUBJECTS[key] || key === "favorites") { view = "world"; world = key; }
+    }
+    document.body.dataset.view = view;
+    document.body.dataset.world = world;
+    document.querySelectorAll(".kid-view").forEach((section) => { section.hidden = section.dataset.view !== view; });
+    if (view === "home") renderHome();
+    if (view === "world") renderWorld(world);
+    if (view === "me") renderPlayer();
+    showCards();
+    window.scrollTo(0, 0);
+    if (!firstRoute) {
+      const title = document.querySelector('.kid-view[data-view="' + view + '"] h1');
+      if (title) title.focus({ preventScroll: true });
+    }
+    firstRoute = false;
+  }
+
+  /* ---------- the grown-up report ---------- */
+
   function sparkline(values) {
     if (values.length < 2) return "";
-    var w = 90, h = 24;
-    var pts = values.map(function (v, i) {
-      return (i * (w / (values.length - 1))).toFixed(1) + "," + (h - 2 - (v / 100) * (h - 4)).toFixed(1);
-    }).join(" ");
+    const w = 90, h = 24;
+    const pts = values.map((v, i) => (i * (w / (values.length - 1))).toFixed(1) + "," + (h - 2 - (v / 100) * (h - 4)).toFixed(1)).join(" ");
     return '<svg class="spark" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="Last ' + values.length + " scores: " + values.join("%, ") + '%"><polyline points="' + pts + '" fill="none" stroke="#4055b5" stroke-width="2"/></svg>';
   }
 
-  function skillRows(summary) {
-    var cat = window.KlgCatalogue;
-    var rows = {};
-    cat.GAMES.forEach(function (g) {
-      var st = summary.games[g.id];
-      g.skills.forEach(function (tag) {
-        var r = rows[tag] || (rows[tag] = { tag: tag, subject: g.subject, games: [], played: [], stars: 0, recent: [], last: "" });
+  function skillRows(current) {
+    const rows = {};
+    KlgCatalogue.GAMES.forEach((g) => {
+      const st = current.games[g.id];
+      g.skills.forEach((tag) => {
+        const r = rows[tag] || (rows[tag] = { tag, subject: g.subject, games: [], played: [], stars: 0, recent: [], last: "" });
         r.games.push(g);
         if (st) {
           r.played.push(g);
@@ -263,17 +426,17 @@
         }
       });
     });
-    return Object.keys(rows).map(function (k) { return rows[k]; });
+    return Object.keys(rows).map((k) => rows[k]);
   }
 
-  function nextGameAfter(game, summary) {
-    var cat = window.KlgCatalogue;
-    for (var key in cat.PATHS) {
-      var steps = cat.PATHS[key].steps;
-      var i = steps.findIndex(function (s) { return s.game === game.id; });
+  function nextGameAfter(game, current) {
+    const cat = window.KlgCatalogue;
+    for (const key in cat.PATHS) {
+      const steps = cat.PATHS[key].steps;
+      const i = steps.findIndex((s) => s.game === game.id);
       if (i >= 0) {
-        for (var j = i + 1; j < steps.length; j++) {
-          var st = summary.games[steps[j].game];
+        for (let j = i + 1; j < steps.length; j++) {
+          const st = current.games[steps[j].game];
           if (!st || !st.bestStars) return cat.byId(steps[j].game);
         }
       }
@@ -281,158 +444,131 @@
     return null;
   }
 
-  function renderReport() {
-    var box = document.getElementById("parent-report");
-    var cat = window.KlgCatalogue;
-    if (!box || !cat) return;
-    var summary = KlgProgress.summary();
-    var rows = skillRows(summary);
-    var avg = function (r) { return r.recent.length ? r.recent.reduce(function (a, b) { return a + b; }, 0) / r.recent.length : null; };
+  function skillName(tag) {
+    const names = KlgCatalogue.SKILL_NAMES || {};
+    return names[tag] || tag.split(".")[1].replace(/-/g, " ");
+  }
 
-    var practise = rows.filter(function (r) { var a = avg(r); return a !== null && a < 60; });
-    var ready = [];
-    rows.filter(function (r) { return r.stars === 3; }).forEach(function (r) {
-      var done = r.played.filter(function (g) { return summary.games[g.id].bestStars === 3; })[0];
-      var next = done && nextGameAfter(done, summary);
-      if (next && !ready.some(function (x) { return x.id === next.id; })) ready.push(next);
+  /** For the grown-up report: the questions this child has missed most often. */
+  function trickyHtml() {
+    const cat = window.KlgCatalogue;
+    const list = KlgProgress.review.tricky(10);
+    if (!list.length) return "";
+    const waiting = KlgProgress.review.summary();
+    let html = '<h4>🔁 Tricky questions</h4><p class="report-note">' + (waiting.due + waiting.waiting) +
+      " saved for review, " + waiting.cleared + " mastered so far.</p>" +
+      '<table class="report-table report-tricky"><thead><tr><th>Question</th><th>Answer</th><th>Missed</th></tr></thead><tbody>';
+    list.forEach((item) => {
+      const game = cat.byId(item.gameId);
+      html += "<tr><td>" + esc(item.prompt) + (game ? " <small>" + esc(game.name) + "</small>" : "") + "</td><td>" + esc(item.answer || "–") + "</td><td>" + item.misses + "×</td></tr>";
+    });
+    return html + "</tbody></table>";
+  }
+
+  function renderReport() {
+    const box = $("parent-report");
+    const cat = window.KlgCatalogue;
+    const current = KlgProgress.summary();
+    const rows = skillRows(current);
+    const avg = (r) => (r.recent.length ? r.recent.reduce((a, b) => a + b, 0) / r.recent.length : null);
+
+    const practise = rows.filter((r) => { const a = avg(r); return a !== null && a < 60; });
+    const ready = [];
+    rows.filter((r) => r.stars === 3).forEach((r) => {
+      const done = r.played.filter((g) => current.games[g.id].bestStars === 3)[0];
+      const next = done && nextGameAfter(done, current);
+      if (next && !ready.some((x) => x.id === next.id)) ready.push(next);
     });
 
-    var html = "<h3>Progress report</h3>";
-    if (!summary.gamesPlayed) {
+    let html = "<h3>Progress report</h3>";
+    if (!current.gamesPlayed) {
       box.innerHTML = html + "<p>No rounds yet. Once your child plays, you will see stars and recent scores for each skill here.</p>";
       return;
     }
-    html += '<p class="report-summary"><b>Needs practice:</b> ' + (practise.length ? practise.map(function (r) { return esc(skillName(r.tag)); }).join(", ") : "nothing right now 🎉") +
-      '<br><b>Ready for next:</b> ' + (ready.length ? ready.slice(0, 4).map(function (g) { return '<a href="games/' + g.id + '/index.html">' + esc(g.icon + " " + g.name) + "</a>"; }).join(", ") : "keep earning stars on the current games") + "</p>";
+    html += '<p class="report-summary"><b>Needs practice:</b> ' + (practise.length ? practise.map((r) => esc(skillName(r.tag))).join(", ") : "nothing right now 🎉") +
+      "<br><b>Ready for next:</b> " + (ready.length ? ready.slice(0, 4).map((g) => '<a href="games/' + g.id + '/index.html">' + esc(g.icon + " " + g.name) + "</a>").join(", ") : "keep earning stars on the current games") + "</p>";
 
-    Object.keys(cat.SUBJECTS).forEach(function (subject) {
-      var list = rows.filter(function (r) { return r.subject === subject && r.played.length; });
+    Object.keys(cat.SUBJECTS).forEach((subject) => {
+      const list = rows.filter((r) => r.subject === subject && r.played.length);
       if (!list.length) return;
       html += "<h4>" + esc(cat.SUBJECTS[subject].label) + '</h4><table class="report-table"><thead><tr><th>Skill</th><th>Stars</th><th>Recent scores</th><th>Last played</th></tr></thead><tbody>';
-      list.forEach(function (r) {
-        var a = avg(r);
+      list.forEach((r) => {
+        const a = avg(r);
         html += "<tr" + (a !== null && a < 60 ? ' class="weak"' : "") + "><td>" + esc(skillName(r.tag)) + "</td><td>" + "⭐".repeat(r.stars) + "☆".repeat(3 - r.stars) + "</td><td>" +
           (r.recent.length ? sparkline(r.recent) + " <small>" + Math.round(a) + "% avg</small>" : "–") + "</td><td>" + esc(r.last || "–") + "</td></tr>";
       });
       html += "</tbody></table>";
     });
+    html += trickyHtml();
     html += '<button type="button" class="print-report" id="print-report">Print this report</button>';
     box.innerHTML = html;
-    document.getElementById("print-report").addEventListener("click", function () { window.print(); });
+    $("print-report").addEventListener("click", () => window.print());
   }
-
-  function skillName(tag) {
-    var names = (window.KlgCatalogue && window.KlgCatalogue.SKILL_NAMES) || {};
-    return names[tag] || tag.split(".")[1].replace(/-/g, " ");
-  }
-
 
   /** Tells grown-ups whether the games are saved on this device yet. */
   function renderOfflineStatus() {
-    var el = document.getElementById("offline-status");
-    if (!el) return;
+    const el = $("offline-status");
     if (!("serviceWorker" in navigator) || !window.caches) { el.textContent = "This browser cannot save the games for offline use."; return; }
-    caches.keys().then(function (keys) {
-      var key = keys.filter(function (k) { return k.indexOf("klg-") === 0; }).pop();
+    caches.keys().then((keys) => {
+      const key = keys.filter((k) => k.indexOf("klg-") === 0).pop();
       if (!key) { el.textContent = "Saving the games for offline use… keep this page open for a minute while online."; return; }
-      return caches.open(key).then(function (c) { return c.keys(); }).then(function (list) {
+      return caches.open(key).then((c) => c.keys()).then((list) => {
         el.textContent = "✓ Saved on this device for offline use (" + list.length + " files).";
       });
-    }).catch(function () { el.textContent = ""; });
+    }).catch(() => { el.textContent = ""; });
   }
 
-  function wireButtons() {
-    document.getElementById("surprise-btn").addEventListener("click", function () {
-      var all = cards().filter(function (card) { return !card.closest(".game-tile").hidden; }).map(cardInfo);
-      if (!all.length) return;
-      if (window.KlgSounds) KlgSounds.click();
-      window.location.href = all[Math.floor(Math.random() * all.length)].href;
+  function openParentDialog() {
+    const current = KlgProgress.summary();
+    renderReport();
+    renderOfflineStatus();
+    $("parent-summary").textContent = current.gamesPlayed + " activities explored · " + current.plays + " rounds completed · " + current.stars + " stars earned.";
+    const list = $("parent-badge-list");
+    list.replaceChildren();
+    KlgProgress.BADGES.forEach((badge) => {
+      const item = document.createElement("div");
+      item.className = "parent-badge";
+      item.textContent = badge.emoji + " " + badge.name + (current.badges[badge.id] ? " · earned" : " · " + badge.hint);
+      list.appendChild(item);
     });
+    $("parent-dialog").showModal();
+  }
 
-    document.getElementById("reset-progress").addEventListener("click", function () {
-      var ok = window.confirm(
-        "Start over? This clears your XP, stars, badges and streak on this device."
-      );
-      if (!ok) return;
+  /* ---------- start ---------- */
+
+  function wireButtons() {
+    $("surprise-btn").addEventListener("click", () => {
+      const list = KlgCatalogue.GAMES;
+      if (window.KlgSounds) KlgSounds.click();
+      window.location.href = "games/" + list[Math.floor(Math.random() * list.length)].id + "/index.html";
+    });
+    $("reset-progress").addEventListener("click", () => {
+      if (!window.confirm("Start over? This clears your XP, stars, badges and streak on this device.")) return;
       KlgProgress.reset();
       window.location.reload();
     });
+    $("parent-open").addEventListener("click", openParentDialog);
+    $("parent-close").addEventListener("click", () => $("parent-dialog").close());
+    $("see-all-grownup").addEventListener("click", () => $("parent-dialog").close());
+    $("home-title-say").replaceWith(Object.assign(speaker("What shall we play?"), { id: "home-title-say" }));
+    const nextSay = speaker(() => "Play next: " + spokenName(KlgCatalogue.byId($("play-next").getAttribute("href").split("/")[1])), "Play next");
+    $("play-next-wrap").appendChild(nextSay);
+    window.addEventListener("hashchange", route);
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    if (!window.KlgProgress) return;
-    var summary = KlgProgress.summary();
-    renderLibrary();
-    renderPlayer(summary);
-    decorateCards(summary);
-    renderDaily(summary);
-    renderPaths(summary);
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!window.KlgProgress || !window.KlgCatalogue) return;
+    summary = KlgProgress.summary();
+    try {
+      const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+      if (Array.isArray(parsed)) favorites = parsed.filter((id) => typeof id === "string");
+    } catch (e) { /* no saved favorites */ }
+    renderCards();
+    decorateCards();
+    renderWorldTiles();
+    wireFilters();
     wireButtons();
-    document.getElementById("parent-open").addEventListener("click", renderReport);
-    document.getElementById("parent-open").addEventListener("click", renderOfflineStatus);
+    paintTopBar();
+    route();
   });
 })();
-
-// Library discovery stays independent of progress storage.
-document.addEventListener('DOMContentLoaded', () => {
-  const tiles = [...document.querySelectorAll('.game-card[data-game]')];
-  let favorites = [];
-  try { const saved = JSON.parse(localStorage.getItem('klg-favorites') || '[]'); if (Array.isArray(saved)) favorites = saved.filter(id => typeof id === 'string'); } catch (_) {}
-  let subject = 'all';
-  const search = document.getElementById('game-search');
-  const level = document.getElementById('level-filter');
-  function filter() {
-    let count = 0;
-    tiles.forEach(card => {
-      const matches = card.textContent.toLowerCase().includes(search.value.trim().toLowerCase()) &&
-        (level.value === 'all' || card.closest('section').id === 'level-' + level.value) &&
-        (subject === 'all' || (subject === 'favorites' ? favorites.includes(card.dataset.game) : card.dataset.subject === subject));
-      card.closest('.game-tile').hidden = !matches;
-      if (matches) count++;
-    });
-    document.querySelectorAll('section[id^="level-"]').forEach(section => {
-      section.hidden = ![...section.querySelectorAll('.game-tile')].some(tile => !tile.hidden);
-    });
-    document.getElementById('filter-status').textContent = `${count} ${count === 1 ? 'game' : 'games'} to explore · Choose what sparks your curiosity`;
-    document.getElementById('empty-games').hidden = count !== 0;
-    document.getElementById('surprise-btn').disabled = count === 0;
-  }
-  tiles.forEach(card => {
-    const id = card.dataset.game;
-    const tile = card.closest('a').parentElement;
-    tile.classList.add('game-tile');
-    const favorite = document.createElement('button');
-    favorite.className = 'favorite-button';
-    favorite.type = 'button';
-    function paint() { const selected = favorites.includes(id); favorite.textContent = selected ? '♥' : '♡'; favorite.setAttribute('aria-pressed', String(selected)); favorite.setAttribute('aria-label', `Favorite ${card.querySelector('h3').textContent}`); }
-    paint();
-    favorite.addEventListener('click', () => { favorites = favorites.includes(id) ? favorites.filter(value => value !== id) : [...favorites,id]; try { localStorage.setItem('klg-favorites', JSON.stringify(favorites)); } catch (_) {} paint(); filter(); });
-    tile.appendChild(favorite);
-  });
-  search.addEventListener('input', filter);
-  level.addEventListener('change', filter);
-  document.querySelectorAll('.subject-tabs button').forEach(button => button.addEventListener('click', () => {
-    subject = button.dataset.subject;
-    document.querySelectorAll('.subject-tabs button').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
-    filter();
-  }));
-  document.getElementById('clear-filters').addEventListener('click', () => { search.value = ''; level.value = 'all'; document.querySelector('[data-subject="all"]').click(); search.focus(); });
-  const dialog = document.getElementById('parent-dialog');
-  document.getElementById('parent-open').addEventListener('click', () => {
-    const summary = KlgProgress.summary();
-    document.getElementById('parent-summary').textContent = `${summary.gamesPlayed} activities explored · ${summary.plays} rounds completed · ${summary.stars} stars earned.`;
-    const shelf = document.getElementById('player-badges');
-    dialog.appendChild(shelf);
-    shelf.classList.add('parent-badges');
-    shelf.replaceChildren();
-    KlgProgress.BADGES.forEach(badge => {
-      const item = document.createElement('div');
-      item.className = 'parent-badge';
-      item.textContent = badge.emoji + ' ' + badge.name + (summary.badges[badge.id] ? ' · earned' : ' · ' + badge.hint);
-      shelf.appendChild(item);
-    });
-    dialog.showModal();
-  });
-  document.getElementById('parent-close').addEventListener('click', () => dialog.close());
-  filter();
-});

@@ -15,18 +15,7 @@
   const level = Number(new URLSearchParams(location.search).get("level")) === 2 ? 2 : 1;
   KlgGameKit.modeLinks(document.getElementById("level-links"), "level", "1");
 
-  const SHORT = [
-    ["🐱", "The cat sat."], ["🐶", "The dog ran."], ["🐸", "The frog jumps."], ["🌞", "The sun is hot."], ["🐦", "A bird can fly."],
-    ["🐟", "Fish can swim."], ["🍎", "I eat an apple."], ["🌧️", "It is raining."], ["🚗", "The car is red."], ["🐷", "The pig is big."],
-    ["🐝", "A bee can buzz."], ["🦆", "The duck swims."], ["⚽", "I kick the ball."], ["📖", "I read a book."], ["🌙", "The moon is up."],
-  ];
-  const LONG = [
-    ["🐱", "The cat sat on the mat."], ["🐶", "The dog ran to the park."], ["🐸", "The frog jumps into the pond."], ["🐦", "The bird sings in the tree."],
-    ["🚲", "The boy rides his red bike."], ["🍏", "The girl eats a big apple."], ["☔", "We use an umbrella when it rains."], ["🐢", "The slow turtle walks to the lake."],
-    ["🐘", "The big elephant drinks water."], ["🚌", "The bus takes us to school."], ["🍰", "We eat cake on my birthday."], ["🏊", "She swims in the pool."],
-    ["🌻", "The flower grows in the garden."], ["🐝", "The bee flies to a flower."],
-  ];
-  const BANK = level === 1 ? SHORT : LONG;
+  const BANK = level === 1 ? window.KlgQuestions.SHORT : window.KlgQuestions.LONG;
 
   KlgRound.run({
     total: 6,
