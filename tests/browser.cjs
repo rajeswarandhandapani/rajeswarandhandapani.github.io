@@ -113,6 +113,28 @@ async function noOverflow(page, label) {
   await exercise(page, 'lat-pulldown').getByRole('button', { name: /Lat pulldown \(planned\)/ }).click();
   assert.equal(await exercise(page, 'lat-pulldown').locator('h3').textContent(), 'Lat pulldown');
 
+  // A third set: added, carrying the weight down, and counted.
+  const setRows = id => exercise(page, id).locator('.set:not(.head)');
+  assert.equal(await exercise(page, 'chest-press').getByRole('button', { name: /^Remove last set/ }).count(), 0, 'nothing extra to remove yet');
+  await weight(page, 'chest-press', 0).fill('40');
+  await exercise(page, 'chest-press').getByRole('button', { name: 'Add set to Chest press machine' }).click();
+  assert.equal(await setRows('chest-press').count(), 3);
+  assert.equal(await weight(page, 'chest-press', 2).inputValue(), '40');
+  assert.equal(await testId(page, 'set-count').textContent(), '4 of 13 sets');
+  for (const n of [0, 1, 2]) { await tick(page, 'chest-press', n).click(); await page.getByRole('button', { name: 'Skip' }).click(); }
+  assert.equal(await testId(page, 'set-count').textContent(), '7 of 13 sets');
+  assert.ok(await exercise(page, 'chest-press').evaluate(e => e.classList.contains('complete')));
+  await exercise(page, 'chest-press').getByRole('button', { name: /^Remove last set/ }).click();
+  await page.locator('#toast', { hasText: 'Untick the last set' }).waitFor();
+  assert.equal(await setRows('chest-press').count(), 3, 'a ticked set is not removed');
+
+  // An added set that isn't wanted can be taken away again.
+  await exercise(page, 'seated-row').getByRole('button', { name: /^Add set to/ }).click();
+  assert.equal(await testId(page, 'set-count').textContent(), '7 of 14 sets');
+  await exercise(page, 'seated-row').getByRole('button', { name: /^Remove last set/ }).click();
+  assert.equal(await setRows('seated-row').count(), 2);
+  assert.equal(await testId(page, 'set-count').textContent(), '7 of 13 sets');
+
   // Warm-up, Apple Watch reminder and a timed stretch.
   const pre = page.locator('[data-routine="gym-pre"]');
   const post = page.locator('[data-routine="gym-post"]');
@@ -134,8 +156,9 @@ async function noOverflow(page, label) {
   await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
   await prevDay(page); await prevDay(page);
   await testId(page, 'set-count').waitFor();
-  assert.equal(await testId(page, 'set-count').textContent(), '4 of 12 sets');
+  assert.equal(await testId(page, 'set-count').textContent(), '7 of 13 sets');
   assert.equal(await tick(page, 'leg-press', 0).getAttribute('aria-pressed'), 'true');
+  assert.equal(await tick(page, 'chest-press', 2).getAttribute('aria-pressed'), 'true', 'the third set is saved');
   assert.equal(await exercise(page, 'seated-row').locator('h3').textContent(), 'Single-arm dumbbell row');
   assert.equal(await testId(page, 'gym-pre-count').textContent(), '1 of 6');
   assert.equal(await testId(page, 'gym-post-count').textContent(), '7 of 7');
@@ -167,9 +190,82 @@ async function noOverflow(page, label) {
   assert.equal(await weight(page, 'leg-press', 0).inputValue(), '60');
   assert.ok(await exercise(page, 'leg-press').getByText('Last, Nov 9: 60 lb × 12, 60 lb × 12').isVisible());
   assert.ok(await exercise(page, 'leg-press').getByText('try a small increase').isVisible());
+  assert.equal(await setRows('chest-press').count(), 3, 'three sets carry to the next session');
+  assert.equal(await weight(page, 'chest-press', 2).inputValue(), '40');
+  assert.equal(await testId(page, 'set-count').textContent(), '0 of 13 sets');
+  await exercise(page, 'chest-press').getByRole('button', { name: /^Remove last set/ }).click();
+  assert.equal(await setRows('chest-press').count(), 2, 'and can go back to the plan');
+  assert.equal(await testId(page, 'set-count').textContent(), '0 of 12 sets');
   assert.equal(await exercise(page, 'seated-row').locator('h3').textContent(), 'Seated row', 'a swap lasts one day');
   assert.equal(await weight(page, 'seated-row', 0).inputValue(), '', 'dumbbell weights do not pre-fill the machine');
   await page.screenshot({ path: path.join(OUT, 'today.png'), fullPage: true });
+
+  // Remove an exercise for today only, and undo it.
+  const cards = page.locator('.exercise');
+  await exercise(page, 'plank').getByRole('button', { name: 'Remove Plank' }).click();
+  await exercise(page, 'plank').getByRole('button', { name: 'Today only' }).click();
+  assert.equal(await cards.count(), 5);
+  assert.equal(await testId(page, 'set-count').textContent(), '0 of 10 sets');
+  await page.getByRole('button', { name: 'Undo' }).click();
+  assert.equal(await cards.count(), 6);
+  await exercise(page, 'plank').getByRole('button', { name: 'Remove Plank' }).click();
+  await exercise(page, 'plank').getByRole('button', { name: 'Today only' }).click();
+
+  // Other days keep it, and a logged exercise can't be removed by accident.
+  await prevDay(page); await prevDay(page);
+  await page.getByRole('heading', { name: 'Monday, November 9' }).waitFor();
+  assert.equal(await tick(page, 'plank', 0).getAttribute('aria-pressed'), 'true');
+  await exercise(page, 'leg-press').getByRole('button', { name: 'Remove Leg press' }).click();
+  await page.locator('#toast', { hasText: 'Untick this exercise' }).waitFor();
+  assert.equal(await exercise(page, 'leg-press').getByRole('button', { name: 'Every workout' }).isVisible(), false);
+  await nextDay(page); await nextDay(page);
+  await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
+
+  // Remove from every workout, then add it back for today only.
+  await exercise(page, 'lat-pulldown').getByRole('button', { name: 'Remove Lat pulldown' }).click();
+  await exercise(page, 'lat-pulldown').getByRole('button', { name: 'Every workout' }).click();
+  assert.equal(await cards.count(), 4);
+  assert.equal(await testId(page, 'set-count').textContent(), '0 of 8 sets');
+  const addPanel = async () => page.getByRole('button', { name: '+ Add exercise' }).click();
+  await addPanel();
+  await page.getByRole('combobox', { name: 'Add to' }).selectOption('today');
+  await page.getByRole('combobox', { name: 'Exercise to add' }).selectOption('lat-pulldown');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  assert.equal(await cards.count(), 5);
+  assert.equal(await testId(page, 'set-count').textContent(), '0 of 10 sets');
+
+  // Create an exercise that joins every workout.
+  await addPanel();
+  await page.getByRole('button', { name: 'Create and add' }).click();
+  await page.locator('#toast', { hasText: 'Enter a name' }).waitFor();
+  await page.getByRole('textbox', { name: 'New exercise name' }).fill('leg press');
+  await page.getByRole('button', { name: 'Create and add' }).click();
+  await page.locator('#toast', { hasText: 'already exists' }).waitFor();
+  await page.getByRole('textbox', { name: 'New exercise name' }).fill('Cable crunch');
+  await page.getByRole('combobox', { name: 'New exercise type' }).selectOption('reps');
+  await page.getByRole('button', { name: 'Create and add' }).click();
+  const crunch = page.locator('.exercise', { hasText: 'Cable crunch' });
+  assert.equal(await crunch.locator('.set:not(.head)').first().locator('input').count(), 1, 'reps only, no weight box');
+  assert.equal(await cards.count(), 6);
+
+  // A mistaken exercise can be deleted while it has no history.
+  await addPanel();
+  await page.getByRole('combobox', { name: 'Add to' }).selectOption('today');
+  await page.getByRole('textbox', { name: 'New exercise name' }).fill('Temp move');
+  await page.getByRole('button', { name: 'Create and add' }).click();
+  assert.equal(await cards.count(), 7);
+  await nav(page, 'Data');
+  await page.getByRole('button', { name: 'Delete Temp move' }).click();
+  await nav(page, 'Today');
+  await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
+  assert.equal(await cards.count(), 6);
+
+  // All of that survives a reload.
+  await page.reload();
+  await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
+  assert.equal(await cards.count(), 6);
+  assert.equal(await exercise(page, 'plank').count(), 0);
+  assert.equal(await crunch.count(), 1);
 
   // Text in a note is only ever text.
   const note = page.getByRole('textbox', { name: 'Note for this day' });
@@ -233,6 +329,13 @@ async function noOverflow(page, label) {
   assert.equal(await testId(page, 'week-cardio').textContent(), '25 of 150 min');
   assert.equal(await page.getByRole('textbox', { name: 'Note for this day' }).inputValue(), '<img src=x onerror="window.__xss=1">');
   assert.equal(await page.evaluate(() => window.__xss), undefined);
+
+  // The routine and created exercises come back with a backup, and can be logged.
+  const restored = page.locator('.exercise', { hasText: 'Cable crunch' });
+  assert.equal(await page.locator('.exercise').count(), 6);
+  await restored.locator('.tick').first().click();
+  await page.getByRole('button', { name: 'Skip' }).click();
+  assert.equal(await testId(page, 'set-count').textContent(), '1 of 12 sets');
 
   // Narrowest phones.
   await page.setViewportSize({ width: 320, height: 640 });

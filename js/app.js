@@ -5,16 +5,17 @@ import { h, select, toast, confirmIt, download, longDate, shortDate, dayLetter, 
 import { startRest, stopRest } from './timer.js';
 import { weeklyBars, lineChart } from './charts.js';
 import {
-  CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
-  PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, TOTAL_SETS, WEEKS, alternatesOf, cardioName, moveById, phaseOf, target,
+  CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
+  MAX_SETS, PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, WEEKS, alternatesOf, cardioName, customMove, lookupMove, phaseOf, target,
 } from './plan.js';
 import {
-  addDays, cardioOf, cleanSettings, exerciseHistory, fromIso, isEmptyDay, lastCardio, lastPerformance, localToday, makeBackup, mondayOf,
-  moderateMinutes, nextMonday, num, parseBackup, programRows, programTotals, programWeek, readyToIncrease, setsDone, statusOf, weekDates, weekSummary, weekdayOf,
+  addDays, cardioOf, cleanSettings, dayExerciseIds, exerciseHistory, fromIso, isEmptyDay, lastCardio, lastPerformance, localToday, makeBackup, mondayOf,
+  moderateMinutes, nextMonday, num, parseBackup, programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, statusOf, weekDates, weekSummary, weekdayOf,
 } from './logic.js';
 
 const main = document.querySelector('#main');
-const DEFAULTS = { startDate: null, rest: 90, beep: true };
+// `routine` is the list of exercise ids for gym days. Null means the plan's own list.
+const DEFAULTS = { startDate: null, rest: 90, beep: true, routine: null, custom: [] };
 const S = {
   view: 'today',
   today: localToday(),
@@ -185,7 +186,7 @@ function setRow(day, ex, i, last, rows, afterChange) {
     saveDay(day);
     afterChange();
     if (!done) return;
-    if (setsDone(day) === TOTAL_SETS) {
+    if (setsDone(day) === totalSets(day)) {
       stopRest();
       toast('All sets done. Finish with your cool-down and stretches.');
     } else {
@@ -208,27 +209,99 @@ function setRow(day, ex, i, last, rows, afterChange) {
 }
 
 const setText = (ex, s) => (ex.weighted ? `${s.weight} lb × ${s.value}` : `${s.value} ${ex.unit}`);
+const findMove = id => lookupMove(S.settings.custom, id);
+const allMoves = () => [...MOVES, ...S.settings.custom.map(customMove)];
+const routineIds = () => S.settings.routine ?? EXERCISES.map(e => e.id);
+const daySlots = day => dayExerciseIds(day, routineIds()).map(findMove).filter(Boolean);
+const activeMove = (day, slot) => findMove(day.gym?.swaps?.[slot.id]) || slot;
+const totalSets = day => daySlots(day).reduce((n, slot) => {
+  const ex = activeMove(day, slot);
+  return n + setCountFor(day, ex, lastPerformance(S.days, ex.id, day.date));
+}, 0);
 
 /** `slot` is the exercise in the plan. What is actually logged can be one of its alternates. */
 function exerciseCard(day, slot, afterChange) {
-  const ex = moveById(day.gym?.swaps?.[slot.id]) || slot;
+  const ex = activeMove(day, slot);
   const swapped = ex.id !== slot.id;
   const last = lastPerformance(S.days, ex.id, day.date);
   const rows = [];
-  for (let i = 0; i < ex.sets; i++) rows.push(setRow(day, ex, i, last, rows, () => { paint(); afterChange(); }));
+  const count = setCountFor(day, ex, last);
+  for (let i = 0; i < count; i++) rows.push(setRow(day, ex, i, last, rows, () => { paint(); afterChange(); }));
+
+  function redraw() {
+    saveDay(day);
+    card.replaceWith(exerciseCard(day, slot, afterChange));
+    afterChange();
+  }
+
+  function addSet() {
+    rows.forEach(r => r.write());
+    const list = day.gym.sets[ex.id];
+    list[count] = { ...list[count - 1], done: false };
+    day.gym.counts ||= {};
+    day.gym.counts[ex.id] = count + 1;
+    redraw();
+  }
+
+  function removeSet() {
+    if (rows[count - 1].isDone()) { toast('Untick the last set before removing it.'); return; }
+    day.gym ||= {};
+    day.gym.counts ||= {};
+    day.gym.counts[ex.id] = count - 1;
+    if (day.gym.sets?.[ex.id]) day.gym.sets[ex.id].length = Math.min(day.gym.sets[ex.id].length, count - 1);
+    redraw();
+  }
 
   function swapTo(move) {
     if (rows.some(r => r.isDone())) { toast('Untick the sets on this exercise before swapping.'); return; }
     day.gym ||= {};
     day.gym.swaps ||= {};
     if (day.gym.sets) delete day.gym.sets[ex.id];
+    if (day.gym.counts) delete day.gym.counts[ex.id];
     if (move.id === slot.id) delete day.gym.swaps[slot.id];
     else day.gym.swaps[slot.id] = move.id;
-    saveDay(day);
-    card.replaceWith(exerciseCard(day, slot, afterChange));
+    redraw();
   }
 
-  const choices = alternatesOf(slot).length ? [slot, ...alternatesOf(slot)].filter(m => m.id !== ex.id) : [];
+  function removeFrom(scope) {
+    const before = { routine: S.settings.routine, gym: structuredClone(day.gym ?? null) };
+    day.gym ||= {};
+    delete day.gym.sets?.[ex.id];
+    delete day.gym.counts?.[ex.id];
+    delete day.gym.swaps?.[slot.id];
+    day.gym.extra = (day.gym.extra || []).filter(id => id !== slot.id);
+    if (scope === 'always') {
+      S.settings.routine = routineIds().filter(id => id !== slot.id);
+      saveSettings();
+    } else if (routineIds().includes(slot.id)) {
+      day.gym.skip = [...(day.gym.skip || []), slot.id];
+    }
+    saveDay(day);
+    render();
+    toast(scope === 'always' ? `${ex.name} removed from your routine.` : `${ex.name} removed for this day.`, { label: 'Undo', run: () => {
+      S.settings.routine = before.routine;
+      saveSettings();
+      if (before.gym) day.gym = before.gym;
+      else delete day.gym;
+      saveDay(day);
+      render();
+    } });
+  }
+
+  const inRoutine = routineIds().includes(slot.id);
+  const removeBox = h('div', { class: 'remove-box', hidden: true },
+    h('span', { class: 'small-text' }, `Remove ${ex.name}?`),
+    h('div', { class: 'row' },
+      inRoutine && h('button', { class: 'ghost', type: 'button', onclick: () => removeFrom('today') }, 'Today only'),
+      h('button', { class: 'ghost', type: 'button', onclick: () => removeFrom('always') }, inRoutine ? 'Every workout' : 'Remove'),
+      h('button', { class: 'link', type: 'button', onclick: () => { removeBox.hidden = true; } }, 'Cancel')));
+  const removeButton = h('button', { class: 'link remove-ex', type: 'button', 'aria-label': `Remove ${ex.name}`, onclick: () => {
+    if (rows.some(r => r.isDone())) { toast('Untick this exercise’s sets before removing it.'); return; }
+    removeBox.hidden = !removeBox.hidden;
+  } }, 'Remove');
+
+  const taken = daySlots(day).map(s => activeMove(day, s).id);
+  const choices = alternatesOf(slot).length ? [slot, ...alternatesOf(slot)].filter(m => m.id !== ex.id && !taken.includes(m.id)) : [];
   const swapList = choices.length ? h('div', { class: 'swap-list', hidden: true },
     choices.map(m => h('button', { class: 'swap-option', type: 'button', onclick: () => swapTo(m) },
       h('strong', {}, m.id === slot.id ? `${m.name} (planned)` : m.name),
@@ -239,14 +312,18 @@ function exerciseCard(day, slot, afterChange) {
     h('div', { class: 'row between' },
       h('div', {}, h('h3', {}, ex.name), h('p', { class: 'muted small-text' }, swapped ? `Instead of ${slot.name}` : ex.focus)),
       h('span', { class: 'target' }, target(ex))),
-    swapped && h('p', { class: 'muted small-text' }, ex.how),
-    swapButton,
+    ex.how && h('p', { class: 'muted small-text' }, ex.how),
+    h('div', { class: 'card-tools' }, swapButton, removeButton),
     swapList,
+    removeBox,
     last && h('p', { class: 'muted small-text last-time' }, `Last, ${shortDate(last.date)}: ${last.sets.map(s => setText(ex, s)).join(', ')}`),
     readyToIncrease(last, ex) && h('p', { class: 'hint' }, 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
     h('div', { class: 'set head muted small-text', 'aria-hidden': 'true' },
       h('span', {}, 'Set'), h('span', {}, ex.weighted ? 'lb' : ''), h('span', {}, ex.unit), h('span', {})),
-    rows.map(r => r.row));
+    rows.map(r => r.row),
+    h('div', { class: 'set-actions' },
+      h('button', { class: 'ghost', type: 'button', 'aria-label': `Add set to ${ex.name}`, disabled: count >= MAX_SETS, onclick: addSet }, '+ Add set'),
+      count > ex.sets && h('button', { class: 'link', type: 'button', 'aria-label': `Remove last set from ${ex.name}`, onclick: removeSet }, 'Remove set')));
   function paint() { card.classList.toggle('complete', rows.every(r => r.isDone())); }
   paint();
   return card;
@@ -254,12 +331,66 @@ function exerciseCard(day, slot, afterChange) {
 
 function gymCard(day) {
   const counter = h('span', { class: 'muted', 'data-testid': 'set-count' });
-  const update = () => { counter.textContent = `${setsDone(day)} of ${TOTAL_SETS} sets`; };
+  const update = () => { counter.textContent = `${setsDone(day)} of ${totalSets(day)} sets`; };
   update();
   return h('section', { class: 'card stack' },
     h('div', { class: 'row between' }, h('h2', {}, 'Gym workout'), counter),
-    EXERCISES.map(ex => exerciseCard(day, ex, () => { update(); refreshWeek(); })),
+    daySlots(day).length === 0 && h('p', { class: 'muted' }, 'No exercises for this day. Add one below.'),
+    daySlots(day).map(ex => exerciseCard(day, ex, () => { update(); refreshWeek(); })),
+    addExercisePanel(day),
     h('p', { class: 'muted small-text' }, 'Use weights that leave about 2–3 good reps in reserve. Ask gym staff to check your form on anything new.'));
+}
+
+function addExercisePanel(day) {
+  const used = new Set(daySlots(day).flatMap(s => [s.id, activeMove(day, s).id]));
+  const available = allMoves().filter(m => !used.has(m.id));
+  const group = (label, moves) => moves.length > 0 && h('optgroup', { label }, moves.map(m => h('option', { value: m.id }, m.name)));
+  const picker = h('select', { 'aria-label': 'Exercise to add' },
+    group('From the plan', available.filter(m => !m.slot && !m.custom)),
+    group('Alternates', available.filter(m => m.slot)),
+    group('Your exercises', available.filter(m => m.custom)));
+  const scope = select('Add to', 'always', [['always', 'Every workout'], ['today', 'Today only']], () => {});
+  const name = h('input', { type: 'text', maxlength: 60, placeholder: 'For example, cable crunch', 'aria-label': 'New exercise name' });
+  const kind = select('New exercise type', 'weight', CUSTOM_KINDS, () => {});
+
+  function addToDay(id) {
+    const routine = routineIds();
+    day.gym ||= {};
+    const unskip = () => { day.gym.skip = (day.gym.skip || []).filter(x => x !== id); };
+    if (scope.value === 'always') {
+      unskip();
+      if (!routine.includes(id)) { S.settings.routine = [...routine, id]; saveSettings(); }
+    } else if (routine.includes(id)) {
+      unskip();
+    } else {
+      day.gym.extra = [...(day.gym.extra || []), id];
+    }
+    saveDay(day);
+    render();
+    toast(`${findMove(id).name} added.`);
+  }
+
+  function create() {
+    const title = name.value.trim();
+    if (!title) { toast('Enter a name for the exercise.'); name.focus(); return; }
+    if (allMoves().some(m => m.name.toLowerCase() === title.toLowerCase())) { toast('That exercise already exists. Choose it from the list.'); return; }
+    const id = `custom-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    S.settings.custom = [...S.settings.custom, { id, name: title, kind: kind.value }];
+    saveSettings();
+    addToDay(id);
+  }
+
+  const panel = h('div', { class: 'add-panel stack', hidden: true },
+    h('label', { class: 'field' }, h('span', {}, 'Add to'), scope),
+    available.length > 0 && h('label', { class: 'field' }, h('span', {}, 'Exercise'), picker),
+    available.length > 0 && h('button', { class: 'primary', type: 'button', onclick: () => addToDay(picker.value) }, 'Add'),
+    h('h3', { class: 'sub' }, 'Not listed? Create your own'),
+    h('label', { class: 'field' }, h('span', {}, 'Name'), name),
+    h('label', { class: 'field' }, h('span', {}, 'Type'), kind),
+    h('button', { class: 'ghost', type: 'button', onclick: create }, 'Create and add'));
+  return h('div', { class: 'stack' },
+    h('button', { class: 'ghost', type: 'button', onclick: () => { panel.hidden = !panel.hidden; } }, '+ Add exercise'),
+    panel);
 }
 
 const stamp = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
@@ -417,16 +548,16 @@ function weeklyCard(rows) {
 }
 
 function exerciseProgress() {
-  const ex = moveById(S.exercise);
+  const ex = findMove(S.exercise) || EXERCISES[0];
   const points = exerciseHistory(S.days, ex);
   const unit = ex.weighted ? 'lb' : ex.unit;
   const describe = p => p.sets.map(s => setText(ex, s)).join(', ');
-  const usedAlternates = MOVES.filter(m => m.slot && exerciseHistory(S.days, m).length);
+  const options = new Map([...routineIds().map(findMove).filter(Boolean), ex, ...allMoves().filter(m => exerciseHistory(S.days, m).length)].map(m => [m.id, m]));
   const title = ex.weighted ? 'Heaviest set' : ex.unit === 'sec' ? 'Longest hold' : 'Most reps';
   return h('section', { class: 'card' },
     h('div', { class: 'row between chart-head' },
       h('h2', {}, title),
-      select('Exercise', S.exercise, [...EXERCISES, ...usedAlternates].map(e => [e.id, e.name]), v => { S.exercise = v; render(); })),
+      select('Exercise', ex.id, [...options.values()].map(e => [e.id, e.name]), v => { S.exercise = v; render(); })),
     points.length
       ? [
         h('div', { class: 'chart' }, lineChart({ points, unit, describe })),
@@ -535,6 +666,18 @@ function dataView() {
       h('label', { class: 'field' }, h('span', {}, 'Rest between sets'),
         select('Rest between sets', S.settings.rest, [[60, '60 seconds'], [75, '75 seconds'], [90, '90 seconds']], async v => { S.settings.rest = Number(v); await saveSettings(); })),
       h('label', { class: 'check' }, beep, h('span', {}, 'Beep when rest ends'))),
+    S.settings.custom.length > 0 && h('section', { class: 'card stack' }, h('h2', {}, 'Your exercises'),
+      h('div', {}, S.settings.custom.map(made => h('div', { class: 'row between line' },
+        h('span', {}, made.name),
+        exerciseHistory(S.days, customMove(made)).length
+          ? h('span', { class: 'muted small-text' }, 'Has logged sets')
+          : h('button', { class: 'link', type: 'button', 'aria-label': `Delete ${made.name}`, onclick: async () => {
+            S.settings.custom = S.settings.custom.filter(m => m.id !== made.id);
+            if (S.settings.routine) S.settings.routine = S.settings.routine.filter(id => id !== made.id);
+            await saveSettings();
+            render();
+            toast(`${made.name} deleted.`);
+          } }, 'Delete'))))),
     h('section', { class: 'card stack' }, h('h2', {}, 'Backup'),
       h('p', {}, `${logged} ${logged === 1 ? 'day' : 'days'} logged on this device. Nothing is sent anywhere, so a backup is the only copy if this phone is lost.`),
       h('p', { class: 'muted' }, S.lastBackup ? `Last backup: ${shortDate(S.lastBackup.slice(0, 10))}` : 'No backup yet.'),

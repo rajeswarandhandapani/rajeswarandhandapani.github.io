@@ -1,6 +1,6 @@
 // Dates, totals and backup checks. No page access here, so all of it can be unit tested.
 
-import { CARDIO_GOAL, CARDIO_TYPES, MOVES, SCHEDULE, STEP_IDS, WEEKS, moveById } from './plan.js';
+import { CARDIO_GOAL, CARDIO_TYPES, CUSTOM_KINDS, MAX_SETS, SCHEDULE, STEP_IDS, WEEKS, lookupMove, moveById } from './plan.js';
 
 const pad = n => String(n).padStart(2, '0');
 export const toIso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -27,7 +27,20 @@ export const setsDone = day => Object.values(day?.gym?.sets || {}).reduce((n, li
 export const cardioOf = day => day?.cardio || [];
 export const moderateMinutes = day => cardioOf(day).filter(c => c.type !== 'gentle').reduce((n, c) => n + c.minutes, 0);
 
+/** The exercises for a day: the routine, this day's changes, and anything already logged that day. */
+export function dayExerciseIds(day, routine) {
+  const gym = day?.gym || {};
+  const skip = gym.skip || [];
+  const ids = [...routine.filter(id => !skip.includes(id)), ...(gym.extra || [])];
+  const slotOfSwap = Object.fromEntries(Object.entries(gym.swaps || {}).map(([slot, move]) => [move, slot]));
+  for (const [id, list] of Object.entries(gym.sets || {})) {
+    if (doneIn(list).length) ids.push(slotOfSwap[id] || id);
+  }
+  return [...new Set(ids)];
+}
+
 export const isEmptyDay = day => !setsDone(day) && !Object.keys(day?.gym?.swaps || {}).length && !Object.keys(day?.steps || {}).length
+  && !(day?.gym?.skip || []).length && !(day?.gym?.extra || []).length
   && !cardioOf(day).length && !day?.rest && !(day?.note || '').trim();
 
 /** What a calendar cell shows: gym, cardio, both, rest, missed, future or open. */
@@ -77,6 +90,14 @@ export function lastPerformance(days, id, before) {
   return null;
 }
 
+/** How many set rows to show: today's choice, else at least the plan and what was done last time. */
+export function setCountFor(day, ex, last) {
+  const chosen = day?.gym?.counts?.[ex.id];
+  const saved = day?.gym?.sets?.[ex.id] || [];
+  const lastTicked = saved.reduce((n, s, i) => (s?.done ? i + 1 : n), 0);
+  return Math.min(MAX_SETS, Math.max(chosen ?? Math.max(ex.sets, last?.sets.length ?? 0), lastTicked));
+}
+
 /** True when every set reached the top of the range last time. Plank is timed, so it never asks. */
 export const readyToIncrease = (last, ex) => Boolean(ex.weighted && last
   && last.sets.length >= ex.sets && last.sets.every(s => s.value >= ex.high));
@@ -108,15 +129,20 @@ function cleanSet(s) {
   return { weight: number(s?.weight), value: number(s?.value), done: s?.done === true };
 }
 
-function cleanDay(raw) {
+function cleanDay(raw, known) {
   const day = { date: raw.date };
   if (raw.gym && typeof raw.gym === 'object') {
     const sets = {};
-    for (const ex of MOVES) {
-      const list = raw.gym.sets?.[ex.id];
-      if (Array.isArray(list)) sets[ex.id] = list.slice(0, ex.sets).map(cleanSet);
+    for (const [id, list] of Object.entries(raw.gym.sets || {})) {
+      if (known(id) && Array.isArray(list)) sets[id] = list.slice(0, MAX_SETS).map(cleanSet);
     }
     day.gym = { sets };
+    const counts = Object.fromEntries(Object.entries(raw.gym.counts || {}).filter(([id, n]) => known(id) && Number.isInteger(n) && n >= 1 && n <= MAX_SETS));
+    if (Object.keys(counts).length) day.gym.counts = counts;
+    for (const key of ['skip', 'extra']) {
+      const ids = Array.isArray(raw.gym[key]) ? raw.gym[key].filter(id => typeof id === 'string' && known(id)) : [];
+      if (ids.length) day.gym[key] = ids;
+    }
     const swaps = Object.fromEntries(Object.entries(raw.gym.swaps || {}).filter(([slot, move]) => moveById(move)?.slot === slot));
     if (Object.keys(swaps).length) day.gym.swaps = swaps;
   }
@@ -135,8 +161,20 @@ function cleanDay(raw) {
   return day;
 }
 
+function cleanCustom(list) {
+  if (!Array.isArray(list)) return [];
+  const kinds = CUSTOM_KINDS.map(k => k[0]);
+  return list
+    .filter(m => /^custom-[\w-]+$/.test(m?.id ?? '') && typeof m.name === 'string' && m.name.trim() && kinds.includes(m.kind))
+    .slice(0, 100)
+    .map(m => ({ id: m.id, name: m.name.trim().slice(0, 60), kind: m.kind }));
+}
+
 export function cleanSettings(raw) {
   const out = {};
+  const custom = cleanCustom(raw?.custom);
+  if (custom.length) out.custom = custom;
+  if (Array.isArray(raw?.routine)) out.routine = [...new Set(raw.routine)].filter(id => typeof id === 'string' && lookupMove(custom, id));
   if (ISO.test(raw?.startDate ?? '')) out.startDate = raw.startDate;
   if ([60, 75, 90].includes(raw?.rest)) out.rest = raw.rest;
   if (typeof raw?.beep === 'boolean') out.beep = raw.beep;
@@ -150,6 +188,8 @@ export function parseBackup(text) {
   let file;
   try { file = JSON.parse(text); } catch { throw new Error(NOT_BACKUP); }
   if (file?.app !== APP || !Array.isArray(file.days)) throw new Error(NOT_BACKUP);
-  const days = file.days.filter(d => ISO.test(d?.date ?? '')).map(cleanDay).filter(d => !isEmptyDay(d));
-  return { settings: cleanSettings(file.settings), days };
+  const settings = cleanSettings(file.settings);
+  const known = id => lookupMove(settings.custom, id);
+  const days = file.days.filter(d => ISO.test(d?.date ?? '')).map(d => cleanDay(d, known)).filter(d => !isEmptyDay(d));
+  return { settings, days };
 }

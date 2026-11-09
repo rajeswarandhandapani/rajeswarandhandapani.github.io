@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   addDays, exerciseHistory, isEmptyDay, lastCardio, lastPerformance, makeBackup, mondayOf, moderateMinutes, nextMonday, parseBackup,
-  programRows, programTotals, programWeek, readyToIncrease, setsDone, statusOf, weekSummary,
+  programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, statusOf, weekSummary, dayExerciseIds,
 } from '../js/logic.js';
-import { EXERCISES, MOVES, ROUTINES, STEP_IDS, TOTAL_SETS, alternatesOf, moveById, target } from '../js/plan.js';
+import { lookupMove, customMove, MAX_SETS, EXERCISES, MOVES, ROUTINES, STEP_IDS, TOTAL_SETS, alternatesOf, moveById, target } from '../js/plan.js';
 
 const LEG = EXERCISES.find(e => e.id === 'leg-press');
 const PLANK = EXERCISES.find(e => e.id === 'plank');
@@ -47,6 +47,17 @@ test('an alternate keeps its own history, apart from the machine', () => {
   assert.equal(lastPerformance(days, 'goblet-squat', '2026-11-11').sets[0].weight, 25);
   assert.equal(setsDone(days['2026-11-09']), 2);
   assert.deepEqual(exerciseHistory(days, moveById('goblet-squat')).map(p => p.value), [25]);
+});
+
+test('set rows follow the plan, last session and today', () => {
+  const three = { sets: [set(60, 12), set(60, 12), set(60, 10)] };
+  assert.equal(setCountFor({}, LEG, null), 2, 'the plan by default');
+  assert.equal(setCountFor({}, LEG, { sets: [set(60, 12)] }), 2, 'never below the plan on its own');
+  assert.equal(setCountFor({}, LEG, three), 3, 'carries an extra set forward');
+  assert.equal(setCountFor({ gym: { counts: { 'leg-press': 2 } } }, LEG, three), 2, 'today wins');
+  assert.equal(setCountFor({ gym: { counts: { 'leg-press': 4 } } }, LEG, null), 4);
+  assert.equal(setCountFor({ gym: { counts: { 'leg-press': 2 }, sets: { 'leg-press': [set(1, 1), set(1, 1), set(1, 1)] } } }, LEG, null), 3, 'a ticked set is never hidden');
+  assert.equal(setCountFor({ gym: { counts: { 'leg-press': 99 } } }, LEG, null), MAX_SETS);
 });
 
 test('dates survive daylight-saving and month changes', () => {
@@ -178,6 +189,68 @@ test('backups round-trip', () => {
   assert.deepEqual(out.settings, settings);
 });
 
+test('backups cap sets and keep valid set counts', () => {
+  const file = JSON.stringify({ app: 'workout-tracker', days: [{ date: '2026-11-09', gym: {
+    sets: { 'leg-press': Array.from({ length: 20 }, () => set(60, 12)) },
+    counts: { 'leg-press': 3, 'chest-press': 99, nope: 2, plank: 1.5 },
+  } }] });
+  const [day] = parseBackup(file).days;
+  assert.equal(day.gym.sets['leg-press'].length, MAX_SETS);
+  assert.deepEqual(day.gym.counts, { 'leg-press': 3 });
+});
+
+test('a day follows the routine and its own changes', () => {
+  const routine = ['leg-press', 'plank'];
+  assert.deepEqual(dayExerciseIds({}, routine), routine);
+  assert.deepEqual(dayExerciseIds({ gym: { skip: ['plank'] } }, routine), ['leg-press']);
+  assert.deepEqual(dayExerciseIds({ gym: { extra: ['db-row'] } }, routine), ['leg-press', 'plank', 'db-row']);
+  assert.deepEqual(dayExerciseIds({ gym: { extra: ['plank'] } }, routine), routine, 'never listed twice');
+});
+
+test('logged work stays on its day after the routine changes', () => {
+  const day = { gym: { sets: { 'seated-row': [set(50, 12)], 'leg-curl': [set(30, 12, false)] } } };
+  assert.deepEqual(dayExerciseIds(day, ['plank']), ['plank', 'seated-row'], 'unticked drafts do not hold a place');
+  const swapped = { gym: { swaps: { 'leg-press': 'goblet-squat' }, sets: { 'goblet-squat': [set(25, 12)] } } };
+  assert.deepEqual(dayExerciseIds(swapped, ['plank']), ['plank', 'leg-press'], 'a swap stays under its exercise');
+});
+
+test('a day with only routine changes is kept', () => {
+  assert.equal(isEmptyDay({ date: 'x', gym: { skip: ['plank'] } }), false);
+  assert.equal(isEmptyDay({ date: 'x', gym: { extra: ['db-row'] } }), false);
+  assert.equal(isEmptyDay({ date: 'x', gym: { skip: [], extra: [] } }), true);
+});
+
+test('custom exercises get targets from their type', () => {
+  const custom = [{ id: 'custom-a', name: 'Crunch', kind: 'reps' }, { id: 'custom-b', name: 'Wall sit', kind: 'time' }, { id: 'custom-c', name: 'Curl', kind: 'weight' }];
+  assert.equal(lookupMove(custom, 'custom-a').weighted, false);
+  assert.equal(lookupMove(custom, 'custom-b').unit, 'sec');
+  assert.equal(lookupMove(custom, 'custom-c').weighted, true);
+  assert.equal(target(customMove(custom[0])), '2 × 10–12');
+  assert.equal(lookupMove(custom, 'leg-press').name, 'Leg press');
+  assert.equal(lookupMove(custom, 'custom-z'), undefined);
+});
+
+test('backups keep the routine and custom exercises, and drop bad ones', () => {
+  const file = JSON.stringify({ app: 'workout-tracker',
+    settings: {
+      routine: ['leg-press', 'custom-a', 'custom-gone', 'leg-press', 5],
+      custom: [{ id: 'custom-a', name: ' Crunch ', kind: 'reps' }, { id: 'evil', name: 'x', kind: 'reps' }, { id: 'custom-b', name: '', kind: 'reps' }, { id: 'custom-c', name: 'y', kind: 'magic' }],
+    },
+    days: [{ date: '2026-11-09', gym: { sets: { 'custom-a': [set(null, 10)], 'custom-gone': [set(null, 10)] }, skip: ['plank', 'nope'], extra: ['custom-a', 7] } }],
+  });
+  const { settings, days } = parseBackup(file);
+  assert.deepEqual(settings.custom, [{ id: 'custom-a', name: 'Crunch', kind: 'reps' }]);
+  assert.deepEqual(settings.routine, ['leg-press', 'custom-a']);
+  assert.deepEqual(Object.keys(days[0].gym.sets), ['custom-a']);
+  assert.deepEqual(days[0].gym.skip, ['plank']);
+  assert.deepEqual(days[0].gym.extra, ['custom-a']);
+});
+
+test('an empty routine survives a backup', () => {
+  const file = JSON.stringify({ app: 'workout-tracker', settings: { routine: [] }, days: [] });
+  assert.deepEqual(parseBackup(file).settings.routine, []);
+});
+
 test('bad backups are refused', () => {
   assert.throws(() => parseBackup('not json'), /not a Workout Tracker backup/);
   assert.throws(() => parseBackup('{"app":"other","days":[]}'), /not a Workout Tracker backup/);
@@ -203,7 +276,7 @@ test('backups drop anything unexpected', () => {
   const day = days[1];
   assert.equal(day.evil, undefined);
   assert.deepEqual(Object.keys(day.gym.sets), ['leg-press']);
-  assert.equal(day.gym.sets['leg-press'].length, 2, 'extra sets are cut');
+  assert.equal(day.gym.sets['leg-press'].length, 3, 'added sets are kept');
   assert.deepEqual(day.gym.sets['leg-press'][0], { weight: null, value: null, done: true });
   assert.equal(day.cardio.length, 1);
 });
