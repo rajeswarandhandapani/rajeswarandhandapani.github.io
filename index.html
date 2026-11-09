@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- The page may only talk to its own origin, so workout logs have nowhere to be sent. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; manifest-src 'self'; worker-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Workout Tracker</title>
+  <meta name="description" content="Private daily workout log for a 12-week heart-health plan.">
+  <meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <span class="brand">Workout Tracker</span>
+    <nav aria-label="Main">
+      <button data-view="today">Today</button>
+      <button data-view="progress">Progress</button>
+      <button data-view="plan">Plan</button>
+      <button data-view="data">Data</button>
+    </nav>
+  </header>
+  <main id="main"></main>
+  <div id="rest" class="rest" role="timer" aria-label="Timer" hidden>
+    <span id="rest-label">Rest</span>
+    <b id="rest-time">1:30</b>
+    <button type="button" data-rest="-15" aria-label="15 seconds less">−15</button>
+    <button type="button" data-rest="15" aria-label="15 seconds more">+15</button>
+    <button type="button" data-rest="skip">Skip</button>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
