@@ -1,6 +1,6 @@
 // Dates, totals and backup checks. No page access here, so all of it can be unit tested.
 
-import { CARDIO_GOAL, CARDIO_TYPES, CUSTOM_KINDS, MAX_SETS, SCHEDULE, STEP_IDS, WEEKS, lookupMove, moveById } from './plan.js';
+import { CARDIO_GOAL, CARDIO_TYPES, CUSTOM_KINDS, EFFORTS, MAX_SETS, SCHEDULE, STEP_IDS, WEEKS, WEIGHT_STEPS, lookupMove, moveById } from './plan.js';
 
 const pad = n => String(n).padStart(2, '0');
 export const toIso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -85,9 +85,49 @@ export function lastPerformance(days, id, before) {
   const dates = Object.keys(days).filter(d => d < before).sort().reverse();
   for (const date of dates) {
     const sets = doneIn(days[date].gym?.sets?.[id]);
-    if (sets.length) return { date, sets };
+    if (sets.length) return { date, sets, effort: days[date].gym?.effort?.[id] };
   }
   return null;
+}
+
+/**
+ * What to do next session, from the last session's sets and effort rating. Reps go up first and
+ * weight second, and weight only rises once every set reached the top of the range.
+ * Returns { action, weight, value, text }, or null without a rating.
+ */
+export function suggestNext(ex, last, { week = 99, step = 5 } = {}) {
+  if (!last?.effort || !last.sets?.length) return null;
+  const { effort, sets } = last;
+  const lowest = Math.min(...sets.map(s => s.value));
+  const atTop = sets.length >= ex.sets && lowest >= ex.high;
+
+  if (!ex.weighted) {
+    const bump = ex.unit === 'sec' ? 5 : 1;
+    const say = (action, value, text) => ({ action, weight: null, value, text: text || `Aim for ${value} ${ex.unit}.` });
+    if (effort === 'max') return say('decrease', Math.max(ex.low, lowest - 2 * bump), `Aim for ${Math.max(ex.low, lowest - 2 * bump)} ${ex.unit} with solid form.`);
+    if (effort === 'hard') return say('hold', lowest, `Stay at ${lowest} ${ex.unit} until it feels steadier.`);
+    if (lowest >= ex.high) return say('hold', ex.high, 'You are at the top of the range. Slow the movement down to make it harder.');
+    return say('increase', Math.min(ex.high, lowest + (effort === 'easy' ? 2 : 1) * bump));
+  }
+
+  const weight = sets[sets.length - 1].weight;
+  if (weight == null) return null;
+  const lighter = Math.max(step, Math.floor((weight * 0.9) / step) * step);
+  const hold = (value, text) => ({ action: 'hold', weight, value, text });
+  const drop = text => (lighter < weight
+    ? { action: 'decrease', weight: lighter, value: ex.low, text }
+    : hold(ex.low, `Stay at ${weight} lb and keep every rep controlled.`));
+  const raise = () => ({ action: 'increase', weight: weight + step, value: ex.low, text: `Try ${weight + step} lb for ${ex.low} reps if every rep feels controlled.` });
+
+  if (effort === 'max') return drop(`Drop to ${lighter} lb and keep every rep controlled.`);
+  if (effort === 'hard') return lowest < ex.low ? drop(`Drop to ${lighter} lb so you can reach ${ex.low} reps.`) : hold(lowest, `Stay at ${weight} lb until it feels steadier.`);
+  if (atTop) {
+    // Being able to do far more means the weight is too light, even while learning the movement.
+    if (effort === 'good' && week < 3) return hold(ex.high, `Weeks 1–2 are for technique, so stay at ${weight} lb.`);
+    return raise();
+  }
+  const value = effort === 'easy' ? ex.high : Math.min(ex.high, lowest + 1);
+  return hold(value, `Stay at ${weight} lb and aim for ${value} reps.`);
 }
 
 /** How many set rows to show: today's choice, else at least the plan and what was done last time. */
@@ -139,6 +179,9 @@ function cleanDay(raw, known) {
     day.gym = { sets };
     const counts = Object.fromEntries(Object.entries(raw.gym.counts || {}).filter(([id, n]) => known(id) && Number.isInteger(n) && n >= 1 && n <= MAX_SETS));
     if (Object.keys(counts).length) day.gym.counts = counts;
+    const ratings = EFFORTS.map(e => e.id);
+    const effort = Object.fromEntries(Object.entries(raw.gym.effort || {}).filter(([id, value]) => known(id) && ratings.includes(value)));
+    if (Object.keys(effort).length) day.gym.effort = effort;
     for (const key of ['skip', 'extra']) {
       const ids = Array.isArray(raw.gym[key]) ? raw.gym[key].filter(id => typeof id === 'string' && known(id)) : [];
       if (ids.length) day.gym[key] = ids;
@@ -177,6 +220,7 @@ export function cleanSettings(raw) {
   if (Array.isArray(raw?.routine)) out.routine = [...new Set(raw.routine)].filter(id => typeof id === 'string' && lookupMove(custom, id));
   if (ISO.test(raw?.startDate ?? '')) out.startDate = raw.startDate;
   if ([60, 75, 90].includes(raw?.rest)) out.rest = raw.rest;
+  if (WEIGHT_STEPS.includes(raw?.step)) out.step = raw.step;
   if (typeof raw?.beep === 'boolean') out.beep = raw.beep;
   return out;
 }

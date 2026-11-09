@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   addDays, exerciseHistory, isEmptyDay, lastCardio, lastPerformance, makeBackup, mondayOf, moderateMinutes, nextMonday, parseBackup,
-  programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, statusOf, weekSummary, dayExerciseIds,
+  programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, statusOf, weekSummary, dayExerciseIds, suggestNext,
 } from '../js/logic.js';
 import { lookupMove, customMove, MAX_SETS, EXERCISES, MOVES, ROUTINES, STEP_IDS, TOTAL_SETS, alternatesOf, moveById, target } from '../js/plan.js';
 
@@ -249,6 +249,92 @@ test('backups keep the routine and custom exercises, and drop bad ones', () => {
 test('an empty routine survives a backup', () => {
   const file = JSON.stringify({ app: 'workout-tracker', settings: { routine: [] }, days: [] });
   assert.deepEqual(parseBackup(file).settings.routine, []);
+});
+
+const rated = (effort, ...pairs) => ({ effort, sets: pairs.map(([w, v]) => set(w, v)) });
+const LATER = { week: 5, step: 5 };
+
+test('no suggestion without a rating or a last session', () => {
+  assert.equal(suggestNext(LEG, null, LATER), null);
+  assert.equal(suggestNext(LEG, { sets: [set(60, 12)] }, LATER), null);
+  assert.equal(suggestNext(LEG, { effort: 'good', sets: [] }, LATER), null);
+  assert.equal(suggestNext(LEG, rated('good', [null, 12]), LATER), null);
+});
+
+test('weight only goes up from the top of the range', () => {
+  const up = suggestNext(LEG, rated('good', [60, 12], [60, 12]), LATER);
+  assert.deepEqual([up.action, up.weight, up.value], ['increase', 65, 10]);
+  const short = suggestNext(LEG, rated('good', [60, 12]), LATER);
+  assert.deepEqual([short.action, short.weight], ['hold', 60], 'fewer sets than planned is not the top');
+});
+
+test('reps climb before weight does', () => {
+  const good = suggestNext(LEG, rated('good', [60, 11], [60, 10]), LATER);
+  assert.deepEqual([good.action, good.weight, good.value], ['hold', 60, 11]);
+  const easy = suggestNext(LEG, rated('easy', [60, 10], [60, 10]), LATER);
+  assert.deepEqual([easy.action, easy.weight, easy.value], ['hold', 60, 12]);
+});
+
+test('weeks 1 and 2 hold the weight unless it was clearly too light', () => {
+  const good = suggestNext(LEG, rated('good', [60, 12], [60, 12]), { week: 1, step: 5 });
+  assert.deepEqual([good.action, good.weight, good.value], ['hold', 60, 12]);
+  assert.match(good.text, /technique/);
+  assert.equal(suggestNext(LEG, rated('good', [60, 12], [60, 12]), { week: 3, step: 5 }).action, 'increase');
+  assert.equal(suggestNext(LEG, rated('easy', [60, 12], [60, 12]), { week: 1, step: 5 }).weight, 65);
+});
+
+test('hard holds, and missing the range or losing form drops the weight', () => {
+  const hard = suggestNext(LEG, rated('hard', [60, 10], [60, 10]), LATER);
+  assert.deepEqual([hard.action, hard.weight, hard.value], ['hold', 60, 10]);
+  const missed = suggestNext(LEG, rated('hard', [60, 8], [60, 7]), LATER);
+  assert.deepEqual([missed.action, missed.weight, missed.value], ['decrease', 50, 10]);
+  const form = suggestNext(LEG, rated('max', [60, 12], [60, 12]), LATER);
+  assert.deepEqual([form.action, form.weight, form.value], ['decrease', 50, 10]);
+});
+
+test('weight changes respect the smallest jump', () => {
+  const step = n => ({ week: 5, step: n });
+  assert.equal(suggestNext(LEG, rated('good', [60, 12], [60, 12]), step(10)).weight, 70);
+  assert.equal(suggestNext(LEG, rated('good', [60, 12], [60, 12]), step(2.5)).weight, 62.5);
+  assert.equal(suggestNext(LEG, rated('max', [60, 12]), step(2.5)).weight, 52.5);
+  assert.equal(suggestNext(LEG, rated('max', [65, 12]), step(10)).weight, 50);
+});
+
+test('weight never drops below one jump', () => {
+  const tiny = suggestNext(LEG, rated('max', [5, 12]), LATER);
+  assert.deepEqual([tiny.action, tiny.weight], ['hold', 5]);
+});
+
+test('the last set sets the working weight', () => {
+  assert.equal(suggestNext(LEG, rated('good', [50, 12], [60, 12]), LATER).weight, 65);
+});
+
+test('timed and bodyweight exercises change reps or seconds, never weight', () => {
+  const PUSH = moveById('incline-pushup');
+  assert.deepEqual(suggestNext(PLANK, rated('good', [null, 30], [null, 25]), LATER).value, 30);
+  assert.equal(suggestNext(PLANK, rated('good', [null, 30]), LATER).weight, null);
+  assert.equal(suggestNext(PUSH, rated('easy', [null, 10], [null, 10]), LATER).value, 12);
+  assert.equal(suggestNext(PUSH, rated('good', [null, 10], [null, 10]), LATER).value, 11);
+  assert.equal(suggestNext(PLANK, rated('hard', [null, 25]), LATER).value, 25);
+  assert.equal(suggestNext(PLANK, rated('max', [null, 20]), LATER).value, 20, 'not below the range');
+  const top = suggestNext(PLANK, rated('easy', [null, 40], [null, 40]), LATER);
+  assert.equal(top.value, 40);
+  assert.match(top.text, /top of the range/);
+});
+
+test('the last session carries its rating', () => {
+  const days = { '2026-11-09': { gym: { sets: { 'leg-press': [set(60, 12)] }, effort: { 'leg-press': 'hard' } } } };
+  assert.equal(lastPerformance(days, 'leg-press', '2026-11-11').effort, 'hard');
+});
+
+test('backups keep valid ratings and the weight jump', () => {
+  const file = JSON.stringify({ app: 'workout-tracker', settings: { step: 10 }, days: [{ date: '2026-11-09', gym: {
+    sets: { 'leg-press': [set(60, 12)] }, effort: { 'leg-press': 'hard', 'chest-press': 'nope', ghost: 'easy' },
+  } }] });
+  const { days, settings } = parseBackup(file);
+  assert.deepEqual(days[0].gym.effort, { 'leg-press': 'hard' });
+  assert.equal(settings.step, 10);
+  assert.equal(parseBackup(JSON.stringify({ app: 'workout-tracker', settings: { step: 7 }, days: [] })).settings.step, undefined);
 });
 
 test('bad backups are refused', () => {
