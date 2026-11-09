@@ -11,7 +11,7 @@ export function h(tag, props = {}, ...children) {
     else if (v === true) el.setAttribute(k, '');
     else if (v !== false && v != null) el.setAttribute(k, v);
   }
-  for (const c of children.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : String(c));
+  for (const c of children.flat(Infinity)) if (c != null && c !== false) el.append(c.nodeType ? c : String(c));
   return el;
 }
 

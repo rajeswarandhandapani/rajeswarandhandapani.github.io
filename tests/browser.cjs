@@ -202,6 +202,11 @@ async function noOverflow(page, label) {
   await noOverflow(page, 'Plan');
   const planText = await page.locator('main').textContent();
   assert.ok(!/LDL|HDL|triglyceride/i.test(planText), 'lab results stay out of the app');
+  assert.ok(!planText.includes('[object'), 'the Plan page shows real content');
+  assert.ok(await page.getByRole('heading', { name: 'Leg press', level: 3 }).isVisible());
+  assert.ok(await page.getByText('Goblet squat: Hold one dumbbell').isVisible());
+  assert.ok(await page.getByRole('heading', { name: 'Gym cool-down and stretch' }).isVisible());
+  assert.ok(await page.getByText('Standing quad stretch: 30 sec each leg').first().isVisible());
 
   // Backup, erase, restore.
   await nav(page, 'Data');
