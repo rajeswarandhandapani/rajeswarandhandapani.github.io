@@ -61,7 +61,20 @@ export const MOVES = EXERCISES.flatMap(ex => [
 export const moveById = id => MOVES.find(m => m.id === id);
 export const alternatesOf = ex => MOVES.filter(m => m.slot === ex.id);
 
+// Exercises you create are saved as { id, name, kind }, and get sensible targets from here.
+export const CUSTOM_KINDS = [['weight', 'Weight and reps'], ['reps', 'Reps only'], ['time', 'Timed (seconds)']];
+export const customMove = ({ id, name, kind }) => ({
+  id, name, kind, custom: true, focus: 'Your exercise', sets: 2,
+  low: kind === 'time' ? 20 : 10, high: kind === 'time' ? 40 : 12,
+  unit: kind === 'time' ? 'sec' : 'reps', weighted: kind === 'weight',
+});
+export function lookupMove(custom, id) {
+  const made = (custom || []).find(m => m.id === id);
+  return moveById(id) || (made ? customMove(made) : undefined);
+}
+
 export const TOTAL_SETS = EXERCISES.reduce((n, e) => n + e.sets, 0);
+export const MAX_SETS = 6;
 export const target = ex => `${ex.sets} × ${ex.low === ex.high ? ex.low : `${ex.low}–${ex.high}`}${ex.unit === 'sec' ? ' sec' : ''}`;
 
 // "gentle" is logged but left out of the 150 minutes, which are for moderate cardio.

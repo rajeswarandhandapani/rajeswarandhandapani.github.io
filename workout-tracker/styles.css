@@ -146,6 +146,15 @@ input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); f
 .tick[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .set.done input { background: var(--accent-soft); border-color: transparent; }
 
+input[type=text] { width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line-strong); border-radius: 8px; }
+.card-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.remove-ex { margin-left: auto; padding: 2px 0; font-size: .86rem; }
+.remove-box { display: flex; flex-direction: column; gap: 6px; background: var(--flag-soft); border-radius: 8px; padding: 10px; }
+.add-panel { border-top: 1px solid var(--line); padding-top: 10px; }
+.add-panel .sub { margin-top: 6px; }
+.set-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.set-actions .ghost { min-height: 40px; padding: 6px 14px; font-size: .9rem; }
+.set-actions .ghost:disabled { opacity: .45; }
 .swap-btn { align-self: flex-start; padding: 2px 0; font-size: .86rem; }
 .swap-list { display: flex; flex-direction: column; gap: 6px; }
 .swap-option { display: flex; flex-direction: column; gap: 1px; text-align: left; min-height: 44px; padding: 8px 12px; background: transparent; border: 1px solid var(--line-strong); border-radius: 8px; cursor: pointer; }
