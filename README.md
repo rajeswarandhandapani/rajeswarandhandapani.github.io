@@ -23,6 +23,7 @@ Plain HTML, CSS and JavaScript modules, with no framework, build step or third-p
 | `js/app.js` | Screens |
 | `js/timer.js` | Rest timer |
 | `js/charts.js` | Progress charts |
+| `js/art.js` | Exercise drawings, made in code with generic machine shapes |
 | `js/store.js` | IndexedDB storage |
 | `js/ui.js` | Shared page helpers |
 | `sw.js` | Offline support. List any new file in `FILES` |

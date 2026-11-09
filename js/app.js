@@ -4,6 +4,7 @@ import * as store from './store.js';
 import { h, select, toast, confirmIt, download, longDate, shortDate, dayLetter, dayName } from './ui.js';
 import { startRest, stopRest } from './timer.js';
 import { weeklyBars, lineChart } from './charts.js';
+import { exerciseArt } from './art.js';
 import {
   CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
   MAX_SETS, PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, WEEKS, alternatesOf, cardioName, customMove, lookupMove, phaseOf, target,
@@ -304,14 +305,25 @@ function exerciseCard(day, slot, afterChange) {
   const choices = alternatesOf(slot).length ? [slot, ...alternatesOf(slot)].filter(m => m.id !== ex.id && !taken.includes(m.id)) : [];
   const swapList = choices.length ? h('div', { class: 'swap-list', hidden: true },
     choices.map(m => h('button', { class: 'swap-option', type: 'button', onclick: () => swapTo(m) },
-      h('strong', {}, m.id === slot.id ? `${m.name} (planned)` : m.name),
-      m.how && h('span', { class: 'muted small-text' }, m.how)))) : null;
+      exerciseArt(m.id, { thumb: true }),
+      h('span', { class: 'swap-text' },
+        h('strong', {}, m.id === slot.id ? `${m.name} (planned)` : m.name),
+        m.how && h('span', { class: 'muted small-text' }, m.how))))) : null;
   const swapButton = choices.length ? h('button', { class: 'link swap-btn', type: 'button', 'aria-label': `Swap ${ex.name}`, onclick: () => { swapList.hidden = !swapList.hidden; } }, swapped ? 'Change' : 'Machine taken? Swap') : null;
 
+  const thumb = exerciseArt(ex.id, { thumb: true });
+  const artView = thumb ? h('div', { hidden: true }, exerciseArt(ex.id, { name: ex.name })) : null;
+  const artButton = thumb ? h('button', { class: 'art-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${ex.name}`, onclick: () => {
+    artView.hidden = !artView.hidden;
+    artButton.setAttribute('aria-expanded', String(!artView.hidden));
+  } }, thumb) : null;
+
   const card = h('article', { class: 'exercise', 'data-exercise': slot.id },
-    h('div', { class: 'row between' },
-      h('div', {}, h('h3', {}, ex.name), h('p', { class: 'muted small-text' }, swapped ? `Instead of ${slot.name}` : ex.focus)),
+    h('div', { class: 'ex-head' },
+      artButton,
+      h('div', { class: 'ex-title' }, h('h3', {}, ex.name), h('p', { class: 'muted small-text' }, swapped ? `Instead of ${slot.name}` : ex.focus)),
       h('span', { class: 'target' }, target(ex))),
+    artView,
     ex.how && h('p', { class: 'muted small-text' }, ex.how),
     h('div', { class: 'card-tools' }, swapButton, removeButton),
     swapList,
