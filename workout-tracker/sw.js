@@ -1,7 +1,7 @@
 // Saves the app's own files for offline use, which matters in a gym with poor signal.
 // Workout logs are never in here: they live in IndexedDB.
 // Tries the network first so updates show up, and falls back to the saved copy.
-const CACHE = 'workout-tracker-v3';
+const CACHE = 'workout-tracker-v4';
 const FILES = [
   './',
   './index.html',

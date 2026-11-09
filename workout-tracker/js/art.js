@@ -4,7 +4,7 @@
 // Each scene gives a start and finish pose. Poses name where the hips, hands and feet go, and the
 // elbows and knees are worked out, so the figure keeps the same proportions in every drawing.
 
-import { svgEl } from './ui.js';
+import { h, svgEl } from './ui.js';
 
 const G = 168; // floor height
 const BODY = { torso: 46, upper: 25, fore: 24, thigh: 34, shin: 33, neck: 18, head: 10, toe: 13 };
@@ -285,12 +285,29 @@ const SCENES = {
 
 function build([tag, attrs]) { return svgEl(tag, attrs); }
 
-function panel(scene, phase, { x = 0, label, showArrow }) {
-  const g = svgEl('g', { transform: `translate(${x} 0)` });
-  const p = solve(scene.poses[phase]);
-  const { back, front } = scene.draw(p, phase);
+const BEND_DEFAULTS = { arm: 1, leg: -1 };
+
+/** A pose part-way between two others. Bends are blended too, so a knee can swing smoothly across. */
+function mixPose(a, b, t) {
+  const out = { ...b };
+  for (const k of ['hip', 'sh', 'head', 'hand', 'foot', 'hand2', 'foot2']) {
+    if (a[k] && b[k]) out[k] = [a[k][0] + (b[k][0] - a[k][0]) * t, a[k][1] + (b[k][1] - a[k][1]) * t];
+  }
+  for (const k of ['lean', 'toe', 'toe2']) out[k] = (a[k] ?? 0) + ((b[k] ?? 0) - (a[k] ?? 0)) * t;
+  for (const k of ['arm', 'leg']) out[k] = (a[k] ?? BEND_DEFAULTS[k]) + ((b[k] ?? BEND_DEFAULTS[k]) - (a[k] ?? BEND_DEFAULTS[k])) * t;
+  for (const k of ['arm2', 'leg2']) {
+    if (a[k] != null && b[k] != null) out[k] = a[k] + (b[k] - a[k]) * t;
+  }
+  return out;
+}
+
+function panel(scene, t, { x = 0, label, showArrow, into }) {
+  const g = into || svgEl('g', { transform: `translate(${x} 0)` });
+  const [first, last = first] = scene.poses;
+  const p = solve(mixPose(first, last, t));
+  const { back, front } = scene.draw(p, t);
   const items = [box(0, 0, 240, 180, 'art-bg', 12), ln([8, G], [232, G], 'art-floor', 1.5), ...back, ...figure(p), ...front, ...arm(p), ...(scene.extra ? scene.extra(p) : [])];
-  g.append(...items.map(build));
+  g.replaceChildren(...items.map(build));
   if (showArrow && scene.arrow) {
     const [a, b] = scene.arrow;
     const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
@@ -308,16 +325,118 @@ function panel(scene, phase, { x = 0, label, showArrow }) {
 export const hasArt = id => Boolean(SCENES[id]);
 
 /** A drawing of an exercise, or null if there isn't one (exercises people create themselves). */
-export function exerciseArt(id, { thumb = false, name = '' } = {}) {
+export function exerciseArt(id, { thumb = false, name = '', at = 1 } = {}) {
   const scene = SCENES[id];
   if (!scene) return null;
   if (thumb) {
     const svg = svgEl('svg', { viewBox: '0 0 240 180', class: 'art art-thumb-img', 'aria-hidden': 'true' });
-    svg.append(panel(scene, scene.hold ? 0 : 1, {}));
+    svg.append(panel(scene, scene.hold ? 0 : at, {}));
     return svg;
   }
   const svg = svgEl('svg', { viewBox: scene.hold ? '0 0 240 180' : '0 0 490 180', class: `art art-full${scene.hold ? ' art-single' : ''}`, role: 'img', 'aria-label': scene.hold ? `${name}: position to hold` : `${name}: start and finish positions` });
   if (scene.hold) svg.append(panel(scene, 0, { label: 'Hold' }));
   else svg.append(panel(scene, 0, { label: 'Start', showArrow: true }), panel(scene, 1, { x: 250, label: 'Finish' }));
   return svg;
+}
+
+/* ---------- Animation ---------- */
+
+// First words are the move from Start to Finish, second are the way back.
+const CUES = {
+  'leg-press': ['Push out', 'Lower with control'],
+  'chest-press': ['Press forward', 'Return with control'],
+  'lat-pulldown': ['Pull down', 'Return with control'],
+  'seated-row': ['Pull back', 'Return with control'],
+  'leg-curl': ['Curl down', 'Return with control'],
+  'hack-squat': ['Lower with control', 'Drive up'],
+  'goblet-squat': ['Squat down with control', 'Stand up'],
+  'step-up': ['Step up', 'Step down with control'],
+  'db-bench': ['Press up', 'Lower with control'],
+  'cable-press': ['Press forward', 'Return with control'],
+  'incline-pushup': ['Push up', 'Lower with control'],
+  'single-arm-pulldown': ['Pull down', 'Return with control'],
+  'straight-arm-pulldown': ['Pull to your thighs', 'Return with control'],
+  'band-pulldown': ['Pull down', 'Return with control'],
+  'chest-supported-row': ['Pull back', 'Return with control'],
+  'cable-row': ['Pull back', 'Return with control'],
+  'db-row': ['Pull up', 'Lower with control'],
+  'lying-curl': ['Curl up', 'Lower with control'],
+  'romanian-deadlift': ['Hinge at the hips with control', 'Stand tall'],
+  'glute-bridge': ['Lift your hips', 'Lower with control'],
+};
+const LOWER_FIRST = new Set(['hack-squat', 'goblet-squat', 'romanian-deadlift']);
+
+const FAST = 1000, PAUSE = 350, SLOW = 1900, RESET = 450;
+const ease = x => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+
+/** Where the movement is at a moment in the loop, and what to say about it. */
+function momentOf(id, ms) {
+  const out = LOWER_FIRST.has(id) ? SLOW : FAST;
+  const back = LOWER_FIRST.has(id) ? FAST : SLOW;
+  const [go, ret] = CUES[id];
+  const m = ms % (out + PAUSE + back + RESET);
+  if (m < out) return { t: ease(m / out), label: go };
+  if (m < out + PAUSE) return { t: 1, label: 'Pause' };
+  if (m < out + PAUSE + back) return { t: 1 - ease((m - out - PAUSE) / back), label: ret };
+  return { t: 0, label: 'Reset' };
+}
+
+/**
+ * A looping demonstration with a pause button. It only runs while start() is in effect. People who
+ * ask their device to reduce motion get the still start and finish view, as does plank, a hold.
+ */
+export function exerciseAnimation(id, { name = '' } = {}) {
+  const scene = SCENES[id];
+  if (!scene) return null;
+  if (scene.hold || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return { el: exerciseArt(id, { name }), start() {}, stop() {} };
+  }
+  const g = svgEl('g');
+  const svg = svgEl('svg', { viewBox: '0 0 240 180', class: 'art art-anim', role: 'img', 'aria-label': `${name}: animated demonstration` }, g);
+  let clock = 0, last = null, frame = null, shown = '';
+
+  function draw() {
+    const { t, label } = momentOf(id, clock);
+    const key = `${t.toFixed(3)}|${label}`;
+    if (key === shown) return;
+    shown = key;
+    panel(scene, t, { into: g });
+    const text = svgEl('text', { x: 12, y: 20, class: 'art-label' });
+    text.textContent = label;
+    g.append(text);
+  }
+
+  function tick(now) {
+    frame = null;
+    if (!svg.isConnected) return;
+    if (last != null) clock += Math.min(now - last, 100);
+    last = now;
+    draw();
+    frame = requestAnimationFrame(tick);
+  }
+
+  function halt() {
+    if (frame != null) cancelAnimationFrame(frame);
+    frame = null;
+  }
+
+  function play() {
+    halt();
+    last = null;
+    button.textContent = 'Pause';
+    button.setAttribute('aria-label', `Pause ${name} demonstration`);
+    frame = requestAnimationFrame(tick);
+  }
+
+  const button = h('button', { class: 'ghost art-pause', type: 'button', onclick: () => {
+    if (frame != null) {
+      halt();
+      button.textContent = 'Play';
+      button.setAttribute('aria-label', `Play ${name} demonstration`);
+    } else {
+      play();
+    }
+  } }, 'Pause');
+  draw();
+  return { el: h('div', { class: 'art-demo' }, svg, button), start: play, stop: halt };
 }

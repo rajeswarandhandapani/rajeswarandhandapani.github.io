@@ -4,19 +4,19 @@ import * as store from './store.js';
 import { h, select, toast, confirmIt, download, longDate, shortDate, dayLetter, dayName } from './ui.js';
 import { startRest, stopRest } from './timer.js';
 import { weeklyBars, lineChart } from './charts.js';
-import { exerciseArt } from './art.js';
+import { exerciseAnimation, exerciseArt } from './art.js';
 import {
-  CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
+  CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EFFORTS, WEIGHT_STEPS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
   MAX_SETS, PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, WEEKS, alternatesOf, cardioName, customMove, lookupMove, phaseOf, target,
 } from './plan.js';
 import {
   addDays, cardioOf, cleanSettings, dayExerciseIds, exerciseHistory, fromIso, isEmptyDay, lastCardio, lastPerformance, localToday, makeBackup, mondayOf,
-  moderateMinutes, nextMonday, num, parseBackup, programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, statusOf, weekDates, weekSummary, weekdayOf,
+  moderateMinutes, nextMonday, num, parseBackup, programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, suggestNext, statusOf, weekDates, weekSummary, weekdayOf,
 } from './logic.js';
 
 const main = document.querySelector('#main');
 // `routine` is the list of exercise ids for gym days. Null means the plan's own list.
-const DEFAULTS = { startDate: null, rest: 90, beep: true, routine: null, custom: [] };
+const DEFAULTS = { startDate: null, rest: 90, beep: true, step: 5, routine: null, custom: [] };
 const S = {
   view: 'today',
   today: localToday(),
@@ -157,12 +157,12 @@ function planCard(date, day) {
     h('div', { class: 'plan-side' }, done ? h('span', { class: 'badge' }, 'Done') : h('span', { class: 'muted' }, plan.time)));
 }
 
-function setRow(day, ex, i, last, rows, afterChange) {
+function setRow(day, ex, i, last, rows, afterChange, suggestion) {
   const saved = day.gym?.sets?.[ex.id]?.[i];
   const prior = last?.sets[i] ?? last?.sets[last.sets.length - 1];
   const name = `${ex.name} set ${i + 1}`;
-  const weight = ex.weighted ? h('input', { type: 'number', inputmode: 'decimal', min: 0, step: 'any', 'aria-label': `${name} weight in pounds`, value: saved?.weight ?? prior?.weight ?? '' }) : null;
-  const value = h('input', { type: 'number', inputmode: 'numeric', min: 0, step: 1, 'aria-label': `${name} ${ex.unit === 'sec' ? 'seconds' : 'reps'}`, value: saved?.value ?? prior?.value ?? ex.low });
+  const weight = ex.weighted ? h('input', { type: 'number', inputmode: 'decimal', min: 0, step: 'any', 'aria-label': `${name} weight in pounds`, value: saved?.weight ?? suggestion?.weight ?? prior?.weight ?? '' }) : null;
+  const value = h('input', { type: 'number', inputmode: 'numeric', min: 0, step: 1, 'aria-label': `${name} ${ex.unit === 'sec' ? 'seconds' : 'reps'}`, value: saved?.value ?? suggestion?.value ?? prior?.value ?? ex.low });
   let done = saved?.done === true;
 
   function write() {
@@ -227,7 +227,31 @@ function exerciseCard(day, slot, afterChange) {
   const last = lastPerformance(S.days, ex.id, day.date);
   const rows = [];
   const count = setCountFor(day, ex, last);
-  for (let i = 0; i < count; i++) rows.push(setRow(day, ex, i, last, rows, () => { paint(); afterChange(); }));
+  const week = programWeek(day.date, S.settings.startDate);
+  const options = { week, step: S.settings.step };
+  const suggestion = suggestNext(ex, last, options);
+  for (let i = 0; i < count; i++) rows.push(setRow(day, ex, i, last, rows, () => { paint(); afterChange(); }, suggestion));
+
+  const nextTime = h('p', { class: 'hint', 'data-testid': 'next-time', hidden: true });
+  function showNext() {
+    const effort = day.gym?.effort?.[ex.id];
+    const sets = (day.gym?.sets?.[ex.id] || []).filter(s => s?.done);
+    const next = effort ? suggestNext(ex, { sets, effort }, options) : null;
+    nextTime.hidden = !next;
+    nextTime.textContent = next ? `Next time: ${next.text}` : '';
+    ratingButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.effort === effort)));
+  }
+  const ratingButtons = EFFORTS.map(e => h('button', { class: 'effort-btn', type: 'button', 'data-effort': e.id, 'aria-pressed': 'false', 'aria-label': `${ex.name} felt: ${e.label}`, onclick: () => {
+    day.gym.effort ||= {};
+    if (day.gym.effort[ex.id] === e.id) delete day.gym.effort[ex.id];
+    else day.gym.effort[ex.id] = e.id;
+    saveDay(day);
+    showNext();
+  } }, h('strong', {}, e.label), h('span', { class: 'muted small-text' }, ex.unit === 'sec' ? e.time : e.reps)));
+  const effortBox = h('div', { class: 'effort', hidden: true },
+    h('span', { class: 'small-text muted' }, 'How hard was that?'),
+    h('div', { class: 'effort-grid' }, ratingButtons),
+    nextTime);
 
   function redraw() {
     saveDay(day);
@@ -259,6 +283,7 @@ function exerciseCard(day, slot, afterChange) {
     day.gym.swaps ||= {};
     if (day.gym.sets) delete day.gym.sets[ex.id];
     if (day.gym.counts) delete day.gym.counts[ex.id];
+    if (day.gym.effort) delete day.gym.effort[ex.id];
     if (move.id === slot.id) delete day.gym.swaps[slot.id];
     else day.gym.swaps[slot.id] = move.id;
     redraw();
@@ -270,6 +295,7 @@ function exerciseCard(day, slot, afterChange) {
     delete day.gym.sets?.[ex.id];
     delete day.gym.counts?.[ex.id];
     delete day.gym.swaps?.[slot.id];
+    delete day.gym.effort?.[ex.id];
     day.gym.extra = (day.gym.extra || []).filter(id => id !== slot.id);
     if (scope === 'always') {
       S.settings.routine = routineIds().filter(id => id !== slot.id);
@@ -312,10 +338,13 @@ function exerciseCard(day, slot, afterChange) {
   const swapButton = choices.length ? h('button', { class: 'link swap-btn', type: 'button', 'aria-label': `Swap ${ex.name}`, onclick: () => { swapList.hidden = !swapList.hidden; } }, swapped ? 'Change' : 'Machine taken? Swap') : null;
 
   const thumb = exerciseArt(ex.id, { thumb: true });
-  const artView = thumb ? h('div', { hidden: true }, exerciseArt(ex.id, { name: ex.name })) : null;
+  const demo = thumb ? exerciseAnimation(ex.id, { name: ex.name }) : null;
+  const artView = thumb ? h('div', { hidden: true }, demo.el) : null;
   const artButton = thumb ? h('button', { class: 'art-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${ex.name}`, onclick: () => {
     artView.hidden = !artView.hidden;
     artButton.setAttribute('aria-expanded', String(!artView.hidden));
+    if (artView.hidden) demo.stop();
+    else demo.start();
   } }, thumb) : null;
 
   const card = h('article', { class: 'exercise', 'data-exercise': slot.id },
@@ -329,14 +358,22 @@ function exerciseCard(day, slot, afterChange) {
     swapList,
     removeBox,
     last && h('p', { class: 'muted small-text last-time' }, `Last, ${shortDate(last.date)}: ${last.sets.map(s => setText(ex, s)).join(', ')}`),
-    readyToIncrease(last, ex) && h('p', { class: 'hint' }, 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
+    suggestion && h('p', { class: 'hint', 'data-testid': 'suggestion', 'data-action': suggestion.action }, `Suggested: ${suggestion.text}`),
+    !suggestion && readyToIncrease(last, ex) && h('p', { class: 'hint' }, 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
     h('div', { class: 'set head muted small-text', 'aria-hidden': 'true' },
       h('span', {}, 'Set'), h('span', {}, ex.weighted ? 'lb' : ''), h('span', {}, ex.unit), h('span', {})),
     rows.map(r => r.row),
     h('div', { class: 'set-actions' },
       h('button', { class: 'ghost', type: 'button', 'aria-label': `Add set to ${ex.name}`, disabled: count >= MAX_SETS, onclick: addSet }, '+ Add set'),
-      count > ex.sets && h('button', { class: 'link', type: 'button', 'aria-label': `Remove last set from ${ex.name}`, onclick: removeSet }, 'Remove set')));
-  function paint() { card.classList.toggle('complete', rows.every(r => r.isDone())); }
+      count > ex.sets && h('button', { class: 'link', type: 'button', 'aria-label': `Remove last set from ${ex.name}`, onclick: removeSet }, 'Remove set')),
+    effortBox);
+  function paint() {
+    const allDone = rows.every(r => r.isDone());
+    card.classList.toggle('complete', allDone);
+    effortBox.hidden = !allDone;
+    showNext();
+  }
+  card.addEventListener('change', showNext);
   paint();
   return card;
 }
@@ -677,6 +714,8 @@ function dataView() {
       h('label', { class: 'field' }, h('span', {}, 'Week 1 starts'), start),
       h('label', { class: 'field' }, h('span', {}, 'Rest between sets'),
         select('Rest between sets', S.settings.rest, [[60, '60 seconds'], [75, '75 seconds'], [90, '90 seconds']], async v => { S.settings.rest = Number(v); await saveSettings(); })),
+      h('label', { class: 'field' }, h('span', {}, 'Smallest weight jump'),
+        select('Smallest weight jump', S.settings.step, WEIGHT_STEPS.map(n => [n, `${n} lb`]), async v => { S.settings.step = Number(v); await saveSettings(); })),
       h('label', { class: 'check' }, beep, h('span', {}, 'Beep when rest ends'))),
     S.settings.custom.length > 0 && h('section', { class: 'card stack' }, h('h2', {}, 'Your exercises'),
       h('div', {}, S.settings.custom.map(made => h('div', { class: 'row between line' },

@@ -73,6 +73,15 @@ export function lookupMove(custom, id) {
   return moveById(id) || (made ? customMove(made) : undefined);
 }
 
+// Asked once all of an exercise's sets are ticked. "Good" is the plan's 2–3 reps in reserve.
+export const EFFORTS = [
+  { id: 'easy', label: 'Easy', reps: '4 or more reps left', time: 'Could go much longer' },
+  { id: 'good', label: 'Good', reps: '2–3 good reps left', time: 'Could go a bit longer' },
+  { id: 'hard', label: 'Hard', reps: '0–1 reps left', time: 'Only just made it' },
+  { id: 'max', label: 'Form slipped', reps: 'Reps stopped being controlled', time: 'Form stopped being solid' },
+];
+export const WEIGHT_STEPS = [2.5, 5, 10, 15];
+
 export const TOTAL_SETS = EXERCISES.reduce((n, e) => n + e.sets, 0);
 export const MAX_SETS = 6;
 export const target = ex => `${ex.sets} × ${ex.low === ex.high ? ex.low : `${ex.low}–${ex.high}`}${ex.unit === 'sec' ? ' sec' : ''}`;
