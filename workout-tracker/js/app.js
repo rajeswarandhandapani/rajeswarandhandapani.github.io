@@ -4,7 +4,7 @@ import * as store from './store.js';
 import { h, select, toast, confirmIt, download, longDate, shortDate, dayLetter, dayName } from './ui.js';
 import { startRest, stopRest } from './timer.js';
 import { weeklyBars, lineChart } from './charts.js';
-import { exerciseAnimation, exerciseArt } from './art.js';
+import { exerciseAnimation, exerciseArt, muscleDiagram } from './art.js';
 import {
   CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EFFORTS, WEIGHT_STEPS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
   MAX_SETS, PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, WEEKS, alternatesOf, cardioName, customMove, lookupMove, phaseOf, target,
@@ -53,10 +53,10 @@ async function saveSettings() {
 
 /* ---------- Shared pieces ---------- */
 
-function cell(date, { selected = false } = {}) {
+function cell(date, { selected = false, showDay = false } = {}) {
   const status = statusFor(date);
   const inner = status === 'both' ? [h('span', { class: 'g' }, 'G'), h('span', { class: 'c' }, 'C')]
-    : { gym: 'G', cardio: 'C', rest: 'R', missed: '–' }[status] || '';
+    : { gym: 'G', cardio: 'C', rest: 'R', missed: '–' }[status] || (showDay ? h('span', { class: 'cell-day' }, Number(date.slice(8))) : '');
   return h('button', {
     class: `cell${date === S.today ? ' is-today' : ''}${selected ? ' selected' : ''}`,
     type: 'button',
@@ -76,7 +76,7 @@ function openDate(date) {
 
 function meter(value, goal) {
   const fill = h('i');
-  fill.style.width = `${Math.min(100, (value / goal) * 100)}%`;
+  fill.style.width = `${goal > 0 ? Math.min(100, (value / goal) * 100) : 0}%`;
   return h('div', { class: 'meter', role: 'progressbar', 'aria-valuenow': value, 'aria-valuemin': 0, 'aria-valuemax': goal }, fill);
 }
 
@@ -86,7 +86,7 @@ function weekBlock(date) {
   return h('div', { class: 'week-block' },
     h('div', { class: 'strip' }, weekDates(monday).map(d => h('div', { class: 'strip-day' },
       h('span', { class: 'muted small-text' }, dayLetter(d)),
-      cell(d, { selected: d === date })))),
+      cell(d, { selected: d === date, showDay: true })))),
     h('div', { class: 'tiles' },
       h('div', { class: 'tile' },
         h('span', { class: 'muted' }, 'Cardio this week'),
@@ -142,7 +142,8 @@ function dateHeader(date) {
     h('button', { class: 'ghost icon', type: 'button', 'aria-label': 'Previous day', onclick: move(-1) }, '‹'),
     h('div', { class: 'date-title' },
       h('h1', {}, date === S.today ? `Today, ${shortDate(date)}` : longDate(date)),
-      h('p', { class: 'muted' }, weekLine(date))),
+      h('p', { class: 'muted' }, weekLine(date)),
+      date !== S.today && h('button', { class: 'today-pill', type: 'button', onclick: () => openDate(S.today) }, 'Back to today →')),
     h('button', { class: 'ghost icon', type: 'button', 'aria-label': 'Next day', disabled: date >= S.today, onclick: move(1) }, '›'));
 }
 
@@ -157,12 +158,15 @@ function planCard(date, day) {
     h('div', { class: 'plan-side' }, done ? h('span', { class: 'badge' }, 'Done') : h('span', { class: 'muted' }, plan.time)));
 }
 
+const stamp = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+const selectOnFocus = e => e.target.select?.();
+
 function setRow(day, ex, i, last, rows, afterChange, suggestion) {
   const saved = day.gym?.sets?.[ex.id]?.[i];
   const prior = last?.sets[i] ?? last?.sets[last.sets.length - 1];
   const name = `${ex.name} set ${i + 1}`;
-  const weight = ex.weighted ? h('input', { type: 'number', inputmode: 'decimal', min: 0, step: 'any', 'aria-label': `${name} weight in pounds`, value: saved?.weight ?? suggestion?.weight ?? prior?.weight ?? '' }) : null;
-  const value = h('input', { type: 'number', inputmode: 'numeric', min: 0, step: 1, 'aria-label': `${name} ${ex.unit === 'sec' ? 'seconds' : 'reps'}`, value: saved?.value ?? suggestion?.value ?? prior?.value ?? ex.low });
+  const weight = ex.weighted ? h('input', { type: 'number', inputmode: 'decimal', min: 0, step: 'any', 'aria-label': `${name} weight in pounds`, value: saved?.weight ?? suggestion?.weight ?? prior?.weight ?? '', onfocus: selectOnFocus }) : null;
+  const value = h('input', { type: 'number', inputmode: 'numeric', min: 0, step: 1, 'aria-label': `${name} ${ex.unit === 'sec' ? 'seconds' : 'reps'}`, value: saved?.value ?? suggestion?.value ?? prior?.value ?? ex.low, onfocus: selectOnFocus });
   let done = saved?.done === true;
 
   function write() {
@@ -191,22 +195,33 @@ function setRow(day, ex, i, last, rows, afterChange, suggestion) {
       stopRest();
       toast('All sets done. Finish with your cool-down and stretches.');
     } else {
-      startRest(S.settings.rest, { beep: S.settings.beep });
+      startRest(S.settings.rest, { beep: S.settings.beep, label: `Rest · ${ex.name}` });
     }
   }
 
+  const holdBtn = !ex.weighted && ex.unit === 'sec' ? h('button', {
+    class: 'ghost time-btn set-timer',
+    type: 'button',
+    'aria-label': `Start timer for ${name}`,
+    onclick: () => {
+      const secs = num(value.value) || ex.low;
+      startRest(secs, { beep: S.settings.beep, label: `${ex.name} (set ${i + 1})` });
+    },
+  }, stamp(num(value.value) || ex.low)) : null;
+
   const tick = h('button', { class: 'tick', type: 'button', 'aria-pressed': String(done), 'aria-label': `${name} done`, onclick: toggle }, '✓');
   const row = h('div', { class: `set${done ? ' done' : ''}` },
-    h('span', { class: 'set-n' }, i + 1), weight || h('span', { class: 'muted set-none' }, '–'), value, tick);
+    h('span', { class: 'set-n' }, i + 1), weight || holdBtn || h('span', { class: 'muted set-none' }, '–'), value, tick);
 
   const later = () => rows.slice(i + 1).filter(r => !r.isDone());
   weight?.addEventListener('input', () => later().forEach(r => { r.weight.value = weight.value; }));
+  value.addEventListener('input', () => { if (holdBtn) holdBtn.textContent = stamp(num(value.value) || ex.low); });
   row.addEventListener('change', () => {
     write();
     later().forEach(r => r.write());
     saveDay(day);
   });
-  return { row, weight, isDone: () => done, write };
+  return { row, weight, value, isDone: () => done, write };
 }
 
 const setText = (ex, s) => (ex.weighted ? `${s.weight} lb × ${s.value}` : `${s.value} ${ex.unit}`);
@@ -337,20 +352,26 @@ function exerciseCard(day, slot, afterChange) {
         m.how && h('span', { class: 'muted small-text' }, m.how))))) : null;
   const swapButton = choices.length ? h('button', { class: 'link swap-btn', type: 'button', 'aria-label': `Swap ${ex.name}`, onclick: () => { swapList.hidden = !swapList.hidden; } }, swapped ? 'Change' : 'Machine taken? Swap') : null;
 
-  const thumb = exerciseArt(ex.id, { thumb: true });
-  const demo = thumb ? exerciseAnimation(ex.id, { name: ex.name }) : null;
-  const artView = thumb ? h('div', { hidden: true }, demo.el) : null;
-  const artButton = thumb ? h('button', { class: 'art-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${ex.name}`, onclick: () => {
+  const thumb = exerciseArt(ex.id, { thumb: true, kind: ex.kind });
+  const demo = thumb && !ex.custom ? exerciseAnimation(ex.id, { name: ex.name, kind: ex.kind }) : null;
+  const artView = demo ? h('div', { hidden: true }, demo.el) : null;
+  const artHint = demo ? h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'How to') : null;
+  const artButton = demo ? h('button', { class: 'art-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${ex.name}`, onclick: () => {
     artView.hidden = !artView.hidden;
     artButton.setAttribute('aria-expanded', String(!artView.hidden));
+    artHint.textContent = artView.hidden ? 'How to' : 'Hide';
     if (artView.hidden) demo.stop();
     else demo.start();
-  } }, thumb) : null;
+  } }, thumb, artHint) : (thumb ? h('div', { class: 'art-thumb art-placeholder' }, thumb, h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'Custom')) : null);
 
   const card = h('article', { class: 'exercise', 'data-exercise': slot.id },
     h('div', { class: 'ex-head' },
       artButton,
-      h('div', { class: 'ex-title' }, h('h3', {}, ex.name), h('p', { class: 'muted small-text' }, swapped ? `Instead of ${slot.name}` : ex.focus)),
+      h('div', { class: 'ex-title' },
+        h('h3', {}, ex.name),
+        h('p', { class: 'muted small-text focus-line' },
+          muscleDiagram(ex.focus),
+          h('span', {}, swapped ? `Instead of ${slot.name}` : ex.focus))),
       h('span', { class: 'target' }, target(ex))),
     artView,
     ex.how && h('p', { class: 'muted small-text' }, ex.how),
@@ -359,9 +380,22 @@ function exerciseCard(day, slot, afterChange) {
     removeBox,
     last && h('p', { class: 'muted small-text last-time' }, `Last, ${shortDate(last.date)}: ${last.sets.map(s => setText(ex, s)).join(', ')}`),
     suggestion && h('p', { class: 'hint', 'data-testid': 'suggestion', 'data-action': suggestion.action }, `Suggested: ${suggestion.text}`),
-    !suggestion && readyToIncrease(last, ex) && h('p', { class: 'hint' }, 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
+    !suggestion && readyToIncrease(last, ex) && (() => {
+      const nextW = last.sets[last.sets.length - 1].weight + S.settings.step;
+      return h('div', { class: 'hint hint-row' },
+        h('span', {}, 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
+        h('button', { class: 'chip-btn', type: 'button', onclick: () => {
+          rows.filter(r => !r.isDone()).forEach(r => {
+            if (r.weight) r.weight.value = nextW;
+            r.value.value = ex.low;
+            r.write();
+          });
+          saveDay(day);
+          toast(`Set to ${nextW} lb × ${ex.low}.`);
+        } }, `Try ${nextW} lb`));
+    })(),
     h('div', { class: 'set head muted small-text', 'aria-hidden': 'true' },
-      h('span', {}, 'Set'), h('span', {}, ex.weighted ? 'lb' : ''), h('span', {}, ex.unit), h('span', {})),
+      h('span', {}, 'Set'), h('span', {}, ex.weighted ? 'lb' : ex.unit === 'sec' ? 'timer' : ''), h('span', {}, ex.unit), h('span', {})),
     rows.map(r => r.row),
     h('div', { class: 'set-actions' },
       h('button', { class: 'ghost', type: 'button', 'aria-label': `Add set to ${ex.name}`, disabled: count >= MAX_SETS, onclick: addSet }, '+ Add set'),
@@ -380,10 +414,20 @@ function exerciseCard(day, slot, afterChange) {
 
 function gymCard(day) {
   const counter = h('span', { class: 'muted', 'data-testid': 'set-count' });
-  const update = () => { counter.textContent = `${setsDone(day)} of ${totalSets(day)} sets`; };
+  const barFill = h('i');
+  const bar = h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Gym workout sets completed', 'aria-valuemin': 0 }, barFill);
+  const update = () => {
+    const done = setsDone(day), total = totalSets(day);
+    counter.textContent = `${done} of ${total} sets`;
+    bar.setAttribute('aria-valuenow', done);
+    bar.setAttribute('aria-valuemax', total);
+    barFill.style.width = `${total > 0 ? Math.min(100, (done / total) * 100) : 0}%`;
+  };
   update();
   return h('section', { class: 'card stack' },
-    h('div', { class: 'row between' }, h('h2', {}, 'Gym workout'), counter),
+    h('div', { class: 'stack-tight' },
+      h('div', { class: 'row between' }, h('h2', {}, 'Gym workout'), counter),
+      bar),
     daySlots(day).length === 0 && h('p', { class: 'muted' }, 'No exercises for this day. Add one below.'),
     daySlots(day).map(ex => exerciseCard(day, ex, () => { update(); refreshWeek(); })),
     addExercisePanel(day),
@@ -442,8 +486,6 @@ function addExercisePanel(day) {
     panel);
 }
 
-const stamp = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-
 function routineCard(day, key) {
   const routine = ROUTINES[key];
   const doneCount = () => routine.steps.filter(s => day.steps?.[s.id]).length;
@@ -461,9 +503,23 @@ function routineCard(day, key) {
         update();
         if (doneCount() === routine.steps.length) box.open = false;
       } });
-      return h('div', { class: `step${step.watch ? ' watch' : ''}` },
-        h('label', { class: 'check' }, input, h('span', { class: 'step-text' }, h('strong', {}, step.text), h('span', { class: 'muted small-text' }, step.detail))),
-        step.seconds && h('button', { class: 'ghost time-btn', type: 'button', 'aria-label': `Start ${stamp(step.seconds)} timer for ${step.text}`, onclick: () => startRest(step.seconds, { beep: S.settings.beep, label: step.text }) }, stamp(step.seconds)));
+      const thumb = exerciseArt(step.id, { thumb: true });
+      const demo = thumb ? exerciseAnimation(step.id, { name: step.text }) : null;
+      const artView = demo ? h('div', { class: 'step-art', hidden: true }, demo.el) : null;
+      const artHint = demo ? h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'How to') : null;
+      const artBtn = demo ? h('button', { class: 'art-thumb step-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${step.text}`, onclick: () => {
+        artView.hidden = !artView.hidden;
+        artBtn.setAttribute('aria-expanded', String(!artView.hidden));
+        artHint.textContent = artView.hidden ? 'How to' : 'Hide';
+        if (artView.hidden) demo.stop();
+        else demo.start();
+      } }, thumb, artHint) : null;
+      return h('div', { class: 'step-wrap' },
+        h('div', { class: `step${step.watch ? ' watch' : ''}` },
+          h('label', { class: 'check' }, input, h('span', { class: 'step-text' }, h('strong', {}, step.text), h('span', { class: 'muted small-text' }, step.detail))),
+          artBtn,
+          step.seconds && h('button', { class: 'ghost time-btn', type: 'button', 'aria-label': `Start ${stamp(step.seconds)} timer for ${step.text}`, onclick: () => startRest(step.seconds, { beep: S.settings.beep, label: step.text }) }, stamp(step.seconds))),
+        artView);
     }));
   return box;
 }
@@ -486,9 +542,9 @@ function cardioCard(day, plan) {
   const resting = plan.kind === 'rest';
   let type = resting ? 'gentle' : previous?.type ?? 'walk';
   const startMinutes = resting ? plan.minutes : Math.max(plan.minutes ?? 20, previous?.minutes ?? 0);
-  const minutes = h('input', { type: 'number', inputmode: 'numeric', min: 1, max: 600, step: 1, value: startMinutes, 'aria-label': 'Minutes' });
+  const minutes = h('input', { type: 'number', inputmode: 'numeric', min: 1, max: 600, step: 1, value: startMinutes, 'aria-label': 'Minutes', onfocus: selectOnFocus });
   const step = n => () => { minutes.value = Math.max(1, (num(minutes.value) ?? 0) + n); };
-  const hr = h('input', { type: 'number', inputmode: 'numeric', min: 30, max: 230, step: 1, placeholder: 'Optional', 'aria-label': 'Average heart rate' });
+  const hr = h('input', { type: 'number', inputmode: 'numeric', min: 30, max: 230, step: 1, placeholder: 'Optional', 'aria-label': 'Average heart rate', onfocus: selectOnFocus });
   const talk = h('input', { type: 'checkbox' });
 
   function log() {
@@ -519,12 +575,17 @@ function cardioCard(day, plan) {
     h('button', { class: 'primary', type: 'button', onclick: log }, cardioOf(day).length ? 'Log more cardio' : 'Log cardio'));
 }
 
-function actionRow(date, day, showGym, showCardio) {
+function actionRow(date, day, plan, showGym, showCardio) {
   const nothingLogged = setsDone(day) === 0 && cardioOf(day).length === 0;
   const add = key => () => { S.adding[key] = date; if (day.rest) { delete day.rest; saveDay(day); } render(); };
+  const hide = key => () => { delete S.adding[key]; render(); };
   const buttons = [
     !showGym && h('button', { class: 'ghost', type: 'button', onclick: add('gym') }, 'Add gym workout'),
+    showGym && S.adding.gym === date && plan.kind !== 'gym' && setsDone(day) === 0
+      && h('button', { class: 'ghost', type: 'button', onclick: hide('gym') }, 'Hide gym workout'),
     !showCardio && h('button', { class: 'ghost', type: 'button', onclick: add('cardio') }, 'Add cardio'),
+    showCardio && S.adding.cardio === date && plan.kind !== 'cardio' && cardioOf(day).length === 0
+      && h('button', { class: 'ghost', type: 'button', onclick: hide('cardio') }, 'Hide cardio'),
     nothingLogged && h('button', { class: 'ghost', type: 'button', onclick: () => {
       if (day.rest) delete day.rest; else day.rest = true;
       S.adding = {};
@@ -536,9 +597,18 @@ function actionRow(date, day, showGym, showCardio) {
 }
 
 function noteCard(day) {
+  const status = h('span', { class: 'muted small-text', 'data-testid': 'note-status' }, (day.note || '').trim() ? 'Saved' : '');
   const box = h('textarea', { rows: 2, maxlength: 2000, 'aria-label': 'Note for this day', placeholder: 'How did it feel? Anything to remember?' }, day.note || '');
-  box.addEventListener('change', () => { day.note = box.value; saveDay(day); });
-  return h('section', { class: 'card stack' }, h('h2', {}, 'Note'), box);
+  const save = () => {
+    day.note = box.value;
+    saveDay(day);
+    status.textContent = box.value.trim() ? 'Saved' : '';
+  };
+  box.addEventListener('input', save);
+  box.addEventListener('change', save);
+  return h('section', { class: 'card stack' },
+    h('div', { class: 'row between' }, h('h2', {}, 'Note'), status),
+    box);
 }
 
 function todayView() {
@@ -548,19 +618,24 @@ function todayView() {
   const plan = SCHEDULE[weekdayOf(date)];
   const showGym = !day.rest && (plan.kind === 'gym' || setsDone(day) > 0 || S.adding.gym === date);
   const showCardio = cardioOf(day).length > 0 || (!day.rest && (plan.kind === 'cardio' || S.adding.cardio === date));
+  const hasSteps = key => ROUTINES[key].steps.some(s => day.steps?.[s.id]);
+  const preKey = showGym && showCardio ? (hasSteps('cardio-pre') && !hasSteps('gym-pre') ? 'cardio-pre' : 'gym-pre')
+    : showGym ? 'gym-pre' : showCardio ? 'cardio-pre' : null;
+  const postKey = showGym && showCardio ? (hasSteps('cardio-post') && !hasSteps('gym-post') ? 'cardio-post' : 'gym-post')
+    : showGym ? 'gym-post' : showCardio ? 'cardio-post' : null;
+  const workouts = plan.kind === 'cardio'
+    ? [showCardio && cardioCard(day, plan), showGym && gymCard(day)]
+    : [showGym && gymCard(day), showCardio && cardioCard(day, plan)];
   weekEl = weekBlock(date);
   return [
     dateHeader(date),
     weekEl,
     planCard(date, day),
     day.rest && h('section', { class: 'card' }, h('p', {}, 'Rest day saved. Recovery is part of the plan.')),
-    showGym && routineCard(day, 'gym-pre'),
-    showGym && gymCard(day),
-    showGym && routineCard(day, 'gym-post'),
-    showCardio && routineCard(day, 'cardio-pre'),
-    showCardio && cardioCard(day, plan),
-    showCardio && routineCard(day, 'cardio-post'),
-    actionRow(date, day, showGym, showCardio),
+    preKey && routineCard(day, preKey),
+    ...workouts,
+    postKey && routineCard(day, postKey),
+    actionRow(date, day, plan, showGym, showCardio),
     noteCard(day),
     safetyLine(),
   ];
@@ -625,9 +700,9 @@ function progressView() {
   return [
     h('h1', {}, 'Progress'),
     h('div', { class: 'tiles' },
-      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Gym visits'), h('b', { 'data-testid': 'total-gym' }, `${totals.gym} of ${WEEKS * GYM_PER_WEEK}`)),
-      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Cardio minutes'), h('b', { 'data-testid': 'total-cardio' }, totals.cardio)),
-      h('div', { class: 'tile' }, h('span', { class: 'muted' }, `Weeks at ${CARDIO_GOAL}+ min`), h('b', {}, `${totals.goalWeeks} of ${WEEKS}`))),
+      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Gym visits'), h('b', { 'data-testid': 'total-gym' }, `${totals.gym} of ${WEEKS * GYM_PER_WEEK}`), meter(totals.gym, WEEKS * GYM_PER_WEEK)),
+      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Cardio minutes'), h('b', { 'data-testid': 'total-cardio' }, totals.cardio), meter(totals.cardio, WEEKS * CARDIO_GOAL)),
+      h('div', { class: 'tile' }, h('span', { class: 'muted' }, `Weeks at ${CARDIO_GOAL}+ min`), h('b', {}, `${totals.goalWeeks} of ${WEEKS}`), meter(totals.goalWeeks, WEEKS))),
     calendar(rows),
     weeklyCard(rows),
     exerciseProgress(),
@@ -640,9 +715,19 @@ const list = items => h('ul', {}, items.map(t => h('li', {}, t)));
 
 function planView() {
   const week = S.settings.startDate ? programWeek(S.today, S.settings.startDate) : 0;
+  const jumps = [
+    ['plan-schedule', 'Schedule'],
+    ['plan-gym', 'Gym'],
+    ['plan-swap', 'Alternates'],
+    ['plan-warm', 'Warm-up'],
+    ['plan-cardio', 'Cardio'],
+    ['plan-food', 'Food'],
+  ];
   return [
     h('h1', {}, '12-week plan'),
-    h('section', { class: 'card' }, h('h2', {}, 'Weekly schedule'),
+    h('nav', { class: 'plan-nav', 'aria-label': 'Plan sections' },
+      jumps.map(([id, label]) => h('button', { class: 'chip-btn', type: 'button', onclick: () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }, label))),
+    h('section', { class: 'card', id: 'plan-schedule' }, h('h2', {}, 'Weekly schedule'),
       h('table', {}, h('tbody', {}, SCHEDULE_ORDER.map(d => {
         const plan = SCHEDULE[d];
         const name = new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(fromIso(addDays('2026-11-09', (d + 6) % 7)));
@@ -650,18 +735,18 @@ function planView() {
       })))),
     h('section', { class: 'card' }, h('h2', {}, 'Stages'),
       PHASES.map(p => h('div', { class: `phase${week >= p.from && week <= p.to ? ' current' : ''}` }, h('strong', {}, `Weeks ${p.from}–${p.to}`), h('span', {}, p.name)))),
-    h('section', { class: 'card' }, h('h2', {}, 'Full-body gym workout'),
-      h('table', {}, h('tbody', {}, EXERCISES.map(e => h('tr', {}, h('th', { scope: 'row' }, e.name), h('td', { class: 'muted' }, e.focus), h('td', { class: 'r' }, target(e)))))),
+    h('section', { class: 'card', id: 'plan-gym' }, h('h2', {}, 'Full-body gym workout'),
+      h('table', {}, h('tbody', {}, EXERCISES.map(e => h('tr', {}, h('th', { scope: 'row' }, e.name), h('td', { class: 'muted' }, h('span', { class: 'focus-line' }, muscleDiagram(e.focus), h('span', {}, e.focus))), h('td', { class: 'r' }, target(e)))))),
       h('h3', { class: 'sub' }, 'Each gym visit'), list(GYM_NOTES)),
-    h('section', { class: 'card' }, h('h2', {}, 'If a machine is taken'),
+    h('section', { class: 'card', id: 'plan-swap' }, h('h2', {}, 'If a machine is taken'),
       h('p', { class: 'muted' }, 'Tap Swap on an exercise during your workout. Each alternate keeps its own weight history.'),
       EXERCISES.filter(e => alternatesOf(e).length).map(e => [h('h3', { class: 'sub' }, e.name), list(alternatesOf(e).map(a => `${a.name}: ${a.how}`))])),
-    h('section', { class: 'card' }, h('h2', {}, 'Warm-up and stretching'),
+    h('section', { class: 'card', id: 'plan-warm' }, h('h2', {}, 'Warm-up and stretching'),
       [['gym-pre', 'Gym warm-up'], ['gym-post', 'Gym cool-down and stretch'], ['cardio-pre', 'Cardio warm-up'], ['cardio-post', 'Cardio cool-down and stretch']].map(([key, name]) => [
         h('h3', { class: 'sub' }, name), list(ROUTINES[key].steps.map(s => `${s.text}: ${s.detail}`)),
       ])),
-    h('section', { class: 'card' }, h('h2', {}, 'Cardio and heart rate'), list(CARDIO_NOTES)),
-    h('section', { class: 'card' }, h('h2', {}, 'Food habits'), list(FOOD_NOTES)),
+    h('section', { class: 'card', id: 'plan-cardio' }, h('h2', {}, 'Cardio and heart rate'), list(CARDIO_NOTES)),
+    h('section', { class: 'card', id: 'plan-food' }, h('h2', {}, 'Food habits'), list(FOOD_NOTES)),
     h('section', { class: 'card' }, h('h2', {}, 'Follow-up'), h('p', {}, FOLLOW_UP)),
     h('section', { class: 'card safety-card stack' }, h('h2', {}, 'Safety'), h('p', {}, SAFETY), h('p', {}, CHECK_FIRST)),
   ];

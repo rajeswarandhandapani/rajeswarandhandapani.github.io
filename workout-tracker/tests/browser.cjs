@@ -30,7 +30,7 @@ async function noOverflow(page, label) {
 
   fs.mkdirSync(OUT, { recursive: true });
   const server = await start(PORT);
-  const browser = await chromium.launch();
+  const browser = await chromium.launch().catch(() => chromium.launch({ channel: 'chrome' })).catch(() => chromium.launch({ channel: 'msedge' }));
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
   const page = await context.newPage();
   const errors = [];
@@ -55,14 +55,16 @@ async function noOverflow(page, label) {
   assert.ok(await page.getByRole('button', { name: 'Next day' }).isDisabled(), 'future days cannot be logged');
   await noOverflow(page, 'Today');
 
-  // Every built-in exercise has a drawing, and tapping it shows start and finish.
+  // Every built-in exercise and non-watch routine step has a drawing, and tapping it shows start and finish.
   const noArt = await page.evaluate(async () => {
     const art = await import('/js/art.js');
     const plan = await import('/js/plan.js');
-    return plan.MOVES.filter(m => !art.hasArt(m.id)).map(m => m.id);
+    const steps = Object.values(plan.ROUTINES).flatMap(r => r.steps.filter(s => !s.watch));
+    return [...plan.MOVES, ...steps].filter(m => !art.hasArt(m.id)).map(m => m.id);
   });
-  assert.deepEqual(noArt, [], 'exercises without a drawing');
+  assert.deepEqual(noArt, [], 'exercises or steps without a drawing');
   assert.equal(await page.locator('.exercise .art-thumb').count(), 6);
+  assert.equal(await page.locator('.exercise .muscle-map').count(), 6);
   const silent = await page.evaluate(async () => {
     const art = await import('/js/art.js');
     const plan = await import('/js/plan.js');
@@ -115,6 +117,7 @@ async function noOverflow(page, label) {
   assert.equal(await testId(page, 'set-count').textContent(), '1 of 12 sets');
   assert.equal(await testId(page, 'week-gym').textContent(), '1 of 3 visits', 'week tile updates straight away');
   await page.locator('#rest').waitFor();
+  assert.equal(await page.locator('#rest-label').textContent(), 'Rest · Leg press');
   assert.equal(await page.locator('#rest-time').textContent(), '1:30');
   await page.getByRole('button', { name: '15 seconds less' }).click();
   assert.equal(await page.locator('#rest-time').textContent(), '1:15');
@@ -127,7 +130,12 @@ async function noOverflow(page, label) {
   await page.locator('#rest').waitFor({ state: 'hidden' });
   assert.ok(await exercise(page, 'leg-press').evaluate(e => e.classList.contains('complete')));
 
-  // Plank has no weight, and is saved in seconds.
+  // Plank has no weight, is saved in seconds, and offers an inline hold timer.
+  await exercise(page, 'plank').getByRole('button', { name: 'Start timer for Plank set 1' }).click();
+  await page.locator('#rest').waitFor();
+  assert.equal(await page.locator('#rest-label').textContent(), 'Plank (set 1)');
+  assert.equal(await page.locator('#rest-time').textContent(), '0:20');
+  await page.getByRole('button', { name: 'Skip' }).click();
   await tick(page, 'plank', 0).click();
   await page.getByRole('button', { name: 'Skip' }).click();
   assert.equal(await testId(page, 'set-count').textContent(), '3 of 12 sets');
@@ -240,12 +248,24 @@ async function noOverflow(page, label) {
   await page.getByRole('button', { name: 'Undo' }).click();
   assert.equal(await testId(page, 'week-cardio').textContent(), '25 of 150 min');
 
+  // Adding a gym workout on a cardio day keeps one warm-up and one cool-down, and can be hidden again.
+  await page.getByRole('button', { name: 'Add gym workout' }).click();
+  assert.equal(await page.locator('details.routine').count(), 2, 'only one warm-up and one cool-down');
+  await page.getByRole('button', { name: 'Hide gym workout' }).click();
+  assert.equal(await page.locator('.exercise').count(), 0);
+
   // Wednesday: last session's numbers are pre-filled, with a nudge at the top of the range.
   await nextDay(page);
   await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
   assert.equal(await weight(page, 'leg-press', 0).inputValue(), '60');
   assert.ok(await exercise(page, 'leg-press').getByText('Last, Nov 9: 60 lb × 12, 60 lb × 12').isVisible());
   assert.ok(await exercise(page, 'leg-press').getByText('try a small increase').isVisible());
+  await exercise(page, 'leg-press').getByRole('button', { name: 'Try 65 lb' }).click();
+  assert.equal(await weight(page, 'leg-press', 0).inputValue(), '65');
+  assert.equal(await exercise(page, 'leg-press').locator('.set:not(.head)').nth(0).locator('input').nth(1).inputValue(), '10');
+  await weight(page, 'leg-press', 0).fill('60');
+  await exercise(page, 'leg-press').locator('.set:not(.head)').nth(0).locator('input').nth(1).fill('12');
+  await exercise(page, 'leg-press').locator('.set:not(.head)').nth(1).locator('input').nth(1).fill('12');
   assert.equal(await exercise(page, 'chest-press').locator('[data-testid="suggestion"]').textContent(), 'Suggested: Stay at 40 lb and aim for 11 reps.');
   assert.equal(await setRows('chest-press').first().locator('input').nth(1).inputValue(), '11', 'the suggestion fills in the reps');
   assert.equal(await exercise(page, 'leg-press').locator('[data-testid="suggestion"]').count(), 0, 'no rating, no suggestion');
@@ -277,7 +297,7 @@ async function noOverflow(page, label) {
   await exercise(page, 'leg-press').getByRole('button', { name: 'Remove Leg press' }).click();
   await page.locator('#toast', { hasText: 'Untick this exercise' }).waitFor();
   assert.equal(await exercise(page, 'leg-press').getByRole('button', { name: 'Every workout' }).isVisible(), false);
-  await nextDay(page); await nextDay(page);
+  await page.getByRole('button', { name: 'Back to today →' }).click();
   await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
 
   // Remove from every workout, then add it back for today only.
@@ -305,7 +325,7 @@ async function noOverflow(page, label) {
   await page.getByRole('button', { name: 'Create and add' }).click();
   const crunch = page.locator('.exercise', { hasText: 'Cable crunch' });
   assert.equal(await crunch.locator('.set:not(.head)').first().locator('input').count(), 1, 'reps only, no weight box');
-  assert.equal(await crunch.locator('.art-thumb').count(), 0, 'a created exercise has no drawing');
+  assert.equal(await crunch.locator('.art-thumb.art-placeholder').count(), 1, 'a created exercise gets a placeholder drawing');
   assert.equal(await cards.count(), 6);
 
   // A mistaken exercise can be deleted while it has no history.
@@ -327,9 +347,10 @@ async function noOverflow(page, label) {
   assert.equal(await exercise(page, 'plank').count(), 0);
   assert.equal(await crunch.count(), 1);
 
-  // Text in a note is only ever text.
+  // Text in a note is only ever text, and saves on input.
   const note = page.getByRole('textbox', { name: 'Note for this day' });
   await note.fill('<img src=x onerror="window.__xss=1">');
+  assert.equal(await testId(page, 'note-status').textContent(), 'Saved');
   await note.blur();
 
   // Progress shows the same numbers.
@@ -410,7 +431,7 @@ async function noOverflow(page, label) {
 
   // Works with no network once the service worker has the files.
   await page.evaluate(() => navigator.serviceWorker.ready);
-  await page.waitForFunction(() => navigator.serviceWorker.controller !== null || caches.has('workout-tracker-v4'));
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null || caches.has('workout-tracker-v7'));
   await page.reload();
   await page.getByRole('heading', { name: 'Today, Nov 11' }).waitFor();
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null);

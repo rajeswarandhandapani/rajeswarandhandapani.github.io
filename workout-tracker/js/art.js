@@ -279,6 +279,156 @@ const SCENES = {
     arrow: [[160, 118], [160, 88]],
     draw: () => ({ back: [pad([24, 165], [190, 165], 6)], front: [] }),
   },
+
+  /* ---------- Warm-up and stretch steps ---------- */
+
+  'gp-cardio': {
+    poses: [
+      { hip: [110, 96], lean: 6, hand: [146, 86], hand2: [92, 102], foot: [132, 156], foot2: [88, 156], leg2: -1, arm: 1, arm2: 1 },
+      { hip: [110, 94], lean: 6, hand: [146, 86], hand2: [126, 96], foot: [90, 156], foot2: [134, 154], leg2: -1, arm: 1, arm2: 1 },
+    ],
+    arrow: [[70, 148], [44, 148]],
+    draw: () => ({
+      back: [box(44, 160, 152, 7, 'art-pad-fill', 3), frame([168, 72], [156, 162], 6), frame([142, 82], [170, 72], 6)],
+      front: [],
+    }),
+  },
+  'gp-legs': {
+    poses: [
+      { hip: [112, 98], lean: 2, hand: [152, 88], foot: [76, 146], foot2: [114, 160], leg: 1, leg2: -1, arm: 1, toe: 40 },
+      { hip: [112, 98], lean: -2, hand: [152, 88], foot: [148, 128], foot2: [114, 160], leg: -1, leg2: -1, arm: 1, toe: -45 },
+    ],
+    arrow: [[78, 132], [144, 114]],
+    draw: () => ({ back: [frame([156, 36], [156, G - 2], 7)], front: [] }),
+  },
+  'cp-legs': {
+    poses: [
+      { hip: [112, 98], lean: 2, hand: [152, 88], foot: [76, 146], foot2: [114, 160], leg: 1, leg2: -1, arm: 1, toe: 40 },
+      { hip: [112, 98], lean: -2, hand: [152, 88], foot: [148, 128], foot2: [114, 160], leg: -1, leg2: -1, arm: 1, toe: -45 },
+    ],
+    arrow: [[78, 132], [144, 114]],
+    draw: () => ({ back: [frame([156, 36], [156, G - 2], 7)], front: [] }),
+  },
+  'gp-hips': {
+    poses: [
+      { hip: [98, 100], lean: 10, hand: [100, 98], foot: [112, 160], foot2: [96, 160], arm: -1 },
+      { hip: [122, 100], lean: -8, hand: [120, 98], foot: [112, 160], foot2: [96, 160], arm: -1 },
+    ],
+    arrow: [[76, 98], [144, 98]],
+    draw: () => ({ back: [], front: [] }),
+  },
+  'gp-arms': {
+    poses: [
+      { hip: [112, 100], lean: 0, hand: [148, 36], hand2: [98, 118], foot: [116, 160], foot2: [100, 160], arm: 1 },
+      { hip: [112, 100], lean: 0, hand: [76, 92], hand2: [98, 118], foot: [116, 160], foot2: [100, 160], arm: -1 },
+    ],
+    arrow: [[154, 46], [154, 92]],
+    draw: () => ({ back: [], front: [] }),
+  },
+  'gp-squat': {
+    poses: [
+      { hip: [108, 96], lean: 4, hand: [136, 86], foot: [116, 160], arm: 1 },
+      { hip: [84, 128], lean: 28, hand: [148, 92], foot: [116, 160], arm: 1 },
+    ],
+    arrow: [[164, 84], [164, 122]],
+    draw: () => ({ back: [], front: [] }),
+  },
+  'cp-ankle': {
+    poses: [
+      { hip: [108, 98], lean: 0, hand: [152, 88], foot: [136, 142], foot2: [108, 160], arm: 1, toe: -45 },
+      { hip: [108, 98], lean: 0, hand: [152, 88], foot: [136, 144], foot2: [108, 160], arm: 1, toe: 45 },
+    ],
+    arrow: [[152, 132], [152, 154]],
+    draw: () => ({ back: [frame([156, 36], [156, G - 2], 7)], front: [] }),
+  },
+  'gs-walk': {
+    poses: [
+      { hip: [112, 98], lean: 4, hand: [134, 102], hand2: [92, 106], foot: [134, 160], foot2: [90, 160], leg2: -1, arm: 1, arm2: -1 },
+      { hip: [112, 96], lean: 4, hand: [94, 106], hand2: [132, 102], foot: [90, 160], foot2: [134, 160], leg2: -1, arm: -1, arm2: 1 },
+    ],
+    arrow: [[150, 62], [180, 62]],
+    draw: () => ({ back: [], front: [] }),
+  },
+  'cp-easy': {
+    poses: [
+      { hip: [112, 98], lean: 4, hand: [134, 102], hand2: [92, 106], foot: [134, 160], foot2: [90, 160], leg2: -1, arm: 1, arm2: -1 },
+      { hip: [112, 96], lean: 4, hand: [94, 106], hand2: [132, 102], foot: [90, 160], foot2: [134, 160], leg2: -1, arm: -1, arm2: 1 },
+    ],
+    arrow: [[150, 62], [180, 62]],
+    draw: () => ({ back: [], front: [] }),
+  },
+  'cs-slow': {
+    poses: [
+      { hip: [112, 98], lean: 4, hand: [134, 102], hand2: [92, 106], foot: [134, 160], foot2: [90, 160], leg2: -1, arm: 1, arm2: -1 },
+      { hip: [112, 96], lean: 4, hand: [94, 106], hand2: [132, 102], foot: [90, 160], foot2: [134, 160], leg2: -1, arm: -1, arm2: 1 },
+    ],
+    arrow: [[150, 62], [180, 62]],
+    draw: () => ({ back: [], front: [] }),
+  },
+  'gs-quad': {
+    poses: [{ hip: [116, 98], lean: 2, hand: [88, 106], hand2: [162, 86], foot: [88, 108], foot2: [118, 160], leg: 1, leg2: -1, arm: -1, arm2: 1, toe: 100 }],
+    hold: true,
+    draw: () => ({ back: [frame([166, 28], [166, G - 2], 7)], front: [] }),
+  },
+  'cs-quad': {
+    poses: [{ hip: [116, 98], lean: 2, hand: [88, 106], hand2: [162, 86], foot: [88, 108], foot2: [118, 160], leg: 1, leg2: -1, arm: -1, arm2: 1, toe: 100 }],
+    hold: true,
+    draw: () => ({ back: [frame([166, 28], [166, G - 2], 7)], front: [] }),
+  },
+  'gs-ham': {
+    poses: [{ hip: [84, 120], lean: 36, hand: [134, 126], foot: [150, 158], foot2: [112, 160], leg: -1, leg2: -1, arm: 1, toe: -65 }],
+    hold: true,
+    draw: () => ({ back: [...seat(58, 98, 134, 76)], front: [] }),
+  },
+  'cs-ham': {
+    poses: [{ hip: [92, 102], lean: 36, hand: [122, 118], foot: [148, 146], foot2: [94, 160], leg: -1, leg2: -1, arm: 1, toe: -60 }],
+    hold: true,
+    draw: () => ({ back: [box(134, 152, 42, 16, 'art-pad-fill', 3)], front: [] }),
+  },
+  'gs-chest': {
+    poses: [{ hip: [122, 98], lean: 6, hand: [104, 52], hand2: [134, 116], foot: [144, 160], foot2: [98, 160], leg2: -1, arm: 1, arm2: 1 }],
+    hold: true,
+    draw: () => ({ back: [frame([106, 16], [106, G - 2], 8), frame([92, 16], [120, 16], 6)], front: [] }),
+  },
+  'gs-lat': {
+    poses: [{ hip: [114, 98], lean: -14, hand: [90, 26], hand2: [124, 112], foot: [122, 160], foot2: [100, 160], leg2: -1, arm: -1, arm2: 1 }],
+    hold: true,
+    draw: () => ({ back: [], front: [] }),
+  },
+  'gs-glute': {
+    poses: [{ hip: [114, 150], sh: [64, 154], head: [44, 154], hand: [122, 120], foot: [136, 110], foot2: [152, 156], leg: -1, leg2: -1, arm: -1, toe: -40 }],
+    hold: true,
+    draw: () => ({ back: [pad([24, 165], [204, 165], 6)], front: [] }),
+  },
+  'cs-calf': {
+    poses: [{ hip: [114, 102], lean: 22, hand: [168, 76], foot: [142, 160], foot2: [68, 160], leg: -1, leg2: 1, arm: 1, toe2: 0 }],
+    hold: true,
+    draw: () => ({ back: [frame([172, 24], [172, G - 2], 8)], front: [] }),
+  },
+  'cs-hip': {
+    poses: [{ hip: [118, 114], lean: 2, hand: [140, 118], foot: [156, 158], foot2: [70, 158], leg: -1, leg2: 1, arm: 1, toe2: 85 }],
+    hold: true,
+    draw: () => ({ back: [pad([46, 165], [190, 165], 6)], front: [] }),
+  },
+
+  /* ---------- Custom exercise placeholders ---------- */
+
+  'custom-weight': {
+    poses: [{ hip: [112, 98], lean: 0, hand: [126, 126], hand2: [98, 118], foot: [118, 160], foot2: [100, 160], arm: -1 }, { hip: [112, 98], lean: 0, hand: [130, 82], hand2: [98, 118], foot: [118, 160], foot2: [100, 160], arm: -1 }],
+    hold: true,
+    draw: () => ({ back: [], front: [] }),
+    extra: p => dumbbell(add(p.ha, [2, 0]), 0, 20),
+  },
+  'custom-reps': {
+    poses: [{ hip: [108, 98], lean: 4, hand: [138, 86], foot: [116, 160], foot2: [98, 160], arm: 1 }],
+    hold: true,
+    draw: () => ({ back: [], front: [] }),
+  },
+  'custom-time': {
+    poses: [{ hip: [96, 140], lean: 79, hand: [166, 158], foot: [30, 155], arm: 1, toe: 80 }],
+    hold: true,
+    draw: () => ({ back: [pad([18, 165], [200, 165], 6)], front: [] }),
+  },
 };
 
 /* ---------- Turning a scene into a picture ---------- */
@@ -322,11 +472,13 @@ function panel(scene, t, { x = 0, label, showArrow, into }) {
   return g;
 }
 
-export const hasArt = id => Boolean(SCENES[id]);
+const sceneFor = (id, kind) => SCENES[id] || (/^custom-/.test(id) ? SCENES[`custom-${kind || 'reps'}`] : null);
 
-/** A drawing of an exercise, or null if there isn't one (exercises people create themselves). */
-export function exerciseArt(id, { thumb = false, name = '', at = 1 } = {}) {
-  const scene = SCENES[id];
+export const hasArt = id => Boolean(sceneFor(id));
+
+/** A drawing of an exercise or stretch, with a fallback placeholder for custom exercises. */
+export function exerciseArt(id, { thumb = false, name = '', at = 1, kind } = {}) {
+  const scene = sceneFor(id, kind);
   if (!scene) return null;
   if (thumb) {
     const svg = svgEl('svg', { viewBox: '0 0 240 180', class: 'art art-thumb-img', 'aria-hidden': 'true' });
@@ -337,6 +489,51 @@ export function exerciseArt(id, { thumb = false, name = '', at = 1 } = {}) {
   if (scene.hold) svg.append(panel(scene, 0, { label: 'Hold' }));
   else svg.append(panel(scene, 0, { label: 'Start', showArrow: true }), panel(scene, 1, { x: 250, label: 'Finish' }));
   return svg;
+}
+
+/* ---------- Muscle diagram ---------- */
+
+const MUSCLE_PARTS = {
+  'Legs and glutes': [
+    ['rect', { x: 10.5, y: 20, width: 11, height: 4.5, rx: 2, class: 'muscle-hit' }],
+    ['line', { x1: 12.2, y1: 24.5, x2: 11.2, y2: 31.5, class: 'muscle-hit-limb', 'stroke-width': 4.2 }],
+    ['line', { x1: 19.8, y1: 24.5, x2: 20.8, y2: 31.5, class: 'muscle-hit-limb', 'stroke-width': 4.2 }],
+  ],
+  'Chest, shoulders, triceps': [
+    ['rect', { x: 10.5, y: 10.5, width: 11, height: 5.5, rx: 2, class: 'muscle-hit' }],
+    ['circle', { cx: 8.8, cy: 12, r: 2.4, class: 'muscle-hit' }],
+    ['circle', { cx: 23.2, cy: 12, r: 2.4, class: 'muscle-hit' }],
+    ['line', { x1: 7.8, y1: 13.5, x2: 6.5, y2: 18.5, class: 'muscle-hit-limb', 'stroke-width': 3.2 }],
+    ['line', { x1: 24.2, y1: 13.5, x2: 25.5, y2: 18.5, class: 'muscle-hit-limb', 'stroke-width': 3.2 }],
+  ],
+  Back: [
+    ['polygon', { points: '9.5,10.5 22.5,10.5 20,19.5 12,19.5', class: 'muscle-hit' }],
+  ],
+  Hamstrings: [
+    ['line', { x1: 12.2, y1: 25, x2: 11.3, y2: 31.8, class: 'muscle-hit-limb', 'stroke-width': 4 }],
+    ['line', { x1: 19.8, y1: 25, x2: 20.7, y2: 31.8, class: 'muscle-hit-limb', 'stroke-width': 4 }],
+  ],
+  Core: [
+    ['rect', { x: 12, y: 15, width: 8, height: 6.5, rx: 1.8, class: 'muscle-hit' }],
+  ],
+  'Your exercise': [
+    ['rect', { x: 11.5, y: 11.5, width: 9, height: 9, rx: 2, class: 'muscle-hit' }],
+  ],
+};
+
+/** A small body outline highlighting the worked muscle group next to the focus text. */
+export function muscleDiagram(focus) {
+  const base = [
+    ['circle', { cx: 16, cy: 5, r: 3.2, class: 'muscle-base-fill' }],
+    ['rect', { x: 10.5, y: 10, width: 11, height: 12.5, rx: 2.5, class: 'muscle-base-fill' }],
+    ['line', { x1: 8.5, y1: 11.8, x2: 5.8, y2: 21.5, class: 'muscle-base', 'stroke-width': 2.8 }],
+    ['line', { x1: 23.5, y1: 11.8, x2: 26.2, y2: 21.5, class: 'muscle-base', 'stroke-width': 2.8 }],
+    ['line', { x1: 12.5, y1: 22.5, x2: 10.8, y2: 37, class: 'muscle-base', 'stroke-width': 3.4 }],
+    ['line', { x1: 19.5, y1: 22.5, x2: 21.2, y2: 37, class: 'muscle-base', 'stroke-width': 3.4 }],
+  ];
+  const hits = MUSCLE_PARTS[focus] || MUSCLE_PARTS['Your exercise'];
+  return svgEl('svg', { viewBox: '0 0 32 40', class: 'muscle-map', 'aria-hidden': 'true' },
+    ...base.map(build), ...hits.map(build));
 }
 
 /* ---------- Animation ---------- */
@@ -363,8 +560,18 @@ const CUES = {
   'lying-curl': ['Curl up', 'Lower with control'],
   'romanian-deadlift': ['Hinge at the hips with control', 'Stand tall'],
   'glute-bridge': ['Lift your hips', 'Lower with control'],
+  'gp-cardio': ['Walk at an easy pace', 'Keep shoulders relaxed'],
+  'gp-legs': ['Swing forward', 'Swing back with control'],
+  'cp-legs': ['Swing forward', 'Swing back with control'],
+  'gp-hips': ['Circle hips forward', 'Circle hips back'],
+  'gp-arms': ['Circle arms forward', 'Circle arms back'],
+  'gp-squat': ['Squat down slowly', 'Stand tall'],
+  'cp-ankle': ['Point toes down', 'Pull toes up'],
+  'gs-walk': ['Walk at an easy pace', 'Steady breathing'],
+  'cp-easy': ['Walk at an easy pace', 'Steady breathing'],
+  'cs-slow': ['Slow your pace down', 'Steady breathing'],
 };
-const LOWER_FIRST = new Set(['hack-squat', 'goblet-squat', 'romanian-deadlift']);
+const LOWER_FIRST = new Set(['hack-squat', 'goblet-squat', 'romanian-deadlift', 'gp-squat']);
 
 const FAST = 1000, PAUSE = 350, SLOW = 1900, RESET = 450;
 const ease = x => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
@@ -385,11 +592,11 @@ function momentOf(id, ms) {
  * A looping demonstration with a pause button. It only runs while start() is in effect. People who
  * ask their device to reduce motion get the still start and finish view, as does plank, a hold.
  */
-export function exerciseAnimation(id, { name = '' } = {}) {
-  const scene = SCENES[id];
+export function exerciseAnimation(id, { name = '', kind } = {}) {
+  const scene = sceneFor(id, kind);
   if (!scene) return null;
   if (scene.hold || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return { el: exerciseArt(id, { name }), start() {}, stop() {} };
+    return { el: exerciseArt(id, { name, kind }), start() {}, stop() {} };
   }
   const g = svgEl('g');
   const svg = svgEl('svg', { viewBox: '0 0 240 180', class: 'art art-anim', role: 'img', 'aria-label': `${name}: animated demonstration` }, g);
