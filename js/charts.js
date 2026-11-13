@@ -112,7 +112,7 @@ export function lineChart({ points, unit, describe }) {
     points.forEach(p => svg.append(svgEl('circle', { cx: x(p), cy: y(p.value), r: 4, class: 'dot-gym' })));
     const end = points[points.length - 1];
     svg.append(label({ x: Math.min(x(end), W - right), y: y(end.value) - 10, 'text-anchor': points.length > 1 ? 'end' : 'middle', class: 'axis strong-tick' }, `${end.value} ${unit}`));
-    svg.append(label({ x: left, y: H - 7, class: 'axis' }, shortDate(first)));
+    svg.append(label({ x: span ? left : x(points[0]), y: H - 7, 'text-anchor': span ? 'start' : 'middle', class: 'axis' }, shortDate(first)));
     if (span) svg.append(label({ x: W - right, y: H - 7, 'text-anchor': 'end', class: 'axis' }, shortDate(end.date)));
     box.append(svg);
     const tip = tooltip(box);

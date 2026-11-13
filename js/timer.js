@@ -3,7 +3,9 @@
 const bar = document.querySelector('#rest');
 const time = document.querySelector('#rest-time');
 const title = document.querySelector('#rest-label');
+const fill = document.querySelector('#rest-fill');
 let end = 0;
+let total = 0;
 let ticker;
 let audio;
 let beepOn = true;
@@ -32,7 +34,8 @@ function beep() {
 }
 
 function update() {
-  const left = Math.ceil((end - Date.now()) / 1000);
+  const rem = end - Date.now();
+  const left = Math.ceil(rem / 1000);
   if (left <= 0) {
     stopRest();
     beep();
@@ -40,6 +43,7 @@ function update() {
     return;
   }
   time.textContent = stamp(left);
+  if (fill && total > 0) fill.style.width = `${Math.max(0, Math.min(100, (rem / total) * 100))}%`;
 }
 
 export function stopRest() {
@@ -59,7 +63,8 @@ export function startRest(seconds, { beep: wantBeep = true, label = 'Rest' } = {
       audio.resume();
     } catch { audio = null; }
   }
-  end = Date.now() + seconds * 1000;
+  total = seconds * 1000;
+  end = Date.now() + total;
   bar.hidden = false;
   update();
   clearInterval(ticker);
@@ -71,6 +76,8 @@ bar.addEventListener('click', e => {
   const action = e.target.closest('[data-rest]')?.dataset.rest;
   if (!action) return;
   if (action === 'skip') { stopRest(); return; }
-  end = Math.max(Date.now() + 1000, end + Number(action) * 1000);
+  const delta = Number(action) * 1000;
+  end = Math.max(Date.now() + 1000, end + delta);
+  total = Math.max(total, end - Date.now());
   update();
 });
