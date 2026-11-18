@@ -6,26 +6,27 @@ import { startRest, stopRest } from './timer.js';
 import { weeklyBars, lineChart } from './charts.js';
 import { exerciseAnimation, exerciseArt, muscleDiagram } from './art.js';
 import {
-  CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EFFORTS, WEIGHT_STEPS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
-  MAX_SETS, PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, WEEKS, alternatesOf, cardioName, customMove, lookupMove, phaseOf, target,
+  ALL_FAMILIES, CARDIO_GOAL, CARDIO_NOTES, CARDIO_TYPES, CHECK_FIRST, CUSTOM_KINDS, EFFORTS, WEIGHT_STEPS, EXERCISES, FOLLOW_UP, FOOD_NOTES, GYM_NOTES, GYM_PER_WEEK, HEART_RATE, MOVES,
+  MAX_SETS, PHASES, ROUTINES, SAFETY, SCHEDULE, SCHEDULE_ORDER, WEEKS, alternatesOf, cardioName, customMove, gifUrl, lookupMove, phaseOf, target, videoUrl,
 } from './plan.js';
 import {
-  addDays, cardioOf, cleanSettings, dayExerciseIds, exerciseHistory, fromIso, isEmptyDay, lastCardio, lastPerformance, localToday, makeBackup, mondayOf,
-  moderateMinutes, nextMonday, num, parseBackup, programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, suggestNext, statusOf, weekDates, weekSummary, weekdayOf,
+  DEFAULT_REMINDER, addDays, cardioOf, cleanSettings, dayExerciseIds, exerciseHistory, fromIso, isEmptyDay, lastCardio, lastPerformance, localToday, makeBackup, makeCalendar, mondayOf,
+  moderateMinutes, nextMonday, num, parseBackup, planDone, programRows, programTotals, programWeek, readyToIncrease, reminderDue, reminderFor, setCountFor, setsDone, suggestNext, statusOf, weekDates, weekSummary, weekdayOf,
 } from './logic.js';
 
 const main = document.querySelector('#main');
 // `routine` is the list of exercise ids for gym days. Null means the plan's own list.
-const DEFAULTS = { startDate: null, rest: 90, beep: true, step: 5, routine: null, custom: [] };
+const defaultSettings = () => ({ startDate: null, rest: 90, beep: true, step: 5, routine: null, custom: [], reminder: { ...DEFAULT_REMINDER, days: [...DEFAULT_REMINDER.days] } });
 const S = {
   view: 'today',
   today: localToday(),
   date: localToday(),
   days: {},
-  settings: { ...DEFAULTS },
+  settings: defaultSettings(),
   adding: {},
   exercise: EXERCISES[0].id,
   lastBackup: null,
+  lastReminder: null,
 };
 
 const getDay = date => (S.days[date] ||= { date });
@@ -37,7 +38,7 @@ async function saveDay(day) {
   if (!askedToPersist) {
     askedToPersist = true;
     // Asks the browser not to clear this site's data when the device runs low on space.
-    navigator.storage?.persist?.().catch(() => {});
+    navigator.storage?.persist?.().catch(() => { });
   }
   try {
     if (isEmptyDay(day)) await store.deleteDay(day.date);
@@ -118,12 +119,14 @@ function setupView() {
       h('p', {}, 'Three gym days, three cardio days and one rest day each week, with your weights and minutes saved as you go.'),
       h('label', { class: 'field' }, h('span', {}, 'Week 1 starts'), input),
       h('p', { class: 'muted' }, 'Weeks run Monday to Sunday. Your logs stay on this device.'),
-      h('button', { class: 'primary', type: 'button', onclick: async () => {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(input.value)) { toast('Choose a start date first.'); return; }
-        S.settings.startDate = input.value;
-        await saveSettings();
-        render({ top: true });
-      } }, 'Start the plan')),
+      h('button', {
+        class: 'primary', type: 'button', onclick: async () => {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(input.value)) { toast('Choose a start date first.'); return; }
+          S.settings.startDate = input.value;
+          await saveSettings();
+          render({ top: true });
+        }
+      }, 'Start the plan')),
     h('section', { class: 'card stack safety-card' }, h('h2', {}, 'Before you begin'), h('p', {}, CHECK_FIRST), h('p', {}, SAFETY)),
   ];
 }
@@ -149,8 +152,7 @@ function dateHeader(date) {
 
 function planCard(date, day) {
   const plan = SCHEDULE[weekdayOf(date)];
-  const done = (plan.kind === 'gym' && setsDone(day) > 0) || (plan.kind === 'cardio' && cardioOf(day).length > 0)
-    || (plan.kind === 'rest' && (day.rest || cardioOf(day).length > 0));
+  const done = planDone(date, day);
   return h('section', { class: 'plan-line' },
     h('div', {},
       h('span', { class: 'muted small-text' }, date === S.today ? 'Planned today' : 'Planned'),
@@ -181,8 +183,8 @@ function setRow(day, ex, i, last, rows, afterChange, suggestion) {
 
   function toggle() {
     if (!done) {
-      if (ex.weighted && num(weight.value) == null) { need(weight, 'Enter the weight first.'); return; }
-      if (num(value.value) == null) { need(value, `Enter the ${ex.unit === 'sec' ? 'seconds' : 'reps'} first.`); return; }
+      if (ex.weighted && !(num(weight.value) > 0)) { need(weight, 'Enter the weight first.'); return; }
+      if (!(num(value.value) > 0)) { need(value, `Enter the ${ex.unit === 'sec' ? 'seconds' : 'reps'} first.`); return; }
     }
     done = !done;
     row.classList.toggle('done', done);
@@ -224,7 +226,17 @@ function setRow(day, ex, i, last, rows, afterChange, suggestion) {
   return { row, weight, value, isDone: () => done, write };
 }
 
-const setText = (ex, s) => (ex.weighted ? `${s.weight} lb × ${s.value}` : `${s.value} ${ex.unit}`);
+const setText = (ex, s) => (ex.weighted ? `${s.weight} lb${ex.assisted ? ' assist' : ''} × ${s.value}` : `${s.value} ${ex.unit}`);
+const extLink = (href, text, label) => h('a', {
+  class: 'link ext-link',
+  href,
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  'aria-label': label,
+}, text);
+const mediaLinks = (item, name) => h('div', { class: 'media-links' },
+  extLink(videoUrl(item), 'Watch form video ↗', `Watch ${name} video`),
+  extLink(gifUrl(item), 'Animated GIFs ↗', `View ${name} animated GIF`));
 const findMove = id => lookupMove(S.settings.custom, id);
 const allMoves = () => [...MOVES, ...S.settings.custom.map(customMove)];
 const routineIds = () => S.settings.routine ?? EXERCISES.map(e => e.id);
@@ -256,13 +268,15 @@ function exerciseCard(day, slot, afterChange) {
     nextTime.textContent = next ? `Next time: ${next.text}` : '';
     ratingButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.effort === effort)));
   }
-  const ratingButtons = EFFORTS.map(e => h('button', { class: 'effort-btn', type: 'button', 'data-effort': e.id, 'aria-pressed': 'false', 'aria-label': `${ex.name} felt: ${e.label}`, onclick: () => {
-    day.gym.effort ||= {};
-    if (day.gym.effort[ex.id] === e.id) delete day.gym.effort[ex.id];
-    else day.gym.effort[ex.id] = e.id;
-    saveDay(day);
-    showNext();
-  } }, h('strong', {}, e.label), h('span', { class: 'muted small-text' }, ex.unit === 'sec' ? e.time : e.reps)));
+  const ratingButtons = EFFORTS.map(e => h('button', {
+    class: 'effort-btn', type: 'button', 'data-effort': e.id, 'aria-pressed': 'false', 'aria-label': `${ex.name} felt: ${e.label}`, onclick: () => {
+      day.gym.effort ||= {};
+      if (day.gym.effort[ex.id] === e.id) delete day.gym.effort[ex.id];
+      else day.gym.effort[ex.id] = e.id;
+      saveDay(day);
+      showNext();
+    }
+  }, h('strong', {}, e.label), h('span', { class: 'muted small-text' }, ex.unit === 'sec' ? e.time : e.reps)));
   const effortBox = h('div', { class: 'effort', hidden: true },
     h('span', { class: 'small-text muted' }, 'How hard was that?'),
     h('div', { class: 'effort-grid' }, ratingButtons),
@@ -285,6 +299,7 @@ function exerciseCard(day, slot, afterChange) {
 
   function removeSet() {
     if (rows[count - 1].isDone()) { toast('Untick the last set before removing it.'); return; }
+    rows.slice(0, count - 1).forEach(r => r.write());
     day.gym ||= {};
     day.gym.counts ||= {};
     day.gym.counts[ex.id] = count - 1;
@@ -292,8 +307,34 @@ function exerciseCard(day, slot, afterChange) {
     redraw();
   }
 
-  function swapTo(move) {
+  let swapScope = 'today';
+  function swapTo(move, scope = swapScope) {
     if (rows.some(r => r.isDone())) { toast('Untick the sets on this exercise before swapping.'); return; }
+    if (scope === 'always' && inRoutine) {
+      const before = { routine: S.settings.routine, gym: structuredClone(day.gym ?? null) };
+      day.gym ||= {};
+      if (move.id !== ex.id) {
+        if (day.gym.sets) delete day.gym.sets[ex.id];
+        if (day.gym.counts) delete day.gym.counts[ex.id];
+        if (day.gym.effort) delete day.gym.effort[ex.id];
+      }
+      if (day.gym.swaps) delete day.gym.swaps[slot.id];
+      S.settings.routine = [...new Set(routineIds().map(id => (id === slot.id ? move.id : id)))];
+      saveSettings();
+      saveDay(day);
+      render();
+      toast(`${move.name} set for every workout.`, {
+        label: 'Undo', run: () => {
+          S.settings.routine = before.routine;
+          saveSettings();
+          if (before.gym) day.gym = before.gym;
+          else delete day.gym;
+          saveDay(day);
+          render();
+        }
+      });
+      return;
+    }
     day.gym ||= {};
     day.gym.swaps ||= {};
     if (day.gym.sets) delete day.gym.sets[ex.id];
@@ -320,14 +361,16 @@ function exerciseCard(day, slot, afterChange) {
     }
     saveDay(day);
     render();
-    toast(scope === 'always' ? `${ex.name} removed from your routine.` : `${ex.name} removed for this day.`, { label: 'Undo', run: () => {
-      S.settings.routine = before.routine;
-      saveSettings();
-      if (before.gym) day.gym = before.gym;
-      else delete day.gym;
-      saveDay(day);
-      render();
-    } });
+    toast(scope === 'always' ? `${ex.name} removed from your routine.` : `${ex.name} removed for this day.`, {
+      label: 'Undo', run: () => {
+        S.settings.routine = before.routine;
+        saveSettings();
+        if (before.gym) day.gym = before.gym;
+        else delete day.gym;
+        saveDay(day);
+        render();
+      }
+    });
   }
 
   const inRoutine = routineIds().includes(slot.id);
@@ -337,32 +380,61 @@ function exerciseCard(day, slot, afterChange) {
       inRoutine && h('button', { class: 'ghost', type: 'button', onclick: () => removeFrom('today') }, 'Today only'),
       h('button', { class: 'ghost', type: 'button', onclick: () => removeFrom('always') }, inRoutine ? 'Every workout' : 'Remove'),
       h('button', { class: 'link', type: 'button', onclick: () => { removeBox.hidden = true; } }, 'Cancel')));
-  const removeButton = h('button', { class: 'link remove-ex', type: 'button', 'aria-label': `Remove ${ex.name}`, onclick: () => {
-    if (rows.some(r => r.isDone())) { toast('Untick this exercise’s sets before removing it.'); return; }
-    removeBox.hidden = !removeBox.hidden;
-  } }, 'Remove');
+  const removeButton = h('button', {
+    class: 'link remove-ex', type: 'button', 'aria-label': `Remove ${ex.name}`, onclick: () => {
+      if (rows.some(r => r.isDone())) { toast('Untick this exercise’s sets before removing it.'); return; }
+      removeBox.hidden = !removeBox.hidden;
+    }
+  }, 'Remove');
 
   const taken = daySlots(day).map(s => activeMove(day, s).id);
   const choices = alternatesOf(slot).length ? [slot, ...alternatesOf(slot)].filter(m => m.id !== ex.id && !taken.includes(m.id)) : [];
+  const todayBtn = inRoutine ? h('button', {
+    class: 'chip-btn', type: 'button', 'aria-pressed': 'true', onclick: () => {
+      swapScope = 'today';
+      todayBtn.setAttribute('aria-pressed', 'true');
+      alwaysBtn.setAttribute('aria-pressed', 'false');
+    }
+  }, 'Today only') : null;
+  const alwaysBtn = inRoutine ? h('button', {
+    class: 'chip-btn', type: 'button', 'aria-pressed': 'false', onclick: () => {
+      swapScope = 'always';
+      todayBtn.setAttribute('aria-pressed', 'false');
+      alwaysBtn.setAttribute('aria-pressed', 'true');
+    }
+  }, 'Every workout') : null;
   const swapList = choices.length ? h('div', { class: 'swap-list', hidden: true },
+    h('div', { class: 'swap-head' },
+      h('span', { class: 'small-text muted' }, slot.family || 'Swap options'),
+      inRoutine && h('div', { class: 'swap-scope', role: 'group', 'aria-label': 'Swap scope' }, todayBtn, alwaysBtn)),
+    swapped && inRoutine && h('button', { class: 'ghost swap-promote', type: 'button', onclick: () => swapTo(ex, 'always') }, `Use ${ex.name} every workout`),
     choices.map(m => h('button', { class: 'swap-option', type: 'button', onclick: () => swapTo(m) },
       exerciseArt(m.id, { thumb: true }),
       h('span', { class: 'swap-text' },
-        h('strong', {}, m.id === slot.id ? `${m.name} (planned)` : m.name),
+        h('span', { class: 'swap-title-row' },
+          h('strong', {}, m.id === slot.id ? `${m.name} (planned)` : m.name),
+          m.fallback && h('span', { class: 'swap-badge' }, m.fallback)),
+        (m.unit !== slot.unit || m.low !== slot.low || m.high !== slot.high) && h('span', { class: 'muted small-text' }, target(m)),
         m.how && h('span', { class: 'muted small-text' }, m.how))))) : null;
-  const swapButton = choices.length ? h('button', { class: 'link swap-btn', type: 'button', 'aria-label': `Swap ${ex.name}`, onclick: () => { swapList.hidden = !swapList.hidden; } }, swapped ? 'Change' : 'Machine taken? Swap') : null;
+  const swapButton = choices.length ? h('button', { class: 'link swap-btn', type: 'button', 'aria-label': `Swap ${ex.name}`, onclick: () => { swapList.hidden = !swapList.hidden; } }, swapped ? 'Change' : (slot.id === 'plank' ? 'Swap exercise' : 'Machine taken? Swap')) : null;
 
   const thumb = exerciseArt(ex.id, { thumb: true, kind: ex.kind });
   const demo = thumb && !ex.custom ? exerciseAnimation(ex.id, { name: ex.name, kind: ex.kind }) : null;
-  const artView = demo ? h('div', { hidden: true }, demo.el) : null;
+  const artView = demo ? h('div', { hidden: true }, demo.el, mediaLinks(ex, ex.name)) : null;
   const artHint = demo ? h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'How to') : null;
-  const artButton = demo ? h('button', { class: 'art-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${ex.name}`, onclick: () => {
-    artView.hidden = !artView.hidden;
-    artButton.setAttribute('aria-expanded', String(!artView.hidden));
-    artHint.textContent = artView.hidden ? 'How to' : 'Hide';
-    if (artView.hidden) demo.stop();
-    else demo.start();
-  } }, thumb, artHint) : (thumb ? h('div', { class: 'art-thumb art-placeholder' }, thumb, h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'Custom')) : null);
+  const artButton = demo ? h('button', {
+    class: 'art-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${ex.name}`, onclick: () => {
+      artView.hidden = !artView.hidden;
+      artButton.setAttribute('aria-expanded', String(!artView.hidden));
+      artHint.textContent = artView.hidden ? 'How to' : 'Hide';
+      if (artView.hidden) demo.stop();
+      else demo.start();
+    }
+  }, thumb, artHint) : (thumb ? h('div', { class: 'art-thumb art-placeholder' }, thumb, h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'Custom')) : null);
+
+  const focusText = swapped
+    ? (ex.family ? `Instead of ${slot.name} · ${ex.family}` : `Instead of ${slot.name}`)
+    : (ex.family ? `${ex.family} · ${ex.focus}` : ex.focus);
 
   const card = h('article', { class: 'exercise', 'data-exercise': slot.id },
     h('div', { class: 'ex-head' },
@@ -371,31 +443,41 @@ function exerciseCard(day, slot, afterChange) {
         h('h3', {}, ex.name),
         h('p', { class: 'muted small-text focus-line' },
           muscleDiagram(ex.focus),
-          h('span', {}, swapped ? `Instead of ${slot.name}` : ex.focus))),
+          h('span', {}, focusText))),
       h('span', { class: 'target' }, target(ex))),
     artView,
     ex.how && h('p', { class: 'muted small-text' }, ex.how),
-    h('div', { class: 'card-tools' }, swapButton, removeButton),
+    h('div', { class: 'card-tools' },
+      swapButton,
+      extLink(videoUrl(ex), 'Video ↗', `Watch ${ex.name} video`),
+      extLink(gifUrl(ex), 'GIF ↗', `View ${ex.name} animated GIF`),
+      removeButton),
     swapList,
     removeBox,
     last && h('p', { class: 'muted small-text last-time' }, `Last, ${shortDate(last.date)}: ${last.sets.map(s => setText(ex, s)).join(', ')}`),
     suggestion && h('p', { class: 'hint', 'data-testid': 'suggestion', 'data-action': suggestion.action }, `Suggested: ${suggestion.text}`),
     !suggestion && readyToIncrease(last, ex) && (() => {
-      const nextW = last.sets[last.sets.length - 1].weight + S.settings.step;
+      const lastW = last.sets[last.sets.length - 1].weight;
+      const nextW = ex.assisted ? Math.max(S.settings.step, lastW - S.settings.step) : lastW + S.settings.step;
+      if (nextW === lastW) return null;
       return h('div', { class: 'hint hint-row' },
-        h('span', {}, 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
-        h('button', { class: 'chip-btn', type: 'button', onclick: () => {
-          rows.filter(r => !r.isDone()).forEach(r => {
-            if (r.weight) r.weight.value = nextW;
-            r.value.value = ex.low;
-            r.write();
-          });
-          saveDay(day);
-          toast(`Set to ${nextW} lb × ${ex.low}.`);
-        } }, `Try ${nextW} lb`));
+        h('span', {}, ex.assisted
+          ? 'You reached the top of the range. If every rep felt controlled, try a little less assistance.'
+          : 'You reached the top of the range. If every rep felt controlled, try a small increase.'),
+        h('button', {
+          class: 'chip-btn', type: 'button', onclick: () => {
+            rows.filter(r => !r.isDone()).forEach(r => {
+              if (r.weight) r.weight.value = nextW;
+              r.value.value = ex.low;
+              r.write();
+            });
+            saveDay(day);
+            toast(`Set to ${nextW} lb × ${ex.low}.`);
+          }
+        }, `Try ${nextW} lb`));
     })(),
     h('div', { class: 'set head muted small-text', 'aria-hidden': 'true' },
-      h('span', {}, 'Set'), h('span', {}, ex.weighted ? 'lb' : ex.unit === 'sec' ? 'timer' : ''), h('span', {}, ex.unit), h('span', {})),
+      h('span', {}, 'Set'), h('span', {}, ex.weighted ? (ex.assisted ? 'assist lb' : 'lb') : ex.unit === 'sec' ? 'timer' : ''), h('span', {}, ex.unit), h('span', {})),
     rows.map(r => r.row),
     h('div', { class: 'set-actions' },
       h('button', { class: 'ghost', type: 'button', 'aria-label': `Add set to ${ex.name}`, disabled: count >= MAX_SETS, onclick: addSet }, '+ Add set'),
@@ -439,12 +521,13 @@ function addExercisePanel(day) {
   const available = allMoves().filter(m => !used.has(m.id));
   const group = (label, moves) => moves.length > 0 && h('optgroup', { label }, moves.map(m => h('option', { value: m.id }, m.name)));
   const picker = h('select', { 'aria-label': 'Exercise to add' },
-    group('From the plan', available.filter(m => !m.slot && !m.custom)),
+    group('From the plan', available.filter(m => !m.slot && !m.optionalFamily && !m.custom)),
+    group('Optional families', available.filter(m => !m.slot && m.optionalFamily)),
     group('Alternates', available.filter(m => m.slot)),
     group('Your exercises', available.filter(m => m.custom)));
-  const scope = select('Add to', 'always', [['always', 'Every workout'], ['today', 'Today only']], () => {});
+  const scope = select('Add to', 'always', [['always', 'Every workout'], ['today', 'Today only']], () => { });
   const name = h('input', { type: 'text', maxlength: 60, placeholder: 'For example, cable crunch', 'aria-label': 'New exercise name' });
-  const kind = select('New exercise type', 'weight', CUSTOM_KINDS, () => {});
+  const kind = select('New exercise type', 'weight', CUSTOM_KINDS, () => { });
 
   function addToDay(id) {
     const routine = routineIds();
@@ -495,25 +578,29 @@ function routineCard(day, key) {
   const box = h('details', { class: 'card routine', 'data-routine': key, open: doneCount() < routine.steps.length },
     h('summary', {}, h('span', { class: 'routine-head' }, h('h2', {}, routine.title), h('span', { class: 'muted small-text' }, routine.time)), counter),
     routine.steps.map(step => {
-      const input = h('input', { type: 'checkbox', checked: day.steps?.[step.id] === true, 'aria-label': step.text, onchange: () => {
-        day.steps ||= {};
-        if (input.checked) day.steps[step.id] = true;
-        else delete day.steps[step.id];
-        saveDay(day);
-        update();
-        if (doneCount() === routine.steps.length) box.open = false;
-      } });
+      const input = h('input', {
+        type: 'checkbox', checked: day.steps?.[step.id] === true, 'aria-label': step.text, onchange: () => {
+          day.steps ||= {};
+          if (input.checked) day.steps[step.id] = true;
+          else delete day.steps[step.id];
+          saveDay(day);
+          update();
+          if (doneCount() === routine.steps.length) box.open = false;
+        }
+      });
       const thumb = exerciseArt(step.id, { thumb: true });
       const demo = thumb ? exerciseAnimation(step.id, { name: step.text }) : null;
-      const artView = demo ? h('div', { class: 'step-art', hidden: true }, demo.el) : null;
+      const artView = demo ? h('div', { class: 'step-art', hidden: true }, demo.el, !step.watch && mediaLinks(step, step.text)) : null;
       const artHint = demo ? h('span', { class: 'art-hint', 'aria-hidden': 'true' }, 'How to') : null;
-      const artBtn = demo ? h('button', { class: 'art-thumb step-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${step.text}`, onclick: () => {
-        artView.hidden = !artView.hidden;
-        artBtn.setAttribute('aria-expanded', String(!artView.hidden));
-        artHint.textContent = artView.hidden ? 'How to' : 'Hide';
-        if (artView.hidden) demo.stop();
-        else demo.start();
-      } }, thumb, artHint) : null;
+      const artBtn = demo ? h('button', {
+        class: 'art-thumb step-thumb', type: 'button', 'aria-expanded': 'false', 'aria-label': `Show how to do ${step.text}`, onclick: () => {
+          artView.hidden = !artView.hidden;
+          artBtn.setAttribute('aria-expanded', String(!artView.hidden));
+          artHint.textContent = artView.hidden ? 'How to' : 'Hide';
+          if (artView.hidden) demo.stop();
+          else demo.start();
+        }
+      }, thumb, artHint) : null;
       return h('div', { class: 'step-wrap' },
         h('div', { class: `step${step.watch ? ' watch' : ''}` },
           h('label', { class: 'check' }, input, h('span', { class: 'step-text' }, h('strong', {}, step.text), h('span', { class: 'muted small-text' }, step.detail))),
@@ -528,13 +615,15 @@ function cardioRow(day, entry) {
   const facts = [`${entry.minutes} min`, entry.hr && `${entry.hr} bpm`, entry.talk && 'talk test passed'].filter(Boolean).join(' · ');
   return h('div', { class: 'row between line' },
     h('div', {}, h('strong', {}, cardioName(entry.type)), h('p', { class: 'muted small-text' }, facts)),
-    h('button', { class: 'link', type: 'button', 'aria-label': `Remove ${cardioName(entry.type)}`, onclick: () => {
-      const before = day.cardio;
-      day.cardio = before.filter(c => c !== entry);
-      saveDay(day);
-      render();
-      toast('Removed.', { label: 'Undo', run: () => { day.cardio = before; saveDay(day); render(); } });
-    } }, 'Remove'));
+    h('button', {
+      class: 'link', type: 'button', 'aria-label': `Remove ${cardioName(entry.type)}`, onclick: () => {
+        const before = day.cardio;
+        day.cardio = before.filter(c => c !== entry);
+        saveDay(day);
+        render();
+        toast('Removed.', { label: 'Undo', run: () => { day.cardio = before; saveDay(day); render(); } });
+      }
+    }, 'Remove'));
 }
 
 function cardioCard(day, plan) {
@@ -582,16 +671,18 @@ function actionRow(date, day, plan, showGym, showCardio) {
   const buttons = [
     !showGym && h('button', { class: 'ghost', type: 'button', onclick: add('gym') }, 'Add gym workout'),
     showGym && S.adding.gym === date && plan.kind !== 'gym' && setsDone(day) === 0
-      && h('button', { class: 'ghost', type: 'button', onclick: hide('gym') }, 'Hide gym workout'),
+    && h('button', { class: 'ghost', type: 'button', onclick: hide('gym') }, 'Hide gym workout'),
     !showCardio && h('button', { class: 'ghost', type: 'button', onclick: add('cardio') }, 'Add cardio'),
     showCardio && S.adding.cardio === date && plan.kind !== 'cardio' && cardioOf(day).length === 0
-      && h('button', { class: 'ghost', type: 'button', onclick: hide('cardio') }, 'Hide cardio'),
-    nothingLogged && h('button', { class: 'ghost', type: 'button', onclick: () => {
-      if (day.rest) delete day.rest; else day.rest = true;
-      S.adding = {};
-      saveDay(day);
-      render();
-    } }, day.rest ? 'Undo rest day' : 'Mark as rest day'),
+    && h('button', { class: 'ghost', type: 'button', onclick: hide('cardio') }, 'Hide cardio'),
+    nothingLogged && h('button', {
+      class: 'ghost', type: 'button', onclick: () => {
+        if (day.rest) delete day.rest; else day.rest = true;
+        S.adding = {};
+        saveDay(day);
+        render();
+      }
+    }, day.rest ? 'Undo rest day' : 'Mark as rest day'),
   ].filter(Boolean);
   return buttons.length ? h('div', { class: 'row actions' }, buttons) : null;
 }
@@ -678,10 +769,16 @@ function exerciseProgress() {
   const describe = p => p.sets.map(s => setText(ex, s)).join(', ');
   const options = new Map([...routineIds().map(findMove).filter(Boolean), ex, ...allMoves().filter(m => exerciseHistory(S.days, m).length)].map(m => [m.id, m]));
   const title = ex.weighted ? 'Heaviest set' : ex.unit === 'sec' ? 'Longest hold' : 'Most reps';
-  return h('section', { class: 'card' },
+  const picker = select('Exercise', ex.id, [...options.values()].map(e => [e.id, e.name]), v => {
+    S.exercise = v;
+    const next = exerciseProgress();
+    card.replaceWith(next);
+    next.querySelector('select')?.focus();
+  });
+  const card = h('section', { class: 'card' },
     h('div', { class: 'row between chart-head' },
       h('h2', {}, title),
-      select('Exercise', ex.id, [...options.values()].map(e => [e.id, e.name]), v => { S.exercise = v; render(); })),
+      picker),
     points.length
       ? [
         h('div', { class: 'chart' }, lineChart({ points, unit, describe })),
@@ -691,18 +788,20 @@ function exerciseProgress() {
             h('tbody', {}, [...points].reverse().map(p => h('tr', {}, h('td', {}, shortDate(p.date)), h('td', {}, describe(p))))))),
       ]
       : h('p', { class: 'muted' }, `Finish a set of ${ex.name.toLowerCase()} to see it here.`));
+  return card;
 }
 
 function progressView() {
   if (!S.settings.startDate) return [h('h1', {}, 'Progress'), h('section', { class: 'card' }, h('p', {}, 'Choose a start date on the Today screen to begin.'))];
-  const rows = programRows(S.days, S.settings.startDate);
+  const count = Math.max(WEEKS, programWeek(S.today, S.settings.startDate));
+  const rows = programRows(S.days, S.settings.startDate, count);
   const totals = programTotals(rows);
   return [
     h('h1', {}, 'Progress'),
     h('div', { class: 'tiles' },
-      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Gym visits'), h('b', { 'data-testid': 'total-gym' }, `${totals.gym} of ${WEEKS * GYM_PER_WEEK}`), meter(totals.gym, WEEKS * GYM_PER_WEEK)),
-      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Cardio minutes'), h('b', { 'data-testid': 'total-cardio' }, totals.cardio), meter(totals.cardio, WEEKS * CARDIO_GOAL)),
-      h('div', { class: 'tile' }, h('span', { class: 'muted' }, `Weeks at ${CARDIO_GOAL}+ min`), h('b', {}, `${totals.goalWeeks} of ${WEEKS}`), meter(totals.goalWeeks, WEEKS))),
+      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Gym visits'), h('b', { 'data-testid': 'total-gym' }, `${totals.gym} of ${rows.length * GYM_PER_WEEK}`), meter(totals.gym, rows.length * GYM_PER_WEEK)),
+      h('div', { class: 'tile' }, h('span', { class: 'muted' }, 'Cardio minutes'), h('b', { 'data-testid': 'total-cardio' }, totals.cardio), meter(totals.cardio, rows.length * CARDIO_GOAL)),
+      h('div', { class: 'tile' }, h('span', { class: 'muted' }, `Weeks at ${CARDIO_GOAL}+ min`), h('b', {}, `${totals.goalWeeks} of ${rows.length}`), meter(totals.goalWeeks, rows.length))),
     calendar(rows),
     weeklyCard(rows),
     exerciseProgress(),
@@ -736,11 +835,27 @@ function planView() {
     h('section', { class: 'card' }, h('h2', {}, 'Stages'),
       PHASES.map(p => h('div', { class: `phase${week >= p.from && week <= p.to ? ' current' : ''}` }, h('strong', {}, `Weeks ${p.from}–${p.to}`), h('span', {}, p.name)))),
     h('section', { class: 'card', id: 'plan-gym' }, h('h2', {}, 'Full-body gym workout'),
-      h('table', {}, h('tbody', {}, EXERCISES.map(e => h('tr', {}, h('th', { scope: 'row' }, e.name), h('td', { class: 'muted' }, h('span', { class: 'focus-line' }, muscleDiagram(e.focus), h('span', {}, e.focus))), h('td', { class: 'r' }, target(e)))))),
+      h('table', {}, h('tbody', {}, EXERCISES.map(e => h('tr', {},
+        h('th', { scope: 'row' }, e.name),
+        h('td', { class: 'muted' },
+          h('span', { class: 'focus-line' }, muscleDiagram(e.focus), h('span', {}, e.focus)),
+          h('div', { class: 'plan-links' },
+            extLink(videoUrl(e), 'Video ↗', `Watch ${e.name} video`),
+            extLink(gifUrl(e), 'GIF ↗', `View ${e.name} animated GIF`))),
+        h('td', { class: 'r' }, target(e)))))),
       h('h3', { class: 'sub' }, 'Each gym visit'), list(GYM_NOTES)),
     h('section', { class: 'card', id: 'plan-swap' }, h('h2', {}, 'If a machine is taken'),
-      h('p', { class: 'muted' }, 'Tap Swap on an exercise during your workout. Each alternate keeps its own weight history.'),
-      EXERCISES.filter(e => alternatesOf(e).length).map(e => [h('h3', { class: 'sub' }, e.name), list(alternatesOf(e).map(a => `${a.name}: ${a.how}`))])),
+      h('p', { class: 'muted' }, 'Tap Swap on an exercise during your workout to pick another movement in the same family. Each alternate keeps its own weight history.'),
+      ALL_FAMILIES.filter(e => alternatesOf(e).length).map(e => [
+        h('h3', { class: 'sub' }, e.name),
+        e.family && h('p', { class: 'muted small-text' }, e.family),
+        list(alternatesOf(e).map(a => [
+          `${a.name}${a.fallback ? ` (${a.fallback})` : ''}: ${a.how} `,
+          extLink(videoUrl(a), 'Video ↗', `Watch ${a.name} video`),
+          ' · ',
+          extLink(gifUrl(a), 'GIF ↗', `View ${a.name} animated GIF`),
+        ])),
+      ])),
     h('section', { class: 'card', id: 'plan-warm' }, h('h2', {}, 'Warm-up and stretching'),
       [['gym-pre', 'Gym warm-up'], ['gym-post', 'Gym cool-down and stretch'], ['cardio-pre', 'Cardio warm-up'], ['cardio-post', 'Cardio cool-down and stretch']].map(([key, name]) => [
         h('h3', { class: 'sub' }, name), list(ROUTINES[key].steps.map(s => `${s.text}: ${s.detail}`)),
@@ -756,8 +871,44 @@ function planView() {
 
 async function loadAll() {
   S.days = Object.fromEntries((await store.allDays()).map(d => [d.date, d]));
-  S.settings = { ...DEFAULTS, ...(await store.getKv('settings')) };
+  const saved = await store.getKv('settings');
+  const base = defaultSettings();
+  S.settings = { ...base, ...saved };
+  S.settings.reminder = { ...base.reminder, ...(saved?.reminder || {}), days: [...(saved?.reminder?.days || base.reminder.days)] };
   S.lastBackup = (await store.getKv('lastBackup')) || null;
+  S.lastReminder = (await store.getKv('lastReminder')) || null;
+}
+
+const localTime = () => {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
+async function showReminder(date, { test = false } = {}) {
+  const info = reminderFor(date);
+  let shown = false;
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration?.();
+      if (reg?.showNotification) {
+        await reg.showNotification(info.title, { body: info.body, tag: 'workout-reminder', icon: 'icons/icon-192.png' });
+        shown = true;
+      } else {
+        new Notification(info.title, { body: info.body, tag: 'workout-reminder', icon: 'icons/icon-192.png' });
+        shown = true;
+      }
+    } catch { }
+  }
+  toast(test && shown ? `Reminder sent: ${info.title}` : `${info.title} (${SCHEDULE[weekdayOf(date)].time})`);
+}
+
+async function checkReminder() {
+  const date = localToday();
+  const day = S.days[date];
+  if (!reminderDue({ reminder: S.settings.reminder, date, nowTime: localTime(), day, lastSent: S.lastReminder })) return;
+  S.lastReminder = date;
+  await store.setKv('lastReminder', date);
+  await showReminder(date);
 }
 
 async function backup() {
@@ -775,7 +926,10 @@ async function restore(file) {
   try { parsed = parseBackup(await file.text()); } catch (e) { toast(e.message); return; }
   const ok = await confirmIt('Replace what is on this device?', `The backup holds ${parsed.days.length} logged days. They will replace everything saved here now.`, 'Replace');
   if (!ok) return;
-  await store.replaceAll(parsed.days, { ...DEFAULTS, ...parsed.settings });
+  const base = defaultSettings();
+  const nextSettings = { ...base, ...parsed.settings };
+  if (parsed.settings.reminder) nextSettings.reminder = { ...base.reminder, ...parsed.settings.reminder, days: [...parsed.settings.reminder.days] };
+  await store.replaceAll(parsed.days, nextSettings);
   await loadAll();
   S.view = 'today';
   S.date = S.today;
@@ -783,14 +937,60 @@ async function restore(file) {
   toast('Backup restored.');
 }
 
+const SHORT_DAY = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
+const LONG_DAY = new Intl.DateTimeFormat('en-US', { weekday: 'long' });
+const KIND_SHORT = { gym: 'Gym', cardio: 'Cardio', rest: 'Rest' };
+
 function dataView() {
-  const start = h('input', { type: 'date', value: S.settings.startDate || '', 'aria-label': 'Plan start date', onchange: async () => {
-    if (!start.value) return;
-    S.settings.startDate = cleanSettings({ startDate: start.value }).startDate;
-    await saveSettings();
-    toast('Start date changed. Your logs were not touched.');
-  } });
+  const start = h('input', {
+    type: 'date', value: S.settings.startDate || '', 'aria-label': 'Plan start date', onchange: async () => {
+      if (!start.value) return;
+      S.settings.startDate = cleanSettings({ startDate: start.value }).startDate;
+      await saveSettings();
+      toast('Start date changed. Your logs were not touched.');
+    }
+  });
   const beep = h('input', { type: 'checkbox', checked: S.settings.beep, onchange: async () => { S.settings.beep = beep.checked; await saveSettings(); } });
+  const r = S.settings.reminder;
+  const reminderOn = h('input', {
+    type: 'checkbox', checked: r.enabled, 'aria-label': 'Daily workout reminder', onchange: async () => {
+      r.enabled = reminderOn.checked;
+      if (r.enabled && typeof Notification !== 'undefined') {
+        const perm = Notification.permission === 'default' ? await Notification.requestPermission?.() : Notification.permission;
+        if (perm === 'denied') toast('Browser notifications blocked. Use Add to calendar (.ics) for lock-screen alerts.');
+      }
+      await saveSettings();
+      if (r.enabled) checkReminder();
+    }
+  });
+  const reminderTime = h('input', {
+    type: 'time', value: r.time, 'aria-label': 'Reminder time', onchange: async () => {
+      const next = cleanSettings({ reminder: { ...r, time: reminderTime.value } }).reminder?.time;
+      if (!next) { reminderTime.value = r.time; return; }
+      r.time = next;
+      S.lastReminder = null;
+      await store.setKv('lastReminder', null);
+      await saveSettings();
+      checkReminder();
+    }
+  });
+  const dayChips = SCHEDULE_ORDER.map(d => {
+    const date = fromIso(addDays('2026-11-09', (d + 6) % 7));
+    const active = r.days.includes(d);
+    const btn = h('button', {
+      class: 'chip-btn day-chip',
+      type: 'button',
+      'aria-pressed': String(active),
+      'aria-label': `Remind on ${LONG_DAY.format(date)}`,
+      onclick: async () => {
+        const has = r.days.includes(d);
+        r.days = has ? r.days.filter(x => x !== d) : [...r.days, d];
+        btn.setAttribute('aria-pressed', String(!has));
+        await saveSettings();
+      },
+    }, `${SHORT_DAY.format(date)} · ${KIND_SHORT[SCHEDULE[d].kind]}`);
+    return btn;
+  });
   const picker = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: () => { if (picker.files[0]) restore(picker.files[0]); picker.value = ''; } });
   const logged = Object.values(S.days).filter(d => !isEmptyDay(d)).length;
   return [
@@ -802,18 +1002,34 @@ function dataView() {
       h('label', { class: 'field' }, h('span', {}, 'Smallest weight jump'),
         select('Smallest weight jump', S.settings.step, WEIGHT_STEPS.map(n => [n, `${n} lb`]), async v => { S.settings.step = Number(v); await saveSettings(); })),
       h('label', { class: 'check' }, beep, h('span', {}, 'Beep when rest ends'))),
+    h('section', { class: 'card stack' }, h('h2', {}, 'Reminders'),
+      h('p', { class: 'muted small-text' }, `Today’s alert: ${reminderFor(S.today).title}`),
+      h('label', { class: 'check' }, reminderOn, h('span', {}, 'Daily workout reminder')),
+      h('label', { class: 'field' }, h('span', {}, 'Reminder time'), reminderTime),
+      h('div', { class: 'field' }, h('span', {}, 'Days'), h('div', { class: 'row' }, dayChips)),
+      h('div', { class: 'row' },
+        h('button', { class: 'ghost', type: 'button', onclick: () => showReminder(S.today, { test: true }) }, 'Test reminder'),
+        h('button', {
+          class: 'ghost', type: 'button', onclick: () => {
+            download('workout-reminders.ics', makeCalendar({ startDate: S.settings.startDate, reminder: r, today: S.today }), 'text/calendar');
+            toast('Calendar reminders downloaded.');
+          }
+        }, 'Add to calendar (.ics)')),
+      h('p', { class: 'muted small-text' }, 'Browser alerts fire while the app is open or running in the background. For locked phones, add the calendar file to your phone calendar.')),
     S.settings.custom.length > 0 && h('section', { class: 'card stack' }, h('h2', {}, 'Your exercises'),
       h('div', {}, S.settings.custom.map(made => h('div', { class: 'row between line' },
         h('span', {}, made.name),
         exerciseHistory(S.days, customMove(made)).length
           ? h('span', { class: 'muted small-text' }, 'Has logged sets')
-          : h('button', { class: 'link', type: 'button', 'aria-label': `Delete ${made.name}`, onclick: async () => {
-            S.settings.custom = S.settings.custom.filter(m => m.id !== made.id);
-            if (S.settings.routine) S.settings.routine = S.settings.routine.filter(id => id !== made.id);
-            await saveSettings();
-            render();
-            toast(`${made.name} deleted.`);
-          } }, 'Delete'))))),
+          : h('button', {
+            class: 'link', type: 'button', 'aria-label': `Delete ${made.name}`, onclick: async () => {
+              S.settings.custom = S.settings.custom.filter(m => m.id !== made.id);
+              if (S.settings.routine) S.settings.routine = S.settings.routine.filter(id => id !== made.id);
+              await saveSettings();
+              render();
+              toast(`${made.name} deleted.`);
+            }
+          }, 'Delete'))))),
     h('section', { class: 'card stack' }, h('h2', {}, 'Backup'),
       h('p', {}, `${logged} ${logged === 1 ? 'day' : 'days'} logged on this device. Nothing is sent anywhere, so a backup is the only copy if this phone is lost.`),
       h('p', { class: 'muted' }, S.lastBackup ? `Last backup: ${shortDate(S.lastBackup.slice(0, 10))}` : 'No backup yet.'),
@@ -823,16 +1039,19 @@ function dataView() {
       picker,
       h('p', { class: 'muted small-text' }, 'Backups are plain files, so keep them somewhere private.')),
     h('section', { class: 'card stack' }, h('h2', {}, 'Erase'),
-      h('button', { class: 'danger', type: 'button', onclick: async () => {
-        if (!await confirmIt('Erase everything on this device?', 'All workouts and settings here will be deleted. Backup files are not affected.', 'Erase')) return;
-        await store.eraseAll();
-        S.days = {};
-        S.settings = { ...DEFAULTS };
-        S.lastBackup = null;
-        S.view = 'today';
-        S.date = S.today;
-        render({ top: true });
-      } }, 'Erase all data')),
+      h('button', {
+        class: 'danger', type: 'button', onclick: async () => {
+          if (!await confirmIt('Erase everything on this device?', 'All workouts and settings here will be deleted. Backup files are not affected.', 'Erase')) return;
+          await store.eraseAll();
+          S.days = {};
+          S.settings = defaultSettings();
+          S.lastBackup = null;
+          S.lastReminder = null;
+          S.view = 'today';
+          S.date = S.today;
+          render({ top: true });
+        }
+      }, 'Erase all data')),
   ];
 }
 
@@ -861,14 +1080,18 @@ document.querySelector('nav').addEventListener('click', e => {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   const now = localToday();
-  if (now === S.today) return;
-  const wasToday = S.date === S.today;
-  S.today = now;
-  if (wasToday) S.date = now;
-  render();
+  if (now !== S.today) {
+    const wasToday = S.date === S.today;
+    S.today = now;
+    if (wasToday) S.date = now;
+    render();
+  }
+  checkReminder();
 });
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
 
 await loadAll();
 render();
+checkReminder();
+setInterval(checkReminder, 30000);

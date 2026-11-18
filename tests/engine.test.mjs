@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  addDays, exerciseHistory, isEmptyDay, lastCardio, lastPerformance, makeBackup, mondayOf, moderateMinutes, nextMonday, parseBackup,
-  programRows, programTotals, programWeek, readyToIncrease, setCountFor, setsDone, statusOf, weekSummary, dayExerciseIds, suggestNext,
+  DEFAULT_REMINDER, addDays, cleanSettings, exerciseHistory, isEmptyDay, lastCardio, lastPerformance, makeBackup, makeCalendar, mondayOf, moderateMinutes, nextMonday, parseBackup,
+  programRows, programTotals, programWeek, readyToIncrease, reminderDue, reminderFor, setCountFor, setsDone, statusOf, weekSummary, dayExerciseIds, suggestNext,
 } from '../js/logic.js';
-import { lookupMove, customMove, MAX_SETS, EXERCISES, MOVES, ROUTINES, STEP_IDS, TOTAL_SETS, alternatesOf, moveById, target } from '../js/plan.js';
+import { ALL_FAMILIES, EXTRA_FAMILIES, lookupMove, customMove, MAX_SETS, EXERCISES, MOVES, ROUTINES, STEP_IDS, TOTAL_SETS, alternatesOf, gifUrl, moveById, sameFamily, target, videoUrl } from '../js/plan.js';
 
 const LEG = EXERCISES.find(e => e.id === 'leg-press');
 const PLANK = EXERCISES.find(e => e.id === 'plank');
@@ -19,19 +19,59 @@ test('the plan has twelve sets of six exercises', () => {
   assert.equal(target(PLANK), '2 × 20–40 sec');
 });
 
-test('alternates keep the sets and targets of the exercise they replace', () => {
+test('alternates keep the family and valid targets of the exercise they replace', () => {
   assert.equal(new Set(MOVES.map(m => m.id)).size, MOVES.length, 'ids are unique');
-  for (const ex of EXERCISES.filter(e => e.id !== 'plank')) {
-    assert.ok(alternatesOf(ex).length >= 3, `${ex.name} has alternates`);
+  assert.equal(EXTRA_FAMILIES.length, 3);
+  for (const ex of ALL_FAMILIES) {
+    assert.ok(ex.family, `${ex.name} has a family`);
+    assert.ok(alternatesOf(ex).length >= 2, `${ex.name} has alternates`);
     for (const alt of alternatesOf(ex)) {
-      assert.equal(target(alt), target(ex));
+      if (ex.id === 'plank') {
+        assert.ok(['sec', 'reps'].includes(alt.unit));
+        assert.equal(alt.sets, ex.sets);
+        assert.ok(alt.low > 0 && alt.high >= alt.low);
+        assert.equal(alt.weighted, false);
+      } else {
+        assert.equal(target(alt), target(ex));
+      }
       assert.equal(alt.focus, ex.focus);
+      assert.equal(alt.family, ex.family);
       assert.ok(alt.how, `${alt.name} says how to do it`);
     }
   }
   assert.equal(moveById('goblet-squat').weighted, true);
   assert.equal(moveById('incline-pushup').weighted, false);
-  assert.equal(alternatesOf(PLANK).length, 0, 'a plank needs no machine');
+  assert.equal(moveById('dead-bug').unit, 'reps');
+  assert.equal(moveById('assisted-pullup').assisted, true);
+  assert.ok(alternatesOf(PLANK).length >= 5, 'plank has core stability alternates');
+});
+
+test('sameFamily allows swapping between any two exercises in a family', () => {
+  assert.equal(sameFamily('leg-press', 'goblet-squat'), true);
+  assert.equal(sameFamily('goblet-squat', 'smith-squat'), true);
+  assert.equal(sameFamily('leg-press', 'leg-press'), false);
+  assert.equal(sameFamily('leg-press', 'db-row'), false);
+  const file = JSON.stringify({
+    app: 'workout-tracker',
+    days: [{ date: '2026-11-09', gym: { swaps: { 'goblet-squat': 'smith-squat', 'leg-press': 'db-row' } } }],
+  });
+  assert.deepEqual(parseBackup(file).days[0].gym.swaps, { 'goblet-squat': 'smith-squat' });
+});
+
+test('assisted pull-up reduces assistance weight to progress and adds assistance to ease off', () => {
+  const ASSISTED = moveById('assisted-pullup');
+  const up = suggestNext(ASSISTED, { effort: 'good', sets: [set(60, 12), set(60, 12)] }, { week: 5, step: 5 });
+  assert.deepEqual([up.action, up.weight, up.value], ['increase', 55, 10]);
+  const down = suggestNext(ASSISTED, { effort: 'max', sets: [set(60, 12), set(60, 12)] }, { week: 5, step: 5 });
+  assert.deepEqual([down.action, down.weight, down.value], ['decrease', 70, 10]);
+  assert.equal(readyToIncrease({ sets: [set(60, 12), set(60, 12)] }, ASSISTED), true);
+  assert.equal(readyToIncrease({ sets: [set(5, 12), set(5, 12)] }, ASSISTED), false);
+});
+
+test('external video and animated GIF helper URLs encode exercise names cleanly', () => {
+  assert.match(videoUrl(LEG), /^https:\/\/www\.youtube\.com\/results\?search_query=Leg%20press%20/);
+  assert.match(gifUrl(LEG), /^https:\/\/www\.google\.com\/search\?tbm=isch&tbs=itp:animated&q=Leg%20press%20/);
+  assert.match(videoUrl('Cable crunch'), /Cable%20crunch/);
 });
 
 test('every routine starts or ends the Watch once, and step ids are unique', () => {
@@ -140,6 +180,9 @@ test('weekly and program totals', () => {
   assert.equal(rows.length, 12);
   assert.equal(rows[1].monday, '2026-11-16');
   assert.deepEqual(programTotals(rows), { gym: 1, cardio: 180, goalWeeks: 1 });
+  const extended = programRows({ ...days, '2027-02-08': { cardio: [{ type: 'walk', minutes: 45 }] } }, '2026-11-11');
+  assert.equal(extended.length, 14);
+  assert.equal(extended[13].cardio, 45);
 });
 
 test('the last session is the newest earlier one with a ticked set', () => {
@@ -160,6 +203,7 @@ test('a weight increase is only suggested at the top of the range', () => {
   assert.equal(readyToIncrease({ sets: [set(60, 12), set(60, 11)] }, LEG), false);
   assert.equal(readyToIncrease({ sets: [set(60, 12)] }, LEG), false);
   assert.equal(readyToIncrease(null, LEG), false);
+  assert.equal(readyToIncrease({ sets: [set(0, 12), set(0, 12)] }, LEG), false);
   assert.equal(readyToIncrease({ sets: [set(null, 40), set(null, 40)] }, PLANK), false);
 });
 
@@ -190,10 +234,14 @@ test('backups round-trip', () => {
 });
 
 test('backups cap sets and keep valid set counts', () => {
-  const file = JSON.stringify({ app: 'workout-tracker', days: [{ date: '2026-11-09', gym: {
-    sets: { 'leg-press': Array.from({ length: 20 }, () => set(60, 12)) },
-    counts: { 'leg-press': 3, 'chest-press': 99, nope: 2, plank: 1.5 },
-  } }] });
+  const file = JSON.stringify({
+    app: 'workout-tracker', days: [{
+      date: '2026-11-09', gym: {
+        sets: { 'leg-press': Array.from({ length: 20 }, () => set(60, 12)) },
+        counts: { 'leg-press': 3, 'chest-press': 99, nope: 2, plank: 1.5 },
+      }
+    }]
+  });
   const [day] = parseBackup(file).days;
   assert.equal(day.gym.sets['leg-press'].length, MAX_SETS);
   assert.deepEqual(day.gym.counts, { 'leg-press': 3 });
@@ -231,7 +279,8 @@ test('custom exercises get targets from their type', () => {
 });
 
 test('backups keep the routine and custom exercises, and drop bad ones', () => {
-  const file = JSON.stringify({ app: 'workout-tracker',
+  const file = JSON.stringify({
+    app: 'workout-tracker',
     settings: {
       routine: ['leg-press', 'custom-a', 'custom-gone', 'leg-press', 5],
       custom: [{ id: 'custom-a', name: ' Crunch ', kind: 'reps' }, { id: 'evil', name: 'x', kind: 'reps' }, { id: 'custom-b', name: '', kind: 'reps' }, { id: 'custom-c', name: 'y', kind: 'magic' }],
@@ -259,6 +308,7 @@ test('no suggestion without a rating or a last session', () => {
   assert.equal(suggestNext(LEG, { sets: [set(60, 12)] }, LATER), null);
   assert.equal(suggestNext(LEG, { effort: 'good', sets: [] }, LATER), null);
   assert.equal(suggestNext(LEG, rated('good', [null, 12]), LATER), null);
+  assert.equal(suggestNext(LEG, rated('good', [0, 12]), LATER), null);
 });
 
 test('weight only goes up from the top of the range', () => {
@@ -328,9 +378,13 @@ test('the last session carries its rating', () => {
 });
 
 test('backups keep valid ratings and the weight jump', () => {
-  const file = JSON.stringify({ app: 'workout-tracker', settings: { step: 10 }, days: [{ date: '2026-11-09', gym: {
-    sets: { 'leg-press': [set(60, 12)] }, effort: { 'leg-press': 'hard', 'chest-press': 'nope', ghost: 'easy' },
-  } }] });
+  const file = JSON.stringify({
+    app: 'workout-tracker', settings: { step: 10 }, days: [{
+      date: '2026-11-09', gym: {
+        sets: { 'leg-press': [set(60, 12)] }, effort: { 'leg-press': 'hard', 'chest-press': 'nope', ghost: 'easy' },
+      }
+    }]
+  });
   const { days, settings } = parseBackup(file);
   assert.deepEqual(days[0].gym.effort, { 'leg-press': 'hard' });
   assert.equal(settings.step, 10);
@@ -365,4 +419,35 @@ test('backups drop anything unexpected', () => {
   assert.equal(day.gym.sets['leg-press'].length, 3, 'added sets are kept');
   assert.deepEqual(day.gym.sets['leg-press'][0], { weight: null, value: null, done: true });
   assert.equal(day.cardio.length, 1);
+});
+
+test('daily reminders describe the workout day, respect time/days/completion, and export ICS', () => {
+  assert.equal(DEFAULT_REMINDER.time, '16:00');
+  assert.equal(reminderFor('2026-11-09').title, 'Gym day: Full-body machine workout');
+  assert.equal(reminderFor('2026-11-10').title, 'Cardio day: Brisk walk or cycling');
+  assert.equal(reminderFor('2026-11-15').title, 'Rest day: Rest or gentle walk');
+
+  const reminder = { enabled: true, time: '16:00', days: [1, 2, 3, 4, 5, 6] };
+  assert.equal(reminderDue({ reminder, date: '2026-11-09', nowTime: '15:59', day: undefined, lastSent: null }), false);
+  assert.equal(reminderDue({ reminder, date: '2026-11-09', nowTime: '16:00', day: undefined, lastSent: null }), true);
+  assert.equal(reminderDue({ reminder: { ...reminder, enabled: false }, date: '2026-11-09', nowTime: '16:00', day: undefined, lastSent: null }), false);
+  assert.equal(reminderDue({ reminder, date: '2026-11-15', nowTime: '16:00', day: undefined, lastSent: null }), false, 'Sunday excluded');
+  assert.equal(reminderDue({ reminder, date: '2026-11-09', nowTime: '16:30', day: undefined, lastSent: '2026-11-09' }), false, 'already sent today');
+  assert.equal(reminderDue({ reminder, date: '2026-11-09', nowTime: '16:30', day: { gym: gym('leg-press', [set(60, 12)]) }, lastSent: null }), false, 'gym already logged');
+  assert.equal(reminderDue({ reminder, date: '2026-11-10', nowTime: '16:30', day: { cardio: [{ type: 'walk', minutes: 20 }] }, lastSent: null }), false, 'cardio already logged');
+  assert.equal(reminderDue({ reminder, date: '2026-11-09', nowTime: '16:30', day: { rest: true }, lastSent: null }), false, 'marked as rest day');
+
+  const sanitized = cleanSettings({ reminder: { enabled: true, time: '16:30', days: [1, 3, 5, 99, 1] } });
+  assert.deepEqual(sanitized.reminder, { enabled: true, time: '16:30', days: [1, 3, 5] });
+  assert.equal(cleanSettings({ reminder: { enabled: false, time: '25:99', days: [] } }).reminder.time, '16:00');
+
+  const parsed = parseBackup(makeBackup([], sanitized, '2026-11-09T00:00:00Z'));
+  assert.deepEqual(parsed.settings.reminder, { enabled: true, time: '16:30', days: [1, 3, 5] });
+
+  const ics = makeCalendar({ startDate: '2026-11-09', reminder: { enabled: true, time: '16:00', days: [1, 2] }, today: '2026-11-09' });
+  assert.match(ics, /BEGIN:VCALENDAR/);
+  assert.match(ics, /DTSTART:20261109T160000/);
+  assert.match(ics, /SUMMARY:Gym day: Full-body machine workout/);
+  assert.match(ics, /SUMMARY:Cardio day: Brisk walk or cycling/);
+  assert.match(ics, /BEGIN:VALARM/);
 });

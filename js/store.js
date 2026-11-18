@@ -11,8 +11,14 @@ function open() {
         req.result.createObjectStore('days', { keyPath: 'date' });
         req.result.createObjectStore('kv');
       };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        const db = req.result;
+        db.onclose = () => { dbp = null; };
+        db.onversionchange = () => { db.close(); dbp = null; };
+        resolve(db);
+      };
+      req.onerror = () => { dbp = null; reject(req.error); };
+      req.onblocked = () => { dbp = null; reject(new Error('Database blocked')); };
     });
   }
   return dbp;

@@ -280,6 +280,201 @@ const SCENES = {
     draw: () => ({ back: [pad([24, 165], [190, 165], 6)], front: [] }),
   },
 
+  'smith-squat': {
+    poses: [{ hip: [108, 96], lean: 6, hand: [114, 52], foot: [122, 160], arm: 1 }, { hip: [84, 128], lean: 22, hand: [114, 84], foot: [122, 160], arm: 1 }],
+    arrow: [[154, 84], [154, 122]],
+    draw: p => ({ back: [floorBar(70, 164), frame([114, 24], [114, G - 2], 7)], front: [dot(add(p.sh, [4, 2]), 7, 'art-plate')] }),
+  },
+  'split-squat': {
+    poses: [
+      { hip: [110, 102], lean: 4, hand: [116, 140], foot: [138, 160], foot2: [78, 158], leg: -1, leg2: 1, arm: -1, toe2: 45 },
+      { hip: [108, 126], lean: 8, hand: [114, 154], foot: [138, 160], foot2: [74, 158], leg: -1, leg2: 1, arm: -1, toe2: 65 },
+    ],
+    arrow: [[156, 92], [156, 128]],
+    draw: () => ({ back: [], front: [] }),
+    extra: p => dumbbell(add(p.ha, [0, 3]), 0, 18),
+  },
+  'smith-bench': {
+    poses: [{ hip: [122, 106], lean: -90, hand: [76, 80], foot: [168, 162], arm: -1, flip: true }, { hip: [122, 106], lean: -90, hand: [76, 54], foot: [168, 162], arm: -1, flip: true }],
+    arrow: [[44, 80], [44, 50]],
+    draw: () => ({ back: [...bench(40, 142, 120), floorBar(28, 182), frame([76, 24], [76, G - 2], 7)], front: [] }),
+    extra: p => [ln([64, p.ha[1]], [88, p.ha[1]], 'art-grip', 4), dot(p.ha, 7, 'art-plate')],
+  },
+  'db-floor-press': {
+    poses: [{ hip: [122, 150], lean: -90, hand: [78, 126], foot: [168, 160], arm: -1, flip: true }, { hip: [122, 150], lean: -90, hand: [78, 102], foot: [168, 160], arm: -1, flip: true }],
+    arrow: [[44, 126], [44, 98]],
+    draw: () => ({ back: [pad([24, 165], [190, 165], 6)], front: [] }),
+    extra: p => dumbbell(add(p.ha, [0, -2]), 0, 20),
+  },
+  'assisted-pullup': {
+    poses: [{ hip: [104, 102], lean: 4, hand: [108, 30], foot: [86, 140], leg: -1, arm: 1, toe: 140 }, { hip: [104, 78], lean: 4, hand: [108, 30], foot: [86, 116], leg: -1, arm: 1, toe: 140 }],
+    arrow: [[62, 92], [62, 60]],
+    draw: (p, t) => {
+      const s = stack(172, 1 - t, 34);
+      return {
+        back: [floorBar(74, 200), ...s.parts, frame([140, 22], [140, G - 2], 7), frame([94, 22], [140, 22], 7), lever([140, p.kn[1] + 6], p.kn, 6), pad(add(p.kn, [-10, 4]), add(p.kn, [10, 4]), 10)],
+        front: [grip([98, 28], [118, 28], 5)],
+      };
+    },
+  },
+  'kneeling-pulldown': {
+    poses: [{ hip: [96, 118], lean: 6, hand: [130, 56], foot: [72, 158], leg: -1, arm: 1, toe: 160 }, { hip: [96, 118], lean: -2, hand: [110, 92], foot: [72, 158], leg: -1, arm: 1, toe: 160 }],
+    arrow: [[150, 54], [142, 88]],
+    draw: (p, t) => {
+      const s = stack(174, t, 24);
+      return { back: [floorBar(64, 204), ...s.parts, pulley([174, 30]), cable(s.lid, [187, 26], [174, 30], p.ha), pad([64, 164], [124, 164], 6)], front: [grip(add(p.ha, [-6, -2]), add(p.ha, [6, -2]), 6)] };
+    },
+  },
+  'incline-db-row': {
+    poses: [{ hip: [76, 126], lean: 44, hand: [116, 134], foot: [96, 160], arm: 1 }, { hip: [76, 126], lean: 44, hand: [92, 110], foot: [96, 160], arm: -1 }],
+    arrow: [[144, 132], [122, 108]],
+    draw: () => ({ back: [frame([72, 138], [72, G - 2]), frame([116, 100], [116, G - 2]), floorBar(64, 124), pad([66, 136], [122, 86], 12)], front: [] }),
+    extra: p => dumbbell(add(p.ha, [0, 3]), 0, 18),
+  },
+  'inverted-row': {
+    poses: [{ hip: [100, 128], sh: [136, 112], hand: [138, 72], foot: [62, 158], arm: 1, toe: -60 }, { hip: [104, 108], sh: [136, 80], hand: [138, 72], foot: [62, 158], arm: 1, toe: -60 }],
+    arrow: [[98, 102], [114, 76]],
+    draw: () => ({ back: [floorBar(120, 166), frame([142, 64], [142, G - 2], 7), grip([126, 72], [150, 72], 5)], front: [] }),
+  },
+  'standing-curl': {
+    poses: [
+      { hip: [106, 98], lean: 4, hand: [144, 86], foot: [110, 158], foot2: [102, 160], leg: -1, leg2: -1, arm: 1 },
+      { hip: [106, 98], lean: 4, hand: [144, 86], foot: [72, 118], foot2: [102, 160], leg: -1, leg2: -1, arm: 1, toe: 110 },
+    ],
+    arrow: [[88, 152], [68, 122]],
+    draw: (p, t) => {
+      const s = stack(174, t);
+      return { back: [floorBar(92, 200), ...s.parts, frame([148, 40], [148, G - 2], 7), cable(s.lid, [186, 30], [160, 126], p.an), lever([108, 126], p.an, 6), dot(p.an, 7, 'art-pad-fill')], front: [] };
+    },
+  },
+  'ball-curl': {
+    poses: [
+      { hip: [94, 128], sh: [56, 150], head: [38, 154], hand: [90, 160], foot: [152, 134], leg: -1, arm: 1, toe: -70 },
+      { hip: [94, 124], sh: [56, 150], head: [38, 154], hand: [90, 160], foot: [126, 132], leg: -1, arm: 1, toe: -60 },
+    ],
+    arrow: [[154, 114], [124, 114]],
+    draw: p => ({ back: [pad([24, 165], [190, 165], 6), dot([p.an[0] + 2, 146], 20, 'art-pad-fill')], front: [] }),
+  },
+  'incline-plank': {
+    poses: [{ hip: [94, 134], sh: [142, 104], hand: [158, 118], foot: [38, 158], arm: 1, toe: 70 }, { hip: [94, 130], sh: [142, 101], hand: [158, 118], foot: [38, 158], arm: 1, toe: 70 }],
+    arrow: [[94, 142], [94, 116]],
+    draw: () => ({ back: bench(136, 204, 124), front: [] }),
+  },
+  'side-plank': {
+    poses: [{ hip: [98, 148], sh: [144, 128], hand: [162, 158], foot: [36, 158], arm: 1, toe: 80 }, { hip: [98, 134], sh: [144, 122], hand: [162, 158], foot: [36, 158], arm: 1, toe: 80 }],
+    arrow: [[98, 154], [98, 126]],
+    draw: () => ({ back: [pad([18, 165], [200, 165], 6)], front: [] }),
+  },
+  'dead-bug': {
+    poses: [
+      { hip: [120, 150], sh: [74, 152], head: [56, 154], hand: [76, 110], hand2: [80, 114], foot: [148, 116], foot2: [144, 118], leg: 1, leg2: 1, arm: -1, arm2: -1, flip: true },
+      { hip: [120, 150], sh: [74, 152], head: [56, 154], hand: [36, 152], hand2: [80, 114], foot: [176, 152], foot2: [144, 118], leg: 1, leg2: 1, arm: -1, arm2: -1, flip: true },
+    ],
+    arrow: [[154, 118], [180, 146]],
+    draw: () => ({ back: [pad([24, 165], [200, 165], 6)], front: [] }),
+  },
+  'bird-dog': {
+    poses: [
+      { hip: [86, 122], sh: [132, 120], hand: [134, 158], hand2: [126, 158], foot: [54, 158], foot2: [60, 158], leg: -1, leg2: -1, arm: 1, arm2: 1, toe: 170, toe2: 170 },
+      { hip: [86, 122], sh: [132, 120], hand: [176, 116], hand2: [126, 158], foot: [28, 122], foot2: [60, 158], leg: -1, leg2: -1, arm: 1, arm2: 1, toe: 150, toe2: 170 },
+    ],
+    arrow: [[148, 110], [182, 110]],
+    draw: () => ({ back: [pad([20, 165], [200, 165], 6)], front: [] }),
+  },
+  'pallof-press': {
+    poses: [{ hip: [112, 100], lean: 4, hand: [128, 72], foot: [118, 160], foot2: [104, 160], arm: 1 }, { hip: [112, 100], lean: 4, hand: [160, 68], foot: [118, 160], foot2: [104, 160], arm: 1 }],
+    arrow: [[134, 48], [168, 48]],
+    draw: (p, t) => {
+      const s = stack(8, t, 36);
+      return { back: [floorBar(6, 40), ...s.parts, pulley([36, 72]), cable(s.lid, [21, 40], [36, 40], [36, 72], p.ha)], front: [grip(add(p.ha, [0, -6]), add(p.ha, [0, 6]))] };
+    },
+  },
+  'shoulder-press': {
+    poses: [{ hip: [92, 130], lean: -6, hand: [106, 80], foot: [124, 160], arm: 1 }, { hip: [92, 130], lean: -6, hand: [106, 42], foot: [124, 160], arm: 1 }],
+    arrow: [[130, 78], [130, 44]],
+    draw: (p, t) => {
+      const s = stack(172, t);
+      return { back: [floorBar(50, 200), ...s.parts, ...seat(74, 110, 143, 92), frame([68, G - 2], [68, 84], 7), backPad(p), lever([74, 90], p.ha, 6), cable([74, 90], [160, 34], [185, 34], s.lid)], front: [grip(add(p.ha, [-6, 0]), add(p.ha, [6, 0]))] };
+    },
+  },
+  'seated-db-press': {
+    poses: [{ hip: [94, 130], lean: -6, hand: [106, 80], foot: [128, 160], arm: 1 }, { hip: [94, 130], lean: -6, hand: [104, 42], foot: [128, 160], arm: 1 }],
+    arrow: [[130, 78], [130, 44]],
+    draw: p => ({ back: [floorBar(68, 134), ...seat(76, 112, 143, 94), backPad(p)], front: [] }),
+    extra: p => dumbbell(add(p.ha, [0, -3]), 0, 20),
+  },
+  'landmine-press': {
+    poses: [{ hip: [112, 102], lean: 8, hand: [130, 68], foot: [128, 160], foot2: [94, 160], arm: 1 }, { hip: [112, 102], lean: 12, hand: [154, 38], foot: [128, 160], foot2: [94, 160], arm: 1 }],
+    arrow: [[136, 62], [162, 34]],
+    draw: p => ({ back: [dot([44, 162], 5, 'art-pulley'), ln([44, 162], add(p.ha, [8, -4]), 'art-lever', 5), dot(p.ha, 7, 'art-plate')], front: [] }),
+  },
+  'cable-shoulder-press': {
+    poses: [{ hip: [112, 102], lean: 6, hand: [126, 68], foot: [128, 160], foot2: [94, 160], arm: 1 }, { hip: [112, 102], lean: 6, hand: [128, 28], foot: [128, 160], foot2: [94, 160], arm: 1 }],
+    arrow: [[148, 66], [148, 30]],
+    draw: (p, t) => {
+      const s = stack(8, t, 36);
+      return { back: [floorBar(6, 40), ...s.parts, pulley([34, 152]), cable(s.lid, [21, 40], [34, 40], [34, 152], p.ha)], front: [grip(add(p.ha, [-6, 0]), add(p.ha, [6, 0]))] };
+    },
+  },
+  'back-extension': {
+    poses: [{ hip: [104, 108], lean: 74, hand: [142, 134], foot: [62, 154], leg: -1, arm: 1, toe: 130 }, { hip: [104, 108], lean: 38, hand: [134, 84], foot: [62, 154], leg: -1, arm: 1, toe: 130 }],
+    arrow: [[154, 114], [142, 74]],
+    draw: () => ({ back: [floorBar(44, 146), frame([64, 154], [116, 112], 7), frame([112, 112], [112, G - 2], 7), pad([94, 114], [116, 110], 11), pad([54, 148], [68, 148], 8)], front: [] }),
+  },
+  'cable-pull-through': {
+    poses: [{ hip: [82, 102], lean: 66, hand: [86, 134], foot: [108, 160], arm: -1 }, { hip: [106, 98], lean: 4, hand: [112, 136], foot: [110, 160], arm: -1 }],
+    arrow: [[84, 86], [114, 78]],
+    draw: (p, t) => {
+      const s = stack(8, t, 36);
+      return { back: [floorBar(6, 40), ...s.parts, pulley([34, 150]), cable(s.lid, [21, 40], [34, 40], [34, 150], p.ha)], front: [grip(add(p.ha, [-5, 0]), add(p.ha, [5, 0]))] };
+    },
+  },
+  'hip-thrust-machine': {
+    poses: [
+      { hip: [104, 146], sh: [72, 114], head: [54, 108], hand: [102, 132], foot: [148, 160], leg: -1, arm: 1 },
+      { hip: [108, 114], sh: [72, 114], head: [54, 108], hand: [106, 118], foot: [148, 160], leg: -1, arm: 1 },
+    ],
+    arrow: [[124, 146], [124, 114]],
+    draw: p => ({ back: [floorBar(48, 168), frame([68, 118], [68, G - 2], 7), pad([54, 114], [82, 114], 12), lever([148, 158], p.hip, 6)], front: [pad(add(p.hip, [-10, -4]), add(p.hip, [10, -4]), 10)] }),
+  },
+  'kb-deadlift': {
+    poses: [{ hip: [106, 98], lean: 6, hand: [114, 136], foot: [112, 160], arm: 1 }, { hip: [80, 114], lean: 66, hand: [120, 138], foot: [112, 160], arm: 1 }],
+    arrow: [[56, 84], [56, 114]],
+    draw: () => ({ back: [], front: [] }),
+    extra: p => dumbbell(add(p.ha, [0, 4]), 0, 18),
+  },
+  'calf-raise': {
+    poses: [
+      { hip: [84, 128], lean: -4, hand: [112, 118], foot: [122, 154], toe: 25, leg: -1, arm: 1 },
+      { hip: [84, 128], lean: -4, hand: [112, 118], foot: [122, 144], toe: 45, leg: -1, arm: 1 },
+    ],
+    arrow: [[148, 148], [148, 126]],
+    draw: p => ({
+      back: [floorBar(52, 166), ...seat(66, 102, 142, 84), frame([128, 158], [128, G - 2], 7), pad([122, 158], [138, 158], 7), lever([84, 126], add(p.kn, [0, -10]), 6)],
+      front: [pad(add(p.kn, [-8, -10]), add(p.kn, [8, -10]), 9), dot(add(p.kn, [18, -10]), 7, 'art-plate')],
+    }),
+  },
+  'leg-press-calf': {
+    poses: [{ hip: [106, 110], lean: -22, hand: [126, 120], foot: [164, 108], toe: -85 }, { hip: [100, 108], lean: -22, hand: [120, 118], foot: [164, 108], toe: -55 }],
+    arrow: [[160, 74], [182, 74]],
+    draw: (p, t) => {
+      const s = stack(6, t);
+      return {
+        back: [floorBar(10, 196), ...s.parts, frame([46, G - 3], [46, 150], 6), frame([40, 150], [182, 128], 7), frame([176, 128], [182, G - 2], 7), frame([180, 80], [180, 128], 7), cable(s.lid, [33, 30], [48, 30], [p.hip[0] - 18, p.hip[1] + 26]), pad(add(p.hip, [-20, 14]), add(p.hip, [16, 10]), 12), backPad(p)],
+        front: [pad([172, 76], [175, 128], 8), grip(add(p.ha, [-5, 0]), add(p.ha, [5, 0]))],
+      };
+    },
+  },
+  'standing-calf-raise': {
+    poses: [
+      { hip: [104, 102], lean: 2, hand: [110, 140], hand2: [142, 86], foot: [110, 160], arm: -1, arm2: 1, toe: 12 },
+      { hip: [104, 94], lean: 2, hand: [110, 132], hand2: [142, 86], foot: [110, 152], arm: -1, arm2: 1, toe: 45 },
+    ],
+    arrow: [[82, 146], [82, 122]],
+    draw: () => ({ back: [frame([146, 36], [146, G - 2], 7), box(100, 158, 28, 10, 'art-pad-fill', 2)], front: [] }),
+    extra: p => dumbbell(add(p.ha, [0, 3]), 0, 18),
+  },
+
   /* ---------- Warm-up and stretch steps ---------- */
 
   'gp-cardio': {
@@ -516,6 +711,20 @@ const MUSCLE_PARTS = {
   Core: [
     ['rect', { x: 12, y: 15, width: 8, height: 6.5, rx: 1.8, class: 'muscle-hit' }],
   ],
+  'Shoulders and triceps': [
+    ['circle', { cx: 8.8, cy: 12, r: 2.8, class: 'muscle-hit' }],
+    ['circle', { cx: 23.2, cy: 12, r: 2.8, class: 'muscle-hit' }],
+    ['line', { x1: 7.8, y1: 13.5, x2: 6.5, y2: 18.5, class: 'muscle-hit-limb', 'stroke-width': 3.5 }],
+    ['line', { x1: 24.2, y1: 13.5, x2: 25.5, y2: 18.5, class: 'muscle-hit-limb', 'stroke-width': 3.5 }],
+  ],
+  'Glutes and lower back': [
+    ['rect', { x: 11.5, y: 16.5, width: 9, height: 4, rx: 1.5, class: 'muscle-hit' }],
+    ['rect', { x: 10.5, y: 20, width: 11, height: 4.5, rx: 2, class: 'muscle-hit' }],
+  ],
+  Calves: [
+    ['line', { x1: 11.5, y1: 30, x2: 10.9, y2: 35.5, class: 'muscle-hit-limb', 'stroke-width': 4 }],
+    ['line', { x1: 20.5, y1: 30, x2: 21.1, y2: 35.5, class: 'muscle-hit-limb', 'stroke-width': 4 }],
+  ],
   'Your exercise': [
     ['rect', { x: 11.5, y: 11.5, width: 9, height: 9, rx: 2, class: 'muscle-hit' }],
   ],
@@ -560,6 +769,32 @@ const CUES = {
   'lying-curl': ['Curl up', 'Lower with control'],
   'romanian-deadlift': ['Hinge at the hips with control', 'Stand tall'],
   'glute-bridge': ['Lift your hips', 'Lower with control'],
+  'smith-squat': ['Squat down with control', 'Stand up'],
+  'split-squat': ['Lower with control', 'Drive up'],
+  'smith-bench': ['Press up', 'Lower with control'],
+  'db-floor-press': ['Press up', 'Lower to floor'],
+  'assisted-pullup': ['Pull up', 'Lower with control'],
+  'kneeling-pulldown': ['Pull down', 'Return with control'],
+  'incline-db-row': ['Pull back', 'Lower with control'],
+  'inverted-row': ['Pull chest to bar', 'Lower with control'],
+  'standing-curl': ['Curl heel up', 'Lower with control'],
+  'ball-curl': ['Roll ball in', 'Extend with control'],
+  'incline-plank': ['Brace your core', 'Hold steady'],
+  'side-plank': ['Lift hips in line', 'Keep core braced'],
+  'dead-bug': ['Extend opposite limbs', 'Return slowly'],
+  'bird-dog': ['Reach arm and leg', 'Return with control'],
+  'pallof-press': ['Press straight out', 'Return with control'],
+  'shoulder-press': ['Press overhead', 'Lower with control'],
+  'seated-db-press': ['Press overhead', 'Lower with control'],
+  'landmine-press': ['Press up and forward', 'Lower with control'],
+  'cable-shoulder-press': ['Press overhead', 'Lower with control'],
+  'back-extension': ['Extend to straight line', 'Hinge down slowly'],
+  'cable-pull-through': ['Drive hips forward', 'Hinge back with control'],
+  'hip-thrust-machine': ['Drive hips up', 'Lower with control'],
+  'kb-deadlift': ['Hinge down with control', 'Stand tall'],
+  'calf-raise': ['Press onto toes', 'Lower slowly'],
+  'leg-press-calf': ['Press through toes', 'Lower slowly'],
+  'standing-calf-raise': ['Raise onto toes', 'Lower slowly'],
   'gp-cardio': ['Walk at an easy pace', 'Keep shoulders relaxed'],
   'gp-legs': ['Swing forward', 'Swing back with control'],
   'cp-legs': ['Swing forward', 'Swing back with control'],
@@ -571,7 +806,7 @@ const CUES = {
   'cp-easy': ['Walk at an easy pace', 'Steady breathing'],
   'cs-slow': ['Slow your pace down', 'Steady breathing'],
 };
-const LOWER_FIRST = new Set(['hack-squat', 'goblet-squat', 'romanian-deadlift', 'gp-squat']);
+const LOWER_FIRST = new Set(['hack-squat', 'goblet-squat', 'romanian-deadlift', 'smith-squat', 'split-squat', 'kb-deadlift', 'gp-squat']);
 
 const FAST = 1000, PAUSE = 350, SLOW = 1900, RESET = 450;
 const ease = x => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);

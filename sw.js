@@ -1,7 +1,7 @@
 // Saves the app's own files for offline use, which matters in a gym with poor signal.
 // Workout logs are never in here: they live in IndexedDB.
-// Tries the network first so updates show up, and falls back to the saved copy.
-const CACHE = 'workout-tracker-v7';
+// Uses stale-while-revalidate so cached screens load instantly and updates fetch in the background.
+const CACHE = 'workout-tracker-v8';
 const FILES = [
   './',
   './index.html',
@@ -38,16 +38,38 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET' || new URL(request.url).origin !== location.origin) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const offline = () => cache.match(request, { ignoreSearch: true }).then(hit => hit || cache.match('./index.html'));
-    try {
-      const response = await Promise.race([
-        fetch(request),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000)),
-      ]);
-      if (response.ok) cache.put(request, response.clone());
-      return response;
-    } catch {
-      return (await offline()) || Response.error();
+    const cached = await cache.match(request, { ignoreSearch: true });
+    const fetchAndCache = async () => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 4000);
+      try {
+        const response = await fetch(request, { signal: ctrl.signal });
+        if (response.ok) await cache.put(request, response.clone());
+        return response;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+    if (cached) {
+      event.waitUntil(fetchAndCache().catch(() => {}));
+      return cached;
     }
+    try {
+      return await fetchAndCache();
+    } catch {
+      return (await cache.match('./index.html')) || Response.error();
+    }
+  })());
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (all.length > 0) {
+      await all[0].focus();
+      return;
+    }
+    await self.clients.openWindow('./index.html');
   })());
 });

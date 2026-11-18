@@ -15,7 +15,10 @@ const stamp = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).pad
 
 async function keepAwake(on) {
   try {
-    if (on && !wake && navigator.wakeLock) wake = await navigator.wakeLock.request('screen');
+    if (on && !wake && navigator.wakeLock) {
+      wake = await navigator.wakeLock.request('screen');
+      wake.addEventListener?.('release', () => { wake = null; });
+    }
     if (!on && wake) { await wake.release(); wake = null; }
   } catch { wake = null; }
 }
@@ -38,8 +41,10 @@ function update() {
   const left = Math.ceil(rem / 1000);
   if (left <= 0) {
     stopRest();
-    beep();
-    navigator.vibrate?.([200, 100, 200]);
+    if (rem > -3000) {
+      beep();
+      navigator.vibrate?.([200, 100, 200]);
+    }
     return;
   }
   time.textContent = stamp(left);
@@ -80,4 +85,11 @@ bar.addEventListener('click', e => {
   end = Math.max(Date.now() + 1000, end + delta);
   total = Math.max(total, end - Date.now());
   update();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && ticker) {
+    update();
+    if (ticker) keepAwake(true);
+  }
 });

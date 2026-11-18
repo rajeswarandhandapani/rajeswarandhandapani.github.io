@@ -22,44 +22,94 @@ export const SCHEDULE = [
 
 export const SCHEDULE_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
-// Alternates are extra suggestions for when a machine is taken. They aren't in the original plan.
+// Alternates are extra suggestions for when a machine is taken or to tailor an exercise within the same movement family.
 // Each one keeps its own weight history, because 60 lb on a machine is not 60 lb with a dumbbell.
 export const EXERCISES = [
-  { id: 'leg-press', name: 'Leg press', focus: 'Legs and glutes', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
+  { id: 'leg-press', name: 'Leg press', family: 'Squat family', focus: 'Legs and glutes', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
     { id: 'hack-squat', name: 'Hack squat machine', how: 'Start lighter than your leg press weight.' },
+    { id: 'smith-squat', name: 'Smith machine squat', how: 'Set the safety stops first. Place feet slightly forward and sit back with control.' },
     { id: 'goblet-squat', name: 'Goblet squat', how: 'Hold one dumbbell at your chest and squat to a comfortable depth.' },
     { id: 'step-up', name: 'Dumbbell step-up', how: 'Step onto a low bench or box. Enter one dumbbell, and reps per leg.' },
+    { id: 'split-squat', name: 'Dumbbell split squat', how: 'Stand in a split stance and lower your back knee toward the floor. Enter one dumbbell, and reps per leg.' },
   ] },
-  { id: 'chest-press', name: 'Chest press machine', focus: 'Chest, shoulders, triceps', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
+  { id: 'chest-press', name: 'Chest press machine', family: 'Horizontal push', focus: 'Chest, shoulders, triceps', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
     { id: 'db-bench', name: 'Dumbbell bench press', how: 'Lie on a flat bench. Enter the weight of one dumbbell.' },
+    { id: 'smith-bench', name: 'Smith machine bench press', how: 'Set the safety catches at chest height and press the bar smoothly.' },
     { id: 'cable-press', name: 'Cable chest press', how: 'Stand in a split stance and press forward at chest height.' },
+    { id: 'db-floor-press', name: 'Dumbbell floor press', how: 'Lie on the floor with knees bent. Enter the weight of one dumbbell.' },
     { id: 'incline-pushup', name: 'Incline push-up', how: 'Hands on a bench or bar, with your body in a straight line.', weighted: false },
   ] },
-  { id: 'lat-pulldown', name: 'Lat pulldown', focus: 'Back', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
+  { id: 'lat-pulldown', name: 'Lat pulldown', family: 'Vertical pull', focus: 'Back', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
+    { id: 'assisted-pullup', name: 'Assisted pull-up machine', how: 'Kneel or stand on the pad and pull your chin to the bar. Log the assistance weight (less weight is harder).', assisted: true },
     { id: 'single-arm-pulldown', name: 'Single-arm cable pulldown', how: 'Pull your elbow down to your side. Enter reps per arm.' },
-    { id: 'straight-arm-pulldown', name: 'Straight-arm cable pulldown', how: 'Keep your arms nearly straight and bring the bar to your thighs.' },
+    { id: 'kneeling-pulldown', name: 'Half-kneeling cable pulldown', how: 'Kneel on one knee in front of a high pulley and pull the handle to your ribs. Enter reps per arm.' },
     { id: 'band-pulldown', name: 'Band pulldown', how: 'Anchor a band overhead and pull your elbows to your sides.', weighted: false },
+    { id: 'straight-arm-pulldown', name: 'Straight-arm cable pulldown', how: 'Keep your arms nearly straight and bring the bar to your thighs.', fallback: 'Lats only (no biceps)' },
   ] },
-  { id: 'seated-row', name: 'Seated row', focus: 'Back', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
+  { id: 'seated-row', name: 'Seated row', family: 'Horizontal pull', focus: 'Back', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, alternates: [
     { id: 'chest-supported-row', name: 'Chest-supported row machine', how: 'Keep your chest on the pad and squeeze your shoulder blades.' },
     { id: 'cable-row', name: 'Seated cable row', how: 'Use the low pulley with a close-grip handle.' },
+    { id: 'incline-db-row', name: 'Chest-supported dumbbell row', how: 'Lie chest-down on an incline bench and row both dumbbells. Enter one dumbbell.' },
     { id: 'db-row', name: 'Single-arm dumbbell row', how: 'One hand and knee on a bench. Enter one dumbbell, and reps per arm.' },
+    { id: 'inverted-row', name: 'Inverted body row', how: 'Hang under a bar set at waist or chest height and pull your chest to the bar.', weighted: false },
   ] },
-  { id: 'leg-curl', name: 'Seated leg curl', focus: 'Hamstrings', sets: 2, low: 12, high: 12, unit: 'reps', weighted: true, alternates: [
+  { id: 'leg-curl', name: 'Seated leg curl', family: 'Knee flexion', focus: 'Hamstrings', sets: 2, low: 12, high: 12, unit: 'reps', weighted: true, alternates: [
     { id: 'lying-curl', name: 'Lying leg curl machine', how: 'Curl slowly and keep your hips on the pad.' },
-    { id: 'romanian-deadlift', name: 'Dumbbell Romanian deadlift', how: 'Soft knees, push your hips back and keep your back flat. Start light.' },
-    { id: 'glute-bridge', name: 'Glute bridge', how: 'Lie on your back and lift your hips by driving through your heels.', weighted: false },
+    { id: 'standing-curl', name: 'Standing single-leg curl', how: 'Curl one heel toward your glute on a standing machine or low cable. Enter reps per leg.' },
+    { id: 'ball-curl', name: 'Stability ball leg curl', how: 'Lie on your back with heels on a ball, lift your hips, and roll the ball in.', weighted: false },
+    { id: 'romanian-deadlift', name: 'Dumbbell Romanian deadlift', how: 'Soft knees, push your hips back and keep your back flat. Start light.', fallback: 'Hip-hinge fallback' },
+    { id: 'glute-bridge', name: 'Glute bridge', how: 'Lie on your back and lift your hips by driving through your heels.', weighted: false, fallback: 'Hip-hinge fallback' },
   ] },
-  { id: 'plank', name: 'Plank', focus: 'Core', sets: 2, low: 20, high: 40, unit: 'sec', weighted: false },
+  { id: 'plank', name: 'Plank', family: 'Core stability', focus: 'Core', sets: 2, low: 20, high: 40, unit: 'sec', weighted: false, alternates: [
+    { id: 'incline-plank', name: 'Incline forearm plank', how: 'Forearms or hands on a bench with your body in a straight line.', unit: 'sec', low: 20, high: 40, weighted: false },
+    { id: 'side-plank', name: 'Side plank', how: 'Balance on one forearm and the side of your foot or knee. Log seconds per side.', unit: 'sec', low: 15, high: 30, weighted: false },
+    { id: 'dead-bug', name: 'Dead bug', how: 'Lie on your back, press your lower back flat, and slowly lower opposite arm and leg. Reps per side.', unit: 'reps', low: 8, high: 10, weighted: false },
+    { id: 'bird-dog', name: 'Bird dog', how: 'On hands and knees, extend opposite arm and leg while keeping your hips level. Reps per side.', unit: 'reps', low: 8, high: 10, weighted: false },
+    { id: 'pallof-press', name: 'Cable or band Pallof press', how: 'Stand sideways to a cable or band at chest height, press straight out, and resist twisting. Reps per side.', unit: 'reps', low: 10, high: 12, weighted: false },
+  ] },
 ];
 
-/** Every movement that can be logged. Alternates take their sets and targets from their exercise. */
-export const MOVES = EXERCISES.flatMap(ex => [
+// Optional movement families users can add from "+ Add exercise" with full swap support.
+export const EXTRA_FAMILIES = [
+  { id: 'shoulder-press', name: 'Shoulder press machine', family: 'Vertical push', focus: 'Shoulders and triceps', sets: 2, low: 10, high: 12, unit: 'reps', weighted: true, optionalFamily: true, how: 'Press overhead in a controlled arc without arching your lower back.', alternates: [
+    { id: 'seated-db-press', name: 'Seated dumbbell shoulder press', how: 'Sit with back support and press dumbbells overhead. Enter one dumbbell.' },
+    { id: 'landmine-press', name: 'Single-arm landmine press', how: 'Press the angled bar upward and forward from shoulder height. Reps per arm.' },
+    { id: 'cable-shoulder-press', name: 'Single-arm cable shoulder press', how: 'Stand staggered and press a handle overhead from shoulder height. Reps per arm.' },
+  ] },
+  { id: 'back-extension', name: 'Back extension', family: 'Hip hinge', focus: 'Glutes and lower back', sets: 2, low: 10, high: 12, unit: 'reps', weighted: false, optionalFamily: true, how: 'Hinge at the hips on a 45° bench and rise until your body forms a straight line.', alternates: [
+    { id: 'cable-pull-through', name: 'Cable pull-through', how: 'Face away from a low pulley, hinge your hips back, and stand tall.', weighted: true },
+    { id: 'hip-thrust-machine', name: 'Hip thrust machine', how: 'Drive through your heels to lift your hips to a flat tabletop position.', weighted: true },
+    { id: 'kb-deadlift', name: 'Dumbbell or kettlebell deadlift', how: 'Stand over the weight, push your hips back, and stand tall with a flat back.', weighted: true },
+  ] },
+  { id: 'calf-raise', name: 'Seated calf raise', family: 'Calf raise', focus: 'Calves', sets: 2, low: 12, high: 15, unit: 'reps', weighted: true, optionalFamily: true, how: 'Lower your heels for a gentle stretch, then press up onto the balls of your feet.', alternates: [
+    { id: 'leg-press-calf', name: 'Leg-press calf press', how: 'Place the balls of your feet at the bottom of the leg press sled and press through your toes.' },
+    { id: 'standing-calf-raise', name: 'Standing dumbbell calf raise', how: 'Hold a dumbbell in one hand and raise up onto your toes. Use a post for balance.' },
+  ] },
+];
+
+export const ALL_FAMILIES = [...EXERCISES, ...EXTRA_FAMILIES];
+
+/** Every movement that can be logged. Alternates take their sets and targets from their exercise unless overridden. */
+export const MOVES = ALL_FAMILIES.flatMap(ex => [
   ex,
-  ...(ex.alternates || []).map(a => ({ ...ex, alternates: undefined, weighted: true, slot: ex.id, ...a })),
+  ...(ex.alternates || []).map(a => ({ ...ex, alternates: undefined, optionalFamily: undefined, weighted: true, slot: ex.id, ...a })),
 ]);
 export const moveById = id => MOVES.find(m => m.id === id);
-export const alternatesOf = ex => MOVES.filter(m => m.slot === ex.id);
+export const familyRootId = moveOrId => {
+  const m = typeof moveOrId === 'string' ? moveById(moveOrId) : moveOrId;
+  return m ? (m.slot || m.id) : null;
+};
+export const familyMembers = moveOrId => {
+  const rootId = familyRootId(moveOrId);
+  return rootId ? MOVES.filter(m => (m.slot || m.id) === rootId) : [];
+};
+export const alternatesOf = ex => familyMembers(ex).filter(m => m.id !== ex.id);
+export const sameFamily = (a, b) => {
+  const aId = typeof a === 'string' ? a : a?.id;
+  const bId = typeof b === 'string' ? b : b?.id;
+  const fa = familyRootId(a), fb = familyRootId(b);
+  return Boolean(fa && fa === fb && aId !== bId);
+};
 
 // Exercises you create are saved as { id, name, kind }, and get sensible targets from here.
 export const CUSTOM_KINDS = [['weight', 'Weight and reps'], ['reps', 'Reps only'], ['time', 'Timed (seconds)']];
@@ -85,6 +135,14 @@ export const WEIGHT_STEPS = [2.5, 5, 10, 15];
 export const TOTAL_SETS = EXERCISES.reduce((n, e) => n + e.sets, 0);
 export const MAX_SETS = 6;
 export const target = ex => `${ex.sets} × ${ex.low === ex.high ? ex.low : `${ex.low}–${ex.high}`}${ex.unit === 'sec' ? ' sec' : ''}`;
+export const videoUrl = item => {
+  const name = typeof item === 'string' ? item : item?.video || item?.name || item?.text || '';
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${name} exercise proper form how to`)}`;
+};
+export const gifUrl = item => {
+  const name = typeof item === 'string' ? item : item?.video || item?.name || item?.text || '';
+  return `https://www.google.com/search?tbm=isch&tbs=itp:animated&q=${encodeURIComponent(`${name} exercise form gif`)}`;
+};
 
 // "gentle" is logged but left out of the 150 minutes, which are for moderate cardio.
 export const CARDIO_TYPES = [
