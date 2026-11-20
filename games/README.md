@@ -837,18 +837,18 @@ a `games/` subfolder of another site.
 **One-time setup (already done):** imported this repo into
 `rajeswarandhandapani.github.io` as a squashed subtree:
 
-```
+```powershell
 cd /path/to/rajeswarandhandapani.github.io
-git subtree add --prefix=games git@github.com:rajeswarandhandapani/kid-Learning-games.git main --squash
+git subtree add --prefix=games git@github.com:rajeswarandhandapani/kid-Learning-games.git main --squash -m "Add games ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
 ```
 
 **After pushing new commits here**, pull them into the website repo:
 
-```
+```powershell
 cd /path/to/rajeswarandhandapani.github.io
-git subtree pull --prefix=games git@github.com:rajeswarandhandapani/kid-Learning-games.git main --squash
+git subtree pull --prefix=games git@github.com:rajeswarandhandapani/kid-Learning-games.git main --squash -m "Sync games ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
 git push origin master
 ```
 
 `--squash` keeps this repo's full commit history out of the website repo's
-log — only one squashed commit lands per sync.
+log — only one squashed commit lands per sync. Passing `-m` avoids opening Vim (in Git Bash, macOS, or Linux, swap `$(Get-Date -Format 'yyyy-MM-dd HH:mm')` with `$(date '+%Y-%m-%d %H:%M')`).
