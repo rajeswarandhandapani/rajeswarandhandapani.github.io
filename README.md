@@ -64,19 +64,19 @@ Like `kid-Learning-games` (`games/`), `money-manager`, and `workout-tracker`, cl
 
 **One-time setup** (after creating and pushing `english-fluency` to `main`):
 
-```bash
+```powershell
 cd c:\prorajes\repos\rajeswarandhandapani.github.io
-git subtree add --prefix=english-fluency git@github.com:rajeswarandhandapani/english-fluency.git main --squash
+git subtree add --prefix=english-fluency git@github.com:rajeswarandhandapani/english-fluency.git main --squash -m "Add english-fluency ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
 git push origin master
 ```
 
 **Syncing future updates** (after pushing new commits to `english-fluency`):
 
-```bash
+```powershell
 cd c:\prorajes\repos\rajeswarandhandapani.github.io
-git subtree pull --prefix=english-fluency git@github.com:rajeswarandhandapani/english-fluency.git main --squash
+git subtree pull --prefix=english-fluency git@github.com:rajeswarandhandapani/english-fluency.git main --squash -m "Sync english-fluency ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
 git push origin master
 ```
 
-`--squash` keeps `english-fluency`'s full commit history out of the website repo's log—only one squashed commit lands per sync.
+`--squash` keeps `english-fluency`'s full commit history out of the website repo's log—only one squashed commit lands per sync. Passing `-m` avoids opening Vim (in Git Bash, macOS, or Linux, swap `$(Get-Date -Format 'yyyy-MM-dd HH:mm')` with `$(date '+%Y-%m-%d %H:%M')`).
 
