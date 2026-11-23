@@ -1,9 +1,0 @@
-node_modules/
-test-output/
-
-# Never commit real financial data
-*.csv
-*.xlsx
-*.qfx
-*.ofx
-*.backup
